@@ -89,4 +89,31 @@ func TestUpdate(t *testing.T) {
 	n._update(1)
 
 	assert.True(m.updated)
+
+	m.active = false
+	m.updated = false
+	m._update(1)
+	assert.False(m.updated)
+}
+
+func TestChildren(t *testing.T) {
+	assert := assert.New(t)
+	m := newMockNode()
+	a := NewBaseNode("a")
+	a.zindex = 0
+	b := NewBaseNode("b")
+	b.zindex = 1
+	c := NewBaseNode("c")
+	c.zindex = 2
+
+	m.AddChild(b)
+	m.AddChild(c)
+	m.AddChild(a)
+
+	r1 := m.children[0].(*BaseNode)
+	r2 := m.children[1].(*BaseNode)
+	r3 := m.children[2].(*BaseNode)
+	assert.Equal(r1.Name, "a")
+	assert.Equal(r2.Name, "b")
+	assert.Equal(r3.Name, "c")
 }
