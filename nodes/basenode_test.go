@@ -1,6 +1,7 @@
 package nodes
 
 import (
+	"sort"
 	"testing"
 
 	"github.com/faiface/pixel"
@@ -16,7 +17,7 @@ func newNakedNode() *nakedNode {
 	n := &nakedNode{
 		BaseNode: *NewBaseNode("test"),
 	}
-	n.self = n
+	n.Self = n
 	return n
 }
 
@@ -34,7 +35,7 @@ func newMockNode() *mockNode {
 		updated:   false,
 		drawn:     false,
 	}
-	m.self = m
+	m.Self = m
 	return m
 }
 
@@ -106,14 +107,23 @@ func TestChildren(t *testing.T) {
 	c := NewBaseNode("c")
 	c.zindex = 2
 
-	m.AddChild(b)
 	m.AddChild(c)
 	m.AddChild(a)
+	m.AddChild(b)
 
 	r1 := m.children[0].(*BaseNode)
 	r2 := m.children[1].(*BaseNode)
 	r3 := m.children[2].(*BaseNode)
-	assert.Equal(r1.Name, "a")
-	assert.Equal(r2.Name, "b")
-	assert.Equal(r3.Name, "c")
+	assert.Equal("a", r1.Name)
+	assert.Equal("b", r2.Name)
+	assert.Equal("c", r3.Name)
+}
+
+func TestSortSlice(t *testing.T) {
+	assert := assert.New(t)
+	sl := []int{0, 3, 6, -1, 23, 2}
+	sort.Slice(sl, func(i, j int) bool {
+		return sl[i] < sl[j]
+	})
+	assert.Equal(sl, []int{-1, 0, 2, 3, 6, 23})
 }

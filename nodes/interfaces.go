@@ -12,6 +12,7 @@ type nodeInternal interface {
 	_update(dt float64)
 	_draw(win *pixelgl.Window, mat pixel.Matrix)
 	_getMat() pixel.Matrix
+	_getZindex() int
 }
 
 type Initializable interface {

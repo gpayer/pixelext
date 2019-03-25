@@ -1,5 +1,11 @@
 package nodes
 
+import (
+	"time"
+
+	"github.com/faiface/pixel"
+)
+
 var sceneManager *SceneManagerStruct
 
 func SceneManager() *SceneManagerStruct {
@@ -7,7 +13,9 @@ func SceneManager() *SceneManagerStruct {
 }
 
 type SceneManagerStruct struct {
-	root nodeInternal
+	root  nodeInternal
+	last  time.Time
+	first bool
 }
 
 func (s *SceneManagerStruct) SetRoot(root nodeInternal) {
@@ -19,6 +27,17 @@ func (s *SceneManagerStruct) SetRoot(root nodeInternal) {
 	root._mount()
 }
 
+func (s *SceneManagerStruct) Run(mat pixel.Matrix) {
+	if s.first {
+		s.last = time.Now()
+		s.first = false
+	}
+	dt := time.Since(s.last).Seconds()
+	s.last = time.Now()
+	s.root._update(dt)
+	s.root._draw(Events().win, mat)
+}
+
 func init() {
-	sceneManager = &SceneManagerStruct{}
+	sceneManager = &SceneManagerStruct{first: true}
 }
