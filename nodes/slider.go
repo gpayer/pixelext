@@ -33,7 +33,7 @@ func (s *Slider) Update(dt float64) {
 	if ev.Clicked(pixelgl.MouseButtonLeft, s) {
 		pos := ev.LocalMousePosition(s)
 		zblPos := pos.Sub(bounds.Min)
-		//fmt.Printf("clicked: %v %v %v %v\n", s.Extraoffset, bounds, pos, zblPos)
+		//fmt.Printf("clicked: %v %v %v %v\n", s.extraoffset, bounds, pos, zblPos)
 		s.current = s.min + (s.max-s.min)*float32(zblPos.X/bounds.W())
 		s.dirty = true
 	} else if ev.MouseScroll().Y != 0 {

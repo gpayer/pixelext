@@ -12,7 +12,7 @@ type BaseNode struct {
 	Name                      string
 	children                  []nodeInternal
 	show, active, initialized bool
-	mat                       pixel.Matrix
+	mat, lastmat              pixel.Matrix
 	pos                       pixel.Vec
 	bounds                    pixel.Rect
 	scale                     pixel.Vec
@@ -21,11 +21,15 @@ type BaseNode struct {
 	origin                    pixel.Vec
 	zindex                    int
 	zeroalignment             Alignment
-	Extraoffset               pixel.Vec
+	extraoffset               pixel.Vec
 }
 
 func (b *BaseNode) _getMat() pixel.Matrix {
 	return b.mat
+}
+
+func (b *BaseNode) _getLastMat() pixel.Matrix {
+	return b.lastmat
 }
 
 func (b *BaseNode) _getZindex() int {
@@ -80,11 +84,12 @@ func (b *BaseNode) _update(dt float64) {
 }
 
 func (b *BaseNode) _draw(win *pixelgl.Window, mat pixel.Matrix) {
+	b.lastmat = mat
 	if !b.active || !b.show {
 		return
 	}
 	for _, child := range b.children {
-		child._draw(win, mat.Chained(child._getMat()))
+		child._draw(win, child._getMat().Chained(mat))
 	}
 	drawable, ok := b.Self.(Drawable)
 	if ok {
@@ -107,7 +112,7 @@ func NewBaseNode(name string) *BaseNode {
 		rotpoint:      pixel.ZV,
 		zindex:        0,
 		zeroalignment: AlignmentBottomLeft,
-		Extraoffset:   pixel.ZV,
+		extraoffset:   pixel.ZV,
 	}
 	b.Self = b
 	b.calcMat()
@@ -118,14 +123,14 @@ func (b *BaseNode) calcMat() {
 	relOrigin := b.origin.Sub(b.bounds.Min)
 	relRotpoint := b.rotpoint.Sub(b.bounds.Min)
 	relPos := b.pos.Sub(relOrigin)
-	b.mat = pixel.IM.ScaledXY(relOrigin, b.scale).Rotated(relRotpoint, b.rot).Moved(relPos)
+	b.mat = pixel.IM.Moved(b.extraoffset).ScaledXY(relOrigin, b.scale).Rotated(relRotpoint, b.rot).Moved(relPos)
 }
 
 func (b *BaseNode) calcZero() {
 	if b.zeroalignment != AlignmentFixed {
 		whalf := b.bounds.W() / 2
 		hhalf := b.bounds.H() / 2
-		blAligned := b.bounds.Moved(b.bounds.Min.Scaled(-1)).Moved(b.Extraoffset)
+		blAligned := b.bounds.Moved(b.bounds.Min.Scaled(-1))
 		switch b.zeroalignment {
 		case AlignmentBottomLeft:
 			b.bounds = blAligned
@@ -219,12 +224,12 @@ func (b *BaseNode) SetZIndex(z int) {
 }
 
 func (b *BaseNode) SetExtraOffset(extra pixel.Vec) {
-	b.Extraoffset = extra
-	b.calcZero()
+	b.extraoffset = extra
+	b.calcMat()
 }
 
 func (b *BaseNode) GetExtraOffset() pixel.Vec {
-	return b.Extraoffset
+	return b.extraoffset
 }
 
 func (b *BaseNode) Show() {

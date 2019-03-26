@@ -17,6 +17,7 @@ type demo struct {
 	nodes.BaseNode
 	text1, text2, text3 *nodes.Text
 	sprite              *nodes.Sprite
+	rotslider           *nodes.BaseNode
 }
 
 func newDemo() *demo {
@@ -64,19 +65,26 @@ func (d *demo) Init() {
 	d.AddChild(text)
 	d.text3 = text
 
-	slidertext := makeText(450, 515, "slidertext", nodes.AlignmentCenter)
+	sltext := nodes.NewBaseNode("sltext")
+	sltext.SetBounds(pixel.R(0, 0, 100, 30))
+	sltext.SetPos(pixel.V(400, 500))
+	sltext.SetRot(0.0)
+	d.AddChild(sltext)
+
+	slidertext := makeText(50, 15, "slidertext", nodes.AlignmentCenter)
 	slidertext.SetZIndex(10)
-	d.AddChild(slidertext)
+	sltext.AddChild(slidertext)
+	d.rotslider = sltext
 
 	slider := nodes.NewSlider("slider1", 0, 1, 0.5)
 	slider.SetBounds(pixel.R(0, 0, 100, 30))
-	slider.SetPos(pixel.V(400, 500))
+	slider.SetPos(pixel.V(0, 0))
 	slider.OnChange(func(v float32) {
 		slidertext.Text().Clear()
 		slidertext.Printf("%.2f", v)
 		fmt.Printf("new value: %.2f\n", v)
 	})
-	d.AddChild(slider)
+	sltext.AddChild(slider)
 
 	slider = nodes.NewSlider("slider2", 0, 1, 0.5)
 	slider.SetBounds(pixel.R(0, 0, 100, 30))
@@ -94,7 +102,6 @@ func (d *demo) Init() {
 	if err != nil {
 		panic(err)
 	}
-	fmt.Printf("%v\n", pic.Bounds())
 	sprite := nodes.NewSprite("sprite1", pic)
 	sprite.SetZeroAlignment(nodes.AlignmentCenter)
 	sprite.SetPos(pixel.V(600, 300))
@@ -108,6 +115,13 @@ func (d *demo) Update(dt float64) {
 	d.text2.SetRot(d.text2.GetRot() + dphi)
 	d.text3.SetRot(d.text3.GetRot() + dphi)
 	d.sprite.SetRot(d.sprite.GetRot() + dphi)
+
+	dphi = math.Pi / 5.0 * dt
+	if nodes.Events().Pressed(pixelgl.KeyA) {
+		d.rotslider.SetRot(d.rotslider.GetRot() + dphi)
+	} else if nodes.Events().Pressed(pixelgl.KeyD) {
+		d.rotslider.SetRot(d.rotslider.GetRot() - dphi)
+	}
 }
 
 func Run() {

@@ -23,7 +23,7 @@ func (e *EventManager) SetWin(win *pixelgl.Window) {
 func (e *EventManager) Clicked(button pixelgl.Button, node nodeInternal) bool {
 	bounds := node.GetBounds()
 	bounds = bounds.Moved(bounds.Min.Scaled(-1)).Moved(node.GetExtraOffset().Scaled(-1))
-	if e.win.JustPressed(button) && bounds.Contains(node._getMat().Unproject(e.win.MousePosition())) {
+	if e.win.JustPressed(button) && bounds.Contains(node._getLastMat().Unproject(e.win.MousePosition())) {
 		return true
 	}
 	return false
@@ -64,7 +64,7 @@ func (e *EventManager) MousePosition() pixel.Vec {
 }
 
 func (e *EventManager) LocalMousePosition(node nodeInternal) pixel.Vec {
-	return node._getMat().Unproject(e.win.MousePosition()).Add(node.GetBounds().Min).Add(node.GetExtraOffset())
+	return node._getLastMat().Unproject(e.win.MousePosition()).Add(node.GetBounds().Min).Add(node.GetExtraOffset())
 }
 
 func (e *EventManager) MousePreviousPosition() pixel.Vec {
