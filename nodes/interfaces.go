@@ -13,6 +13,8 @@ type nodeInternal interface {
 	_draw(win *pixelgl.Window, mat pixel.Matrix)
 	_getMat() pixel.Matrix
 	_getZindex() int
+	GetBounds() pixel.Rect
+	GetExtraOffset() pixel.Vec
 }
 
 type Initializable interface {

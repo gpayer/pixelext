@@ -21,6 +21,7 @@ type BaseNode struct {
 	origin                    pixel.Vec
 	zindex                    int
 	zeroalignment             Alignment
+	Extraoffset               pixel.Vec
 }
 
 func (b *BaseNode) _getMat() pixel.Matrix {
@@ -105,7 +106,8 @@ func NewBaseNode(name string) *BaseNode {
 		rot:           0,
 		rotpoint:      pixel.ZV,
 		zindex:        0,
-		zeroalignment: AlignmentFixed,
+		zeroalignment: AlignmentBottomLeft,
+		Extraoffset:   pixel.ZV,
 	}
 	b.Self = b
 	b.calcMat()
@@ -123,7 +125,7 @@ func (b *BaseNode) calcZero() {
 	if b.zeroalignment != AlignmentFixed {
 		whalf := b.bounds.W() / 2
 		hhalf := b.bounds.H() / 2
-		blAligned := b.bounds.Moved(b.bounds.Min.Scaled(-1))
+		blAligned := b.bounds.Moved(b.bounds.Min.Scaled(-1)).Moved(b.Extraoffset)
 		switch b.zeroalignment {
 		case AlignmentBottomLeft:
 			b.bounds = blAligned
@@ -196,6 +198,7 @@ func (b *BaseNode) GetRotPoint() pixel.Vec {
 
 func (b *BaseNode) SetBounds(r pixel.Rect) {
 	b.bounds = r
+	b.calcZero()
 	b.calcMat()
 }
 
@@ -209,6 +212,19 @@ func (b *BaseNode) GetBounds() pixel.Rect {
 func (b *BaseNode) SetZeroAlignment(a Alignment) {
 	b.zeroalignment = a
 	b.calcZero()
+}
+
+func (b *BaseNode) SetZIndex(z int) {
+	b.zindex = z
+}
+
+func (b *BaseNode) SetExtraOffset(extra pixel.Vec) {
+	b.Extraoffset = extra
+	b.calcZero()
+}
+
+func (b *BaseNode) GetExtraOffset() pixel.Vec {
+	return b.Extraoffset
 }
 
 func (b *BaseNode) Show() {
@@ -229,4 +245,5 @@ func (b *BaseNode) AddChild(child nodeInternal) {
 		less := (b.children[i]._getZindex() < b.children[j]._getZindex())
 		return less
 	})
+	child._init()
 }

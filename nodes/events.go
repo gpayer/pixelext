@@ -1,6 +1,7 @@
 package nodes
 
 import (
+	"github.com/faiface/pixel"
 	"github.com/faiface/pixel/pixelgl"
 )
 
@@ -20,8 +21,9 @@ func (e *EventManager) SetWin(win *pixelgl.Window) {
 
 // Clicked checks for mouse clicks inside of the given node
 func (e *EventManager) Clicked(button pixelgl.Button, node nodeInternal) bool {
-	b := node.(*BaseNode)
-	if e.win.JustPressed(button) && b.bounds.Contains(b.mat.Unproject(e.win.MousePosition())) {
+	bounds := node.GetBounds()
+	bounds = bounds.Moved(bounds.Min.Scaled(-1)).Moved(node.GetExtraOffset().Scaled(-1))
+	if e.win.JustPressed(button) && bounds.Contains(node._getMat().Unproject(e.win.MousePosition())) {
 		return true
 	}
 	return false
@@ -51,6 +53,22 @@ func (e *EventManager) Pressed(button pixelgl.Button) bool {
 
 func (e *EventManager) Repeated(button pixelgl.Button) bool {
 	return e.win.Repeated(button)
+}
+
+func (e *EventManager) MouseScroll() pixel.Vec {
+	return e.win.MouseScroll()
+}
+
+func (e *EventManager) MousePosition() pixel.Vec {
+	return e.win.MousePosition()
+}
+
+func (e *EventManager) LocalMousePosition(node nodeInternal) pixel.Vec {
+	return node._getMat().Unproject(e.win.MousePosition()).Add(node.GetBounds().Min).Add(node.GetExtraOffset())
+}
+
+func (e *EventManager) MousePreviousPosition() pixel.Vec {
+	return e.win.MousePreviousPosition()
 }
 
 func init() {

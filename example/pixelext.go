@@ -1,8 +1,10 @@
 package main
 
 import (
+	"fmt"
 	"math"
 	"pixelext/nodes"
+	"pixelext/services"
 
 	"github.com/faiface/pixel/imdraw"
 
@@ -14,6 +16,7 @@ import (
 type demo struct {
 	nodes.BaseNode
 	text1, text2, text3 *nodes.Text
+	sprite              *nodes.Sprite
 }
 
 func newDemo() *demo {
@@ -60,6 +63,43 @@ func (d *demo) Init() {
 	text = makeText(200, 400, "text2", nodes.AlignmentTopRight)
 	d.AddChild(text)
 	d.text3 = text
+
+	slidertext := makeText(450, 515, "slidertext", nodes.AlignmentCenter)
+	slidertext.SetZIndex(10)
+	d.AddChild(slidertext)
+
+	slider := nodes.NewSlider("slider1", 0, 1, 0.5)
+	slider.SetBounds(pixel.R(0, 0, 100, 30))
+	slider.SetPos(pixel.V(400, 500))
+	slider.OnChange(func(v float32) {
+		slidertext.Text().Clear()
+		slidertext.Printf("%.2f", v)
+		fmt.Printf("new value: %.2f\n", v)
+	})
+	d.AddChild(slider)
+
+	slider = nodes.NewSlider("slider2", 0, 1, 0.5)
+	slider.SetBounds(pixel.R(0, 0, 100, 30))
+	slider.SetPos(pixel.V(400, 400))
+	slider.SetZeroAlignment(nodes.AlignmentCenter)
+	d.AddChild(slider)
+
+	slider = nodes.NewSlider("slider3", 0, 1, 0.5)
+	slider.SetBounds(pixel.R(0, 0, 50, 20))
+	slider.SetPos(pixel.V(500, 300))
+	slider.SetZeroAlignment(nodes.AlignmentTopRight)
+	d.AddChild(slider)
+
+	pic, err := services.ResourceManager().LoadPicture("gopher.png")
+	if err != nil {
+		panic(err)
+	}
+	fmt.Printf("%v\n", pic.Bounds())
+	sprite := nodes.NewSprite("sprite1", pic)
+	sprite.SetZeroAlignment(nodes.AlignmentCenter)
+	sprite.SetPos(pixel.V(600, 300))
+	d.AddChild(sprite)
+	d.sprite = sprite
 }
 
 func (d *demo) Update(dt float64) {
@@ -67,6 +107,7 @@ func (d *demo) Update(dt float64) {
 	d.text1.SetRot(d.text1.GetRot() + dphi)
 	d.text2.SetRot(d.text2.GetRot() + dphi)
 	d.text3.SetRot(d.text3.GetRot() + dphi)
+	d.sprite.SetRot(d.sprite.GetRot() + dphi)
 }
 
 func Run() {
@@ -78,6 +119,7 @@ func Run() {
 	if err != nil {
 		panic(err)
 	}
+	win.SetSmooth(true)
 	nodes.Events().SetWin(win)
 
 	root := newDemo()
