@@ -1,6 +1,8 @@
-package nodes
+package ui
 
 import (
+	"pixelext/nodes"
+
 	"github.com/faiface/pixel"
 	"github.com/faiface/pixel/imdraw"
 	"github.com/faiface/pixel/pixelgl"
@@ -8,7 +10,7 @@ import (
 )
 
 type Slider struct {
-	BaseNode
+	nodes.BaseNode
 	min, max, current float32
 	dirty             bool
 	canvas            *pixelgl.Canvas
@@ -28,7 +30,7 @@ func (s *Slider) Unmounted() {
 }
 
 func (s *Slider) Update(dt float64) {
-	ev := Events()
+	ev := nodes.Events()
 	bounds := s.GetBounds()
 	if ev.Clicked(pixelgl.MouseButtonLeft, s) {
 		pos := ev.LocalMousePosition(s)
@@ -87,7 +89,7 @@ func (s *Slider) OnChange(fn func(v float32)) {
 
 func NewSlider(name string, min, max, current float32) *Slider {
 	sl := &Slider{
-		BaseNode: *NewBaseNode(name),
+		BaseNode: *nodes.NewBaseNode(name),
 		min:      min, max: max, current: current,
 		onchange: func(_ float32) {},
 	}

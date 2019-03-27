@@ -13,12 +13,12 @@ func SceneManager() *SceneManagerStruct {
 }
 
 type SceneManagerStruct struct {
-	root  nodeInternal
+	root  Node
 	last  time.Time
 	first bool
 }
 
-func (s *SceneManagerStruct) SetRoot(root nodeInternal) {
+func (s *SceneManagerStruct) SetRoot(root Node) {
 	if s.root != nil {
 		s.root._unmount()
 	}

@@ -5,6 +5,7 @@ import (
 	"math"
 	"pixelext/nodes"
 	"pixelext/services"
+	"pixelext/ui"
 
 	"github.com/faiface/pixel/imdraw"
 
@@ -76,7 +77,7 @@ func (d *demo) Init() {
 	sltext.AddChild(slidertext)
 	d.rotslider = sltext
 
-	slider := nodes.NewSlider("slider1", 0, 1, 0.5)
+	slider := ui.NewSlider("slider1", 0, 1, 0.5)
 	slider.SetBounds(pixel.R(0, 0, 100, 30))
 	slider.SetPos(pixel.V(0, 0))
 	slider.OnChange(func(v float32) {
@@ -86,13 +87,13 @@ func (d *demo) Init() {
 	})
 	sltext.AddChild(slider)
 
-	slider = nodes.NewSlider("slider2", 0, 1, 0.5)
+	slider = ui.NewSlider("slider2", 0, 1, 0.5)
 	slider.SetBounds(pixel.R(0, 0, 100, 30))
 	slider.SetPos(pixel.V(400, 400))
 	slider.SetZeroAlignment(nodes.AlignmentCenter)
 	d.AddChild(slider)
 
-	slider = nodes.NewSlider("slider3", 0, 1, 0.5)
+	slider = ui.NewSlider("slider3", 0, 1, 0.5)
 	slider.SetBounds(pixel.R(0, 0, 50, 20))
 	slider.SetPos(pixel.V(500, 300))
 	slider.SetZeroAlignment(nodes.AlignmentTopRight)
@@ -107,6 +108,22 @@ func (d *demo) Init() {
 	sprite.SetPos(pixel.V(600, 300))
 	d.AddChild(sprite)
 	d.sprite = sprite
+
+	hbox := ui.NewHBox("hbox1")
+	hbox.SetPos(pixel.V(100, 700))
+	hbox.Padding = 5
+	hbox.BorderWidth = 2
+	d.AddChild(hbox)
+
+	text = nodes.NewText("f1", "basic")
+	text.Printf("Field1")
+	hbox.AddChild(text)
+	text = nodes.NewText("f2", "basic")
+	text.Printf("Field2")
+	hbox.AddChild(text)
+	text = nodes.NewText("f3", "basic")
+	text.Printf("Field3")
+	hbox.AddChild(text)
 }
 
 func (d *demo) Update(dt float64) {
@@ -127,7 +144,7 @@ func (d *demo) Update(dt float64) {
 func Run() {
 	win, err := pixelgl.NewWindow(pixelgl.WindowConfig{
 		Title:  "pixelext example",
-		Bounds: pixel.R(0, 0, 800, 600),
+		Bounds: pixel.R(0, 0, 1000, 800),
 		VSync:  true,
 	})
 	if err != nil {
@@ -143,12 +160,12 @@ func Run() {
 	im := imdraw.New(nil)
 	im.SetColorMask(colornames.Gray)
 	var i float64
-	for i = 100; i < 800; i += 100 {
-		im.Push(pixel.V(i, 0), pixel.V(i, 600))
+	for i = 100; i < win.Bounds().W(); i += 100 {
+		im.Push(pixel.V(i, 0), pixel.V(i, win.Bounds().H()))
 		im.Line(1)
 	}
-	for i = 100; i < 600; i += 100 {
-		im.Push(pixel.V(0, i), pixel.V(800, i))
+	for i = 100; i < win.Bounds().H(); i += 100 {
+		im.Push(pixel.V(0, i), pixel.V(win.Bounds().W(), i))
 		im.Line(1)
 	}
 

@@ -8,9 +8,9 @@ import (
 )
 
 type BaseNode struct {
-	Self                      nodeInternal
+	Self                      Node
 	Name                      string
-	children                  []nodeInternal
+	children                  []Node
 	show, active, initialized bool
 	mat, lastmat              pixel.Matrix
 	pos                       pixel.Vec
@@ -34,6 +34,14 @@ func (b *BaseNode) _getLastMat() pixel.Matrix {
 
 func (b *BaseNode) _getZindex() int {
 	return b.zindex
+}
+
+func (b *BaseNode) GetContainerBounds() pixel.Rect {
+	r := b.GetBounds()
+	for _, child := range b.children {
+		r = r.Union(child.GetContainerBounds().Moved(child.GetPos().Sub(child.GetOrigin())))
+	}
+	return r
 }
 
 func (b *BaseNode) _init() {
@@ -88,19 +96,19 @@ func (b *BaseNode) _draw(win *pixelgl.Window, mat pixel.Matrix) {
 	if !b.active || !b.show {
 		return
 	}
-	for _, child := range b.children {
-		child._draw(win, child._getMat().Chained(mat))
-	}
 	drawable, ok := b.Self.(Drawable)
 	if ok {
 		drawable.Draw(win, mat)
+	}
+	for _, child := range b.children {
+		child._draw(win, child._getMat().Chained(mat))
 	}
 }
 
 func NewBaseNode(name string) *BaseNode {
 	b := &BaseNode{
 		Name:          name,
-		children:      make([]nodeInternal, 0),
+		children:      make([]Node, 0),
 		show:          true,
 		active:        true,
 		mat:           pixel.IM,
@@ -244,11 +252,15 @@ func (b *BaseNode) SetActive(active bool) {
 	b.active = active
 }
 
-func (b *BaseNode) AddChild(child nodeInternal) {
+func (b *BaseNode) AddChild(child Node) {
 	b.children = append(b.children, child)
 	sort.SliceStable(b.children, func(i, j int) bool {
 		less := (b.children[i]._getZindex() < b.children[j]._getZindex())
 		return less
 	})
 	child._init()
+}
+
+func (b BaseNode) Children() []Node {
+	return b.children
 }

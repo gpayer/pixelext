@@ -20,7 +20,7 @@ func (e *EventManager) SetWin(win *pixelgl.Window) {
 }
 
 // Clicked checks for mouse clicks inside of the given node
-func (e *EventManager) Clicked(button pixelgl.Button, node nodeInternal) bool {
+func (e *EventManager) Clicked(button pixelgl.Button, node Node) bool {
 	bounds := node.GetBounds()
 	bounds = bounds.Moved(bounds.Min.Scaled(-1)).Moved(node.GetExtraOffset().Scaled(-1))
 	if e.win.JustPressed(button) && bounds.Contains(node._getLastMat().Unproject(e.win.MousePosition())) {
@@ -63,7 +63,7 @@ func (e *EventManager) MousePosition() pixel.Vec {
 	return e.win.MousePosition()
 }
 
-func (e *EventManager) LocalMousePosition(node nodeInternal) pixel.Vec {
+func (e *EventManager) LocalMousePosition(node Node) pixel.Vec {
 	return node._getLastMat().Unproject(e.win.MousePosition()).Add(node.GetBounds().Min).Add(node.GetExtraOffset())
 }
 
