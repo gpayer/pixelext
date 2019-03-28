@@ -37,7 +37,7 @@ func (b *BaseNode) _getZindex() int {
 }
 
 func (b *BaseNode) GetContainerBounds() pixel.Rect {
-	r := b.GetBounds()
+	r := b.Self.GetBounds()
 	for _, child := range b.children {
 		r = r.Union(child.GetContainerBounds().Moved(child.GetPos().Sub(child.GetOrigin())))
 	}
@@ -141,23 +141,23 @@ func (b *BaseNode) calcZero() {
 		blAligned := b.bounds.Moved(b.bounds.Min.Scaled(-1))
 		switch b.zeroalignment {
 		case AlignmentBottomLeft:
-			b.bounds = blAligned
+			b.Self.SetBoundsInternal(blAligned)
 		case AlignmentBottomCenter:
-			b.bounds = blAligned.Moved(pixel.V(-whalf, 0))
+			b.Self.SetBoundsInternal(blAligned.Moved(pixel.V(-whalf, 0)))
 		case AlignmentBottomRight:
-			b.bounds = blAligned.Moved(pixel.V(-2*whalf, 0))
+			b.Self.SetBoundsInternal(blAligned.Moved(pixel.V(-2*whalf, 0)))
 		case AlignmentCenterLeft:
-			b.bounds = blAligned.Moved(pixel.V(0, -hhalf))
+			b.Self.SetBoundsInternal(blAligned.Moved(pixel.V(0, -hhalf)))
 		case AlignmentCenter:
-			b.bounds = blAligned.Moved(pixel.V(-whalf, -hhalf))
+			b.Self.SetBoundsInternal(blAligned.Moved(pixel.V(-whalf, -hhalf)))
 		case AlignmentCenterRight:
-			b.bounds = blAligned.Moved(pixel.V(-2*whalf, -hhalf))
+			b.Self.SetBoundsInternal(blAligned.Moved(pixel.V(-2*whalf, -hhalf)))
 		case AlignmentTopLeft:
-			b.bounds = blAligned.Moved(pixel.V(0, -2*hhalf))
+			b.Self.SetBoundsInternal(blAligned.Moved(pixel.V(0, -2*hhalf)))
 		case AlignmentTopCenter:
-			b.bounds = blAligned.Moved(pixel.V(-whalf, -2*hhalf))
+			b.Self.SetBoundsInternal(blAligned.Moved(pixel.V(-whalf, -2*hhalf)))
 		case AlignmentTopRight:
-			b.bounds = blAligned.Moved(pixel.V(-2*whalf, -2*hhalf))
+			b.Self.SetBoundsInternal(blAligned.Moved(pixel.V(-2*whalf, -2*hhalf)))
 		default:
 		}
 		b.calcMat()
@@ -210,9 +210,13 @@ func (b *BaseNode) GetRotPoint() pixel.Vec {
 }
 
 func (b *BaseNode) SetBounds(r pixel.Rect) {
-	b.bounds = r
+	b.SetBoundsInternal(r)
 	b.calcZero()
 	b.calcMat()
+}
+
+func (b *BaseNode) SetBoundsInternal(r pixel.Rect) {
+	b.bounds = r
 }
 
 func (b *BaseNode) GetBounds() pixel.Rect {

@@ -34,3 +34,7 @@ func (t *Text) Printf(format string, a ...interface{}) {
 func (t *Text) Draw(win *pixelgl.Window, mat pixel.Matrix) {
 	t.txt.Draw(win, mat)
 }
+
+func (t *Text) Clear() {
+	t.txt.Clear()
+}

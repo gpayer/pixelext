@@ -1,11 +1,16 @@
 package main
 
 import (
+	"flag"
 	"fmt"
+	"log"
 	"math"
+	"os"
 	"pixelext/nodes"
 	"pixelext/services"
 	"pixelext/ui"
+	"runtime"
+	"runtime/pprof"
 
 	"github.com/faiface/pixel/imdraw"
 
@@ -124,6 +129,11 @@ func (d *demo) Init() {
 	text = nodes.NewText("f3", "basic")
 	text.Printf("Field3")
 	hbox.AddChild(text)
+
+	bbox := nodes.NewBorderBox("bbox", 50, 50)
+	bbox.SetBorderWidth(2)
+	bbox.SetPos(pixel.V(500, 700))
+	d.AddChild(bbox)
 }
 
 func (d *demo) Update(dt float64) {
@@ -140,6 +150,8 @@ func (d *demo) Update(dt float64) {
 		d.rotslider.SetRot(d.rotslider.GetRot() - dphi)
 	}
 }
+
+var memprofile = flag.String("memprofile", "", "write memory profile to `file`")
 
 func Run() {
 	win, err := pixelgl.NewWindow(pixelgl.WindowConfig{
@@ -178,8 +190,21 @@ func Run() {
 		nodes.SceneManager().Run(pixel.IM)
 		win.Update()
 	}
+	if *memprofile != "" {
+		fmemprofile, err := os.Create(*memprofile)
+		if err != nil {
+			panic(err)
+		}
+		defer fmemprofile.Close()
+		runtime.GC()
+		if err := pprof.WriteHeapProfile(fmemprofile); err != nil {
+			log.Fatal("could not write memory profile: ", err)
+		}
+	}
 }
 
 func main() {
+	flag.Parse()
+
 	pixelgl.Run(Run)
 }

@@ -16,10 +16,24 @@ type Node interface {
 	_getZindex() int
 	GetContainerBounds() pixel.Rect
 	GetBounds() pixel.Rect
+	SetBounds(r pixel.Rect)
+	SetBoundsInternal(r pixel.Rect)
+	SetOrigin(origin pixel.Vec)
 	GetOrigin() pixel.Vec
 	GetPos() pixel.Vec
 	SetPos(pos pixel.Vec)
+	SetRot(rot float64)
+	GetRot() float64
+	SetScale(scale pixel.Vec)
+	GetScale() pixel.Vec
+	SetRotPoint(rotpoint pixel.Vec)
+	GetRotPoint() pixel.Vec
+	SetZeroAlignment(a Alignment)
+	SetZIndex(z int)
 	GetExtraOffset() pixel.Vec
+	Show()
+	Hide()
+	AddChild(child Node)
 	Children() []Node
 }
 
