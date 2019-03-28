@@ -22,6 +22,7 @@ type BaseNode struct {
 	zindex                    int
 	zeroalignment             Alignment
 	extraoffset               pixel.Vec
+	styles                    *Styles
 }
 
 func (b *BaseNode) _getMat() pixel.Matrix {
@@ -121,6 +122,7 @@ func NewBaseNode(name string) *BaseNode {
 		zindex:        0,
 		zeroalignment: AlignmentBottomLeft,
 		extraoffset:   pixel.ZV,
+		styles:        &Styles{},
 	}
 	b.Self = b
 	b.calcMat()
@@ -269,6 +271,14 @@ func (b *BaseNode) AddChild(child Node) {
 	child._init()
 }
 
-func (b BaseNode) Children() []Node {
+func (b *BaseNode) Children() []Node {
 	return b.children
+}
+
+func (b *BaseNode) SetStyles(styles *Styles) {
+	b.styles = styles
+}
+
+func (b *BaseNode) GetStyles() *Styles {
+	return b.styles
 }

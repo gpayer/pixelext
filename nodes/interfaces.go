@@ -36,6 +36,8 @@ type Node interface {
 	Hide()
 	AddChild(child Node)
 	Children() []Node
+	SetStyles(styles *Styles)
+	GetStyles() *Styles
 }
 
 type Initializable interface {
