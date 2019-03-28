@@ -164,6 +164,10 @@ func (b *BaseNode) calcZero() {
 	}
 }
 
+func (b *BaseNode) GetName() string {
+	return b.Name
+}
+
 func (b *BaseNode) SetPos(p pixel.Vec) {
 	b.pos = p
 	b.calcMat()

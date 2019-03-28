@@ -133,7 +133,14 @@ func (d *demo) Init() {
 	bbox := nodes.NewBorderBox("bbox", 50, 50)
 	bbox.SetBorderWidth(2)
 	bbox.SetPos(pixel.V(500, 700))
+	bbox.SetZIndex(-1)
 	d.AddChild(bbox)
+
+	canvas := nodes.NewCanvas("canvas", 100, 100)
+	canvas.Clear(colornames.Royalblue)
+	canvas.SetPos(pixel.V(200, 200))
+	canvas.SetZIndex(-1)
+	d.AddChild(canvas)
 }
 
 func (d *demo) Update(dt float64) {

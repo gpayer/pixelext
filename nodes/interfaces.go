@@ -14,6 +14,7 @@ type Node interface {
 	_getMat() pixel.Matrix
 	_getLastMat() pixel.Matrix
 	_getZindex() int
+	GetName() string
 	GetContainerBounds() pixel.Rect
 	GetBounds() pixel.Rect
 	SetBounds(r pixel.Rect)
