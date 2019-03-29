@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"image/color"
 	"log"
 	"math"
 	"os"
@@ -41,6 +42,13 @@ func makeText(x, y float64, name string, al nodes.Alignment) *nodes.Text {
 }
 
 func (d *demo) Init() {
+	styles := nodes.DefaultStyles()
+	styles.Text.Color = colornames.Chartreuse
+	styles.Border.Width = 5
+	styles.Border.Color = colornames.Fuchsia
+	styles.Element.EnabledColor = colornames.Darkgreen
+	styles.Background.Color = color.RGBA{R: 30, G: 30, B: 30, A: 128}
+
 	text := makeText(100, 100, "text1", nodes.AlignmentBottomLeft)
 	d.AddChild(text)
 	d.text1 = text
@@ -68,6 +76,7 @@ func (d *demo) Init() {
 	d.AddChild(text)
 
 	text = makeText(200, 400, "text2", nodes.AlignmentTopRight)
+	text.SetStyles(styles)
 	d.AddChild(text)
 	d.text3 = text
 
@@ -90,6 +99,7 @@ func (d *demo) Init() {
 		slidertext.Printf("%.2f", v)
 		fmt.Printf("new value: %.2f\n", v)
 	})
+	slider.SetStyles(styles)
 	sltext.AddChild(slider)
 
 	slider = ui.NewSlider("slider2", 0, 1, 0.5)
@@ -116,8 +126,7 @@ func (d *demo) Init() {
 
 	hbox := ui.NewHBox("hbox1")
 	hbox.SetPos(pixel.V(100, 700))
-	hbox.Padding = 5
-	hbox.BorderWidth = 2
+	hbox.SetStyles(styles)
 	d.AddChild(hbox)
 
 	text = nodes.NewText("f1", "basic")
@@ -125,13 +134,16 @@ func (d *demo) Init() {
 	hbox.AddChild(text)
 	text = nodes.NewText("f2", "basic")
 	text.Printf("Field2")
+	txtstyle := text.GetStyles()
+	txtstyle.Text.Color = colornames.Gold
+	text.SetStyles(txtstyle)
 	hbox.AddChild(text)
 	text = nodes.NewText("f3", "basic")
 	text.Printf("Field3")
 	hbox.AddChild(text)
 
 	bbox := nodes.NewBorderBox("bbox", 50, 50)
-	bbox.SetBorderWidth(2)
+	bbox.SetStyles(styles)
 	bbox.SetPos(pixel.V(500, 700))
 	bbox.SetZIndex(-1)
 	d.AddChild(bbox)
@@ -141,6 +153,13 @@ func (d *demo) Init() {
 	canvas.SetPos(pixel.V(200, 200))
 	canvas.SetZIndex(-1)
 	d.AddChild(canvas)
+
+	button := ui.NewButton("btn1", 75, 40, "Click me!")
+	button.SetPos(pixel.V(700, 700))
+	button.OnClick(func() {
+		fmt.Println("Button clicked!")
+	})
+	d.AddChild(button)
 }
 
 func (d *demo) Update(dt float64) {

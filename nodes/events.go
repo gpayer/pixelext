@@ -29,6 +29,15 @@ func (e *EventManager) Clicked(button pixelgl.Button, node Node) bool {
 	return false
 }
 
+func (e *EventManager) MouseHovering(node Node) bool {
+	bounds := node.GetBounds()
+	bounds = bounds.Moved(bounds.Min.Scaled(-1)).Moved(node.GetExtraOffset().Scaled(-1))
+	if bounds.Contains(node._getLastMat().Unproject(e.win.MousePosition())) {
+		return true
+	}
+	return false
+}
+
 func (e *EventManager) JustPressedButtons(buttons ...pixelgl.Button) []pixelgl.Button {
 	var result []pixelgl.Button
 	for _, b := range buttons {

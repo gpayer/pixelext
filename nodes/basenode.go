@@ -122,7 +122,7 @@ func NewBaseNode(name string) *BaseNode {
 		zindex:        0,
 		zeroalignment: AlignmentBottomLeft,
 		extraoffset:   pixel.ZV,
-		styles:        &Styles{},
+		styles:        DefaultStyles(),
 	}
 	b.Self = b
 	b.calcMat()

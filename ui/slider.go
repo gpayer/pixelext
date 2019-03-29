@@ -6,7 +6,6 @@ import (
 	"github.com/faiface/pixel"
 	"github.com/faiface/pixel/imdraw"
 	"github.com/faiface/pixel/pixelgl"
-	"golang.org/x/image/colornames"
 )
 
 type Slider struct {
@@ -49,23 +48,32 @@ func (s *Slider) Update(dt float64) {
 		s.dirty = true
 	}
 	if s.dirty {
+		styles := s.GetStyles()
 		bounds = s.canvas.Bounds()
 		s.onchange(s.current)
-		s.canvas.Clear(colornames.Black)
+		s.canvas.Clear(styles.Background.Color)
 		im := imdraw.New(nil)
-		im.Color = colornames.White
+		im.Color = styles.Border.Color
 		min := bounds.Min
 		max := bounds.Max
-		im.Push(min, pixel.V(min.X, max.Y), max, pixel.V(max.X, min.Y))
-		im.Polygon(2)
+		bw := styles.Border.Width
+		if bw > 0 {
+			im.Push(min, pixel.V(min.X, max.Y), max, pixel.V(max.X, min.Y))
+			im.Polygon(bw)
+		}
 		currentw := (bounds.W() - 2) * float64(s.current/(s.max-s.min))
-		im.Color = colornames.Skyblue
-		innerOrig := min.Add(pixel.V(1, 1))
-		im.Push(innerOrig, innerOrig.Add(pixel.V(currentw, 0)), innerOrig.Add(pixel.V(currentw, bounds.H()-2)), innerOrig.Add(pixel.V(0, bounds.H()-2)))
+		im.Color = styles.Element.EnabledColor
+		innerOrig := min.Add(pixel.V(bw/2, bw/2))
+		im.Push(innerOrig, innerOrig.Add(pixel.V(currentw, 0)), innerOrig.Add(pixel.V(currentw, bounds.H()-bw)), innerOrig.Add(pixel.V(0, bounds.H()-bw)))
 		im.Polygon(0)
 		im.Draw(s.canvas)
 		s.dirty = false
 	}
+}
+
+func (s *Slider) SetStyles(styles *nodes.Styles) {
+	s.BaseNode.SetStyles(styles)
+	s.dirty = true
 }
 
 func (s *Slider) Draw(win *pixelgl.Window, mat pixel.Matrix) {

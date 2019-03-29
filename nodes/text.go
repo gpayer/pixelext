@@ -2,6 +2,7 @@ package nodes
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/faiface/pixel"
 	"github.com/faiface/pixel/pixelgl"
@@ -10,7 +11,8 @@ import (
 
 type Text struct {
 	BaseNode
-	txt *text.Text
+	txt     *text.Text
+	content strings.Builder
 }
 
 func NewText(name, atlasname string) *Text {
@@ -27,6 +29,7 @@ func (t *Text) Text() *text.Text {
 }
 
 func (t *Text) Printf(format string, a ...interface{}) {
+	fmt.Fprintf(&t.content, format, a...)
 	fmt.Fprintf(t.txt, format, a...)
 	t.SetBounds(t.txt.Bounds())
 }
@@ -36,5 +39,19 @@ func (t *Text) Draw(win *pixelgl.Window, mat pixel.Matrix) {
 }
 
 func (t *Text) Clear() {
+	t.content.Reset()
 	t.txt.Clear()
+}
+
+func (t *Text) SetStyles(styles *Styles) {
+	redraw := false
+	if t.GetStyles().Text.Color != styles.Text.Color {
+		redraw = true
+	}
+	t.BaseNode.SetStyles(styles)
+	if redraw {
+		t.txt.Color = styles.Text.Color
+		t.txt.Clear()
+		fmt.Fprint(t.txt, t.content.String())
+	}
 }
