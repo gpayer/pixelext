@@ -155,11 +155,21 @@ func (d *demo) Init() {
 	d.AddChild(canvas)
 
 	button := ui.NewButton("btn1", 75, 40, "Click me!")
-	button.SetPos(pixel.V(700, 700))
+	button.SetPos(pixel.V(710, 710))
 	button.OnClick(func() {
 		fmt.Println("Button clicked!")
 	})
 	d.AddChild(button)
+
+	btngroup := ui.NewButtonGroup("btngroup", 40)
+	btngroup.SetPos(pixel.V(710, 640))
+	btngroup.AddButton("First Choice", "1", 0)
+	btngroup.AddButton("Nr. 2", "2", 0)
+	btngroup.AddButton("Three", "3", 0)
+	btngroup.OnChange(func(v string) {
+		fmt.Println(v)
+	})
+	d.AddChild(btngroup)
 }
 
 func (d *demo) Update(dt float64) {

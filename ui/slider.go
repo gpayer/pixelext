@@ -37,7 +37,7 @@ func (s *Slider) Update(dt float64) {
 		//fmt.Printf("clicked: %v %v %v %v\n", s.extraoffset, bounds, pos, zblPos)
 		s.current = s.min + (s.max-s.min)*float32(zblPos.X/bounds.W())
 		s.dirty = true
-	} else if ev.MouseScroll().Y != 0 {
+	} else if ev.MouseScroll().Y != 0 && ev.MouseHovering(s) {
 		s.current += float32(0.1 * ev.MouseScroll().Y)
 		if s.current > s.max {
 			s.current = s.max

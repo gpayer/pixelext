@@ -42,7 +42,7 @@ func NewButton(name string, w, h float64, text string) *Button {
 	states := []ButtonState{ButtonEnabled, ButtonDisabled, ButtonHover, ButtonPressed}
 	for _, state := range states {
 		b.canvases[state] = nodes.NewCanvas("", w, h)
-		b.canvases[state].GetStyles().Border.Width = 1
+		b.canvases[state].GetStyles().Border.Width = 2
 		b.AddChild(b.canvases[state])
 	}
 
@@ -56,6 +56,12 @@ func NewButton(name string, w, h float64, text string) *Button {
 
 	b.text = nodes.NewText("buttontxt", "basic")
 	b.text.Printf(text)
+	if w == 0 {
+		w = b.text.GetBounds().W() + 2*b.GetStyles().Padding
+	}
+	if h == 0 {
+		h = b.text.GetBounds().H() + 2*b.GetStyles().Padding
+	}
 	b.text.SetPos(pixel.V(w/2, h/2))
 	b.text.SetZeroAlignment(nodes.AlignmentCenter)
 	b.text.SetZIndex(10)
@@ -121,7 +127,7 @@ func (b *Button) Update(dt float64) {
 			b.state = ButtonPressed
 		} else if b.state == ButtonPressed && nodes.Events().Pressed(pixelgl.MouseButtonLeft) {
 			b.state = ButtonPressed
-		} else if nodes.Events().JustReleased(pixelgl.MouseButtonLeft) {
+		} else if b.state == ButtonPressed && nodes.Events().JustReleased(pixelgl.MouseButtonLeft) {
 			b.state = ButtonEnabled
 			b.onclick()
 		} else {
