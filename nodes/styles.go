@@ -21,7 +21,8 @@ type Styles struct {
 		EnabledColor  color.Color
 		DisabledColor color.Color
 	}
-	Padding float64
+	Padding       float64
+	RoundToPixels bool
 }
 
 func DefaultStyles() *Styles {
@@ -33,5 +34,6 @@ func DefaultStyles() *Styles {
 	s.Element.EnabledColor = colornames.Steelblue
 	s.Element.DisabledColor = colornames.Darkgray
 	s.Padding = 5
+	s.RoundToPixels = true
 	return s
 }

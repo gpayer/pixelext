@@ -1,6 +1,7 @@
 package nodes
 
 import (
+	"math"
 	"sort"
 
 	"github.com/faiface/pixel"
@@ -39,6 +40,9 @@ func (b *BaseNode) _getZindex() int {
 
 func (b *BaseNode) GetContainerBounds() pixel.Rect {
 	r := b.Self.GetBounds()
+	if r.Norm().Area() > 0 {
+		return r
+	}
 	for _, child := range b.children {
 		r = r.Union(child.GetContainerBounds().Moved(child.GetPos().Sub(child.GetOrigin())))
 	}
@@ -140,6 +144,10 @@ func (b *BaseNode) calcZero() {
 	if b.zeroalignment != AlignmentFixed {
 		whalf := b.bounds.W() / 2
 		hhalf := b.bounds.H() / 2
+		if b.styles.RoundToPixels {
+			whalf = math.Round(whalf)
+			hhalf = math.Round(hhalf)
+		}
 		blAligned := b.bounds.Moved(b.bounds.Min.Scaled(-1))
 		switch b.zeroalignment {
 		case AlignmentBottomLeft:
@@ -171,7 +179,11 @@ func (b *BaseNode) GetName() string {
 }
 
 func (b *BaseNode) SetPos(p pixel.Vec) {
-	b.pos = p
+	if b.styles.RoundToPixels {
+		b.pos = pixel.V(math.Round(p.X), math.Round(p.Y))
+	} else {
+		b.pos = p
+	}
 	b.calcMat()
 }
 
@@ -222,7 +234,7 @@ func (b *BaseNode) SetBounds(r pixel.Rect) {
 }
 
 func (b *BaseNode) SetBoundsInternal(r pixel.Rect) {
-	b.bounds = r
+	b.bounds = r.Norm()
 }
 
 func (b *BaseNode) GetBounds() pixel.Rect {

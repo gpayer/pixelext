@@ -31,6 +31,7 @@ func (t *Text) Text() *text.Text {
 func (t *Text) Printf(format string, a ...interface{}) {
 	fmt.Fprintf(&t.content, format, a...)
 	fmt.Fprintf(t.txt, format, a...)
+	t.SetExtraOffset(pixel.V(0, t.txt.Bounds().H()-t.txt.Atlas().LineHeight()))
 	t.SetBounds(t.txt.Bounds())
 }
 

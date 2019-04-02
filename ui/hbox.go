@@ -34,9 +34,10 @@ func (h *HBox) recalcPositions() {
 	for _, child := range h.Children() {
 		if child.GetName() != "__bg" {
 			child.SetPos(pixel.V(xpos, padding))
-			xpos += child.GetBounds().W() + 2*padding
-			if child.GetBounds().H() > maxy {
-				maxy = child.GetBounds().H()
+			childbounds := child.GetContainerBounds()
+			xpos += childbounds.W() + 2*padding
+			if childbounds.H() > maxy {
+				maxy = childbounds.H()
 			}
 		}
 	}

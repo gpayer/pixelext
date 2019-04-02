@@ -170,6 +170,25 @@ func (d *demo) Init() {
 		fmt.Println(v)
 	})
 	d.AddChild(btngroup)
+
+	grid := ui.NewGrid("grid", 3)
+	grid.SetPos(pixel.V(900, 600))
+	d.AddChild(grid)
+
+	text = nodes.NewText("", "basic")
+	text.Printf("One Field")
+	grid.AddChild(text)
+
+	button = ui.NewButton("btn1", 0, 0, "Btn!")
+	grid.AddChild(button)
+
+	text = nodes.NewText("", "basic")
+	text.Printf("Last")
+	grid.AddChild(text)
+
+	text = nodes.NewText("", "basic")
+	text.Printf("Next line")
+	grid.AddChild(text)
 }
 
 func (d *demo) Update(dt float64) {
@@ -192,7 +211,7 @@ var memprofile = flag.String("memprofile", "", "write memory profile to `file`")
 func Run() {
 	win, err := pixelgl.NewWindow(pixelgl.WindowConfig{
 		Title:  "pixelext example",
-		Bounds: pixel.R(0, 0, 1000, 800),
+		Bounds: pixel.R(0, 0, 1200, 800),
 		VSync:  true,
 	})
 	if err != nil {
