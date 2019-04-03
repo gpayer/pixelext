@@ -1,14 +1,17 @@
 package ui
 
 import (
+	"math"
 	"pixelext/nodes"
+
+	"github.com/faiface/pixel/imdraw"
 
 	"github.com/faiface/pixel"
 )
 
 type Grid struct {
 	nodes.BaseNode
-	bbox *nodes.BorderBox
+	bbox *nodes.Canvas
 	cols int
 }
 
@@ -18,10 +21,11 @@ func NewGrid(name string, cols int) *Grid {
 		cols:     cols,
 	}
 	g.Self = g
-	g.SetZeroAlignment(nodes.AlignmentTopLeft)
-	g.bbox = nodes.NewBorderBox("__bbox", g.GetStyles().Padding, g.GetStyles().Padding)
+	//g.SetZeroAlignment(nodes.AlignmentTopLeft)
+	g.bbox = nodes.NewCanvas("__bbox", 1, 1)
 	g.bbox.SetZIndex(-10)
 	g.bbox.SetPos(pixel.V(0, 0))
+	g.bbox.SetZeroAlignment(nodes.AlignmentTopLeft)
 	g.AddChild(g.bbox)
 	return g
 }
@@ -45,11 +49,13 @@ func (g *Grid) recalcPositions() {
 		if row >= len(maxy) {
 			maxy = append(maxy, 0.0)
 		}
-		if cb.W() > maxx[curcol] {
-			maxx[curcol] = cb.W()
+		curw := cb.W() + 2*child.GetStyles().Padding
+		if curw > maxx[curcol] {
+			maxx[curcol] = curw
 		}
-		if cb.H() > maxy[row] {
-			maxy[row] = cb.H()
+		curh := cb.H() + 2*child.GetStyles().Padding
+		if curh > maxy[row] {
+			maxy[row] = curh
 		}
 		curcol++
 		if curcol == g.cols {
@@ -60,25 +66,48 @@ func (g *Grid) recalcPositions() {
 
 	row = 0
 	curcol = 0
-	x := styles.Padding
-	y := -styles.Padding
+	x := 0.0
+	y := 0.0
 	for _, child := range g.Children() {
 		if child.GetName() == "__bbox" {
 			continue
 		}
-		//child.SetZeroAlignment(nodes.AlignmentTopLeft)
+		x += child.GetStyles().Padding
+		y += child.GetStyles().Padding
+		child.SetZeroAlignment(nodes.AlignmentTopLeft)
 		child.SetPos(pixel.V(x, -y))
-		x += maxx[curcol] + styles.Padding
+		x += maxx[curcol] - child.GetStyles().Padding
+		y -= child.GetStyles().Padding
 		curcol++
 		if curcol == g.cols {
 			curcol = 0
-			y -= (maxy[row] + styles.Padding)
-			x = styles.Padding
+			y += maxy[row]
+			x = 0
 			row++
 		}
 	}
-	b = pixel.R(0, 0, sumSlice(maxx)+float64(len(maxx)+1)*styles.Padding, sumSlice(maxy)+float64(len(maxy)+1)*styles.Padding).Norm()
+	b = pixel.R(0, 0, math.Round(sumSlice(maxx)), math.Round(sumSlice(maxy))).Norm()
+
 	g.bbox.SetBounds(b)
+	im := imdraw.New(nil)
+	im.Color = styles.Border.Color
+	im.Push(b.Min, pixel.V(b.Max.X, b.Min.Y), b.Max, pixel.V(b.Min.X, b.Max.Y))
+	im.Polygon(styles.Border.Width)
+	x = maxx[0]
+	for i := 1; i < len(maxx); i++ {
+		im.Push(pixel.V(x, b.Min.Y), pixel.V(x, b.Max.Y))
+		im.Line(1)
+		x += maxx[i]
+	}
+	y = b.Max.Y - maxy[0]
+	for i := 1; i < len(maxy); i++ {
+		im.Push(pixel.V(b.Min.X, y), pixel.V(b.Max.X, y))
+		im.Line(1)
+		y -= maxy[i]
+	}
+	g.bbox.Clear(styles.Background.Color)
+	im.Draw(g.bbox.Canvas())
+
 	g.SetBounds(b)
 }
 

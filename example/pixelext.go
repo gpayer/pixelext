@@ -172,7 +172,7 @@ func (d *demo) Init() {
 	d.AddChild(btngroup)
 
 	grid := ui.NewGrid("grid", 3)
-	grid.SetPos(pixel.V(900, 600))
+	grid.SetPos(pixel.V(910, 590))
 	d.AddChild(grid)
 
 	text = nodes.NewText("", "basic")
