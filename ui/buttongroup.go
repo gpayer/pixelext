@@ -26,9 +26,13 @@ func NewButtonGroup(name string, h float64) *ButtonGroup {
 func (g *ButtonGroup) AddButton(caption, value string, w float64) {
 	btn := NewButton("", w, g.h, caption)
 	if g.current != nil {
-		btn.SetEnabled(false)
+		btn.SetEnabled(true)
 	}
 	g.buttons = append(g.buttons, btn)
+	if len(g.buttons) == 1 {
+		g.current = btn
+		btn.SetEnabled(false)
+	}
 	btn.OnClick(func() {
 		if g.current != nil {
 			g.current.SetEnabled(true)
