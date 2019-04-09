@@ -22,23 +22,24 @@ const (
 )
 
 type Button struct {
-	nodes.BaseNode
+	UIBase
 	state    ButtonState
 	canvases map[ButtonState]*nodes.Canvas
-	text     *nodes.Text
+	text     *Text
 	enabled  bool
 	onclick  func()
 }
 
 func NewButton(name string, w, h float64, text string) *Button {
 	b := &Button{
-		BaseNode: *nodes.NewBaseNode(name),
+		UIBase:   *NewUIBase(name),
 		state:    ButtonEnabled,
 		canvases: make(map[ButtonState]*nodes.Canvas, 4),
 		enabled:  true,
 		onclick:  func() {},
 	}
 	b.Self = b
+	b.UISelf = b
 	states := []ButtonState{ButtonEnabled, ButtonDisabled, ButtonHover, ButtonPressed}
 	for _, state := range states {
 		b.canvases[state] = nodes.NewCanvas("", w, h)
@@ -54,19 +55,19 @@ func NewButton(name string, w, h float64, text string) *Button {
 	b.canvases[ButtonPressed].GetStyles().Element.EnabledColor = colornames.Darkblue
 	b.canvases[ButtonPressed].GetStyles().Border.Color = colornames.Gray
 
-	b.text = nodes.NewText("buttontxt", "basic")
+	b.text = NewText("buttontxt", "basic")
 	b.text.Printf(text)
 	if w == 0 {
-		w = b.text.GetBounds().W() + 2*b.GetStyles().Padding
+		w = b.text.Size().X + 2*b.GetStyles().Padding
 	}
 	if h == 0 {
-		h = b.text.GetBounds().H() + 2*b.GetStyles().Padding
+		h = b.text.Size().Y + 2*b.GetStyles().Padding
 	}
 	b.text.SetPos(pixel.V(w/2, h/2))
-	b.text.SetZeroAlignment(nodes.AlignmentCenter)
+	b.text.SetAlignment(nodes.AlignmentCenter)
 	b.text.SetZIndex(10)
 	b.AddChild(b.text)
-	b.SetBounds(pixel.R(0, 0, w, h))
+	b.SetSize(pixel.V(w, h))
 	return b
 }
 
@@ -79,32 +80,16 @@ func (b *Button) drawCanvases() {
 			canvas.Clear(styles.Element.EnabledColor)
 		}
 		if styles.Border.Width > 0 {
-			bounds := b.GetBounds()
+			bounds := b.Size()
 			im := imdraw.New(nil)
 			im.Color = styles.Border.Color
 			im.Push(pixel.ZV,
-				pixel.V(0, bounds.H()),
-				pixel.V(bounds.W(), bounds.H()),
-				pixel.V(bounds.W(), 0))
+				pixel.V(0, bounds.Y),
+				pixel.V(bounds.X, bounds.Y),
+				pixel.V(bounds.X, 0))
 			im.Polygon(styles.Border.Width)
 			im.Draw(canvas.Canvas())
 		}
-	}
-}
-
-func (b *Button) SetBounds(r pixel.Rect) {
-	oldbounds := b.GetBounds()
-	var redraw bool = false
-	if oldbounds.W() != r.W() || oldbounds.H() != r.H() {
-		redraw = true
-	}
-	b.BaseNode.SetBounds(r)
-
-	if redraw {
-		for _, canvas := range b.canvases {
-			canvas.SetBounds(pixel.R(0, 0, r.W(), r.H()))
-		}
-		b.drawCanvases()
 	}
 }
 

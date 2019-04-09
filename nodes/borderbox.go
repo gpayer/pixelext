@@ -32,8 +32,8 @@ func (b *BorderBox) redrawCanvas() {
 	}
 }
 
-func (b *BorderBox) SetBounds(r pixel.Rect) {
-	b.Canvas.SetBounds(r)
+func (b *BorderBox) SetSize(size pixel.Vec) {
+	b.canvas.SetBounds(pixel.R(0, 0, size.X, size.Y))
 	b.redrawCanvas()
 }
 

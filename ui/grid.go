@@ -10,22 +10,22 @@ import (
 )
 
 type Grid struct {
-	nodes.BaseNode
+	UIBase
 	bbox *nodes.Canvas
 	cols int
 }
 
 func NewGrid(name string, cols int) *Grid {
 	g := &Grid{
-		BaseNode: *nodes.NewBaseNode(name),
-		cols:     cols,
+		UIBase: *NewUIBase(name),
+		cols:   cols,
 	}
 	g.Self = g
+	g.UISelf = g
 	//g.SetZeroAlignment(nodes.AlignmentTopLeft)
 	g.bbox = nodes.NewCanvas("__bbox", 1, 1)
 	g.bbox.SetZIndex(-10)
 	g.bbox.SetPos(pixel.V(0, 0))
-	g.bbox.SetZeroAlignment(nodes.AlignmentTopLeft)
 	g.AddChild(g.bbox)
 	return g
 }
@@ -42,18 +42,22 @@ func (g *Grid) recalcPositions() {
 		if child.GetName() == "__bbox" {
 			continue
 		}
-		cb := child.GetContainerBounds()
+		uichild, ok := child.(UINode)
+		if !ok {
+			continue
+		}
+		cb := uichild.Size()
 		if curcol >= len(maxx) {
 			maxx = append(maxx, 0.0)
 		}
 		if row >= len(maxy) {
 			maxy = append(maxy, 0.0)
 		}
-		curw := cb.W() + 2*child.GetStyles().Padding
+		curw := cb.X + 2*child.GetStyles().Padding
 		if curw > maxx[curcol] {
 			maxx[curcol] = curw
 		}
-		curh := cb.H() + 2*child.GetStyles().Padding
+		curh := cb.Y + 2*child.GetStyles().Padding
 		if curh > maxy[row] {
 			maxy[row] = curh
 		}
@@ -74,7 +78,6 @@ func (g *Grid) recalcPositions() {
 		}
 		x += child.GetStyles().Padding
 		y += child.GetStyles().Padding
-		child.SetZeroAlignment(nodes.AlignmentTopLeft)
 		child.SetPos(pixel.V(x, -y))
 		x += maxx[curcol] - child.GetStyles().Padding
 		y -= child.GetStyles().Padding
@@ -88,7 +91,6 @@ func (g *Grid) recalcPositions() {
 	}
 	b = pixel.R(0, 0, math.Round(sumSlice(maxx)), math.Round(sumSlice(maxy))).Norm()
 
-	g.bbox.SetBounds(b)
 	im := imdraw.New(nil)
 	im.Color = styles.Border.Color
 	im.Push(b.Min, pixel.V(b.Max.X, b.Min.Y), b.Max, pixel.V(b.Min.X, b.Max.Y))
@@ -108,7 +110,7 @@ func (g *Grid) recalcPositions() {
 	g.bbox.Clear(styles.Background.Color)
 	im.Draw(g.bbox.Canvas())
 
-	g.SetBounds(b)
+	g.SetSize(b.Size())
 }
 
 func sumSlice(sl []float64) float64 {

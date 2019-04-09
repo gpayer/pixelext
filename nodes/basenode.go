@@ -38,17 +38,6 @@ func (b *BaseNode) _getZindex() int {
 	return b.zindex
 }
 
-func (b *BaseNode) GetContainerBounds() pixel.Rect {
-	r := b.Self.GetBounds()
-	if r.Norm().Area() > 0 {
-		return r
-	}
-	for _, child := range b.children {
-		r = r.Union(child.GetContainerBounds().Moved(child.GetPos().Sub(child.GetOrigin())))
-	}
-	return r
-}
-
 func (b *BaseNode) _init() {
 	if b.initialized {
 		return
@@ -134,44 +123,7 @@ func NewBaseNode(name string) *BaseNode {
 }
 
 func (b *BaseNode) calcMat() {
-	relOrigin := b.origin.Sub(b.bounds.Min)
-	relRotpoint := b.rotpoint.Sub(b.bounds.Min)
-	relPos := b.pos.Sub(relOrigin)
-	b.mat = pixel.IM.Moved(b.extraoffset).ScaledXY(relOrigin, b.scale).Rotated(relRotpoint, b.rot).Moved(relPos)
-}
-
-func (b *BaseNode) calcZero() {
-	if b.zeroalignment != AlignmentFixed {
-		whalf := b.bounds.W() / 2
-		hhalf := b.bounds.H() / 2
-		if b.styles.RoundToPixels {
-			whalf = math.Round(whalf)
-			hhalf = math.Round(hhalf)
-		}
-		blAligned := b.bounds.Moved(b.bounds.Min.Scaled(-1))
-		switch b.zeroalignment {
-		case AlignmentBottomLeft:
-			b.Self.SetBoundsInternal(blAligned)
-		case AlignmentBottomCenter:
-			b.Self.SetBoundsInternal(blAligned.Moved(pixel.V(-whalf, 0)))
-		case AlignmentBottomRight:
-			b.Self.SetBoundsInternal(blAligned.Moved(pixel.V(-2*whalf, 0)))
-		case AlignmentCenterLeft:
-			b.Self.SetBoundsInternal(blAligned.Moved(pixel.V(0, -hhalf)))
-		case AlignmentCenter:
-			b.Self.SetBoundsInternal(blAligned.Moved(pixel.V(-whalf, -hhalf)))
-		case AlignmentCenterRight:
-			b.Self.SetBoundsInternal(blAligned.Moved(pixel.V(-2*whalf, -hhalf)))
-		case AlignmentTopLeft:
-			b.Self.SetBoundsInternal(blAligned.Moved(pixel.V(0, -2*hhalf)))
-		case AlignmentTopCenter:
-			b.Self.SetBoundsInternal(blAligned.Moved(pixel.V(-whalf, -2*hhalf)))
-		case AlignmentTopRight:
-			b.Self.SetBoundsInternal(blAligned.Moved(pixel.V(-2*whalf, -2*hhalf)))
-		default:
-		}
-		b.calcMat()
-	}
+	b.mat = pixel.IM.Moved(b.extraoffset).ScaledXY(b.origin, b.scale).Rotated(b.rotpoint, b.rot).Moved(b.pos)
 }
 
 func (b *BaseNode) GetName() string {
@@ -227,28 +179,6 @@ func (b *BaseNode) GetRotPoint() pixel.Vec {
 	return b.rotpoint
 }
 
-func (b *BaseNode) SetBounds(r pixel.Rect) {
-	b.SetBoundsInternal(r)
-	b.calcZero()
-	b.calcMat()
-}
-
-func (b *BaseNode) SetBoundsInternal(r pixel.Rect) {
-	b.bounds = r.Norm()
-}
-
-func (b *BaseNode) GetBounds() pixel.Rect {
-	return b.bounds
-}
-
-// SetZeroAlignment decides how to handle element boundaries. Unless the alignment is AlignementFixed
-// the Min and Max values of the boundaries Rect are recalculated to have the zero point at the
-// requested position.
-func (b *BaseNode) SetZeroAlignment(a Alignment) {
-	b.zeroalignment = a
-	b.calcZero()
-}
-
 func (b *BaseNode) SetZIndex(z int) {
 	b.zindex = z
 }
@@ -293,4 +223,10 @@ func (b *BaseNode) SetStyles(styles *Styles) {
 
 func (b *BaseNode) GetStyles() *Styles {
 	return b.styles
+}
+
+func (b *BaseNode) SetSize(size pixel.Vec) {}
+
+func (b *BaseNode) Contains(point pixel.Vec) bool {
+	return false
 }

@@ -9,7 +9,7 @@ import (
 )
 
 type Slider struct {
-	nodes.BaseNode
+	UIBase
 	min, max, current float32
 	dirty             bool
 	canvas            *pixelgl.Canvas
@@ -17,9 +17,9 @@ type Slider struct {
 }
 
 func (s *Slider) Init() {
-	s.canvas = pixelgl.NewCanvas(s.GetBounds())
+	size := s.Size()
+	s.canvas = pixelgl.NewCanvas(pixel.R(0, 0, size.X, size.Y))
 	s.dirty = true
-	s.SetExtraOffset(pixel.V(s.GetBounds().W()/2, s.GetBounds().H()/2))
 }
 
 func (s *Slider) Mounted() {
@@ -30,12 +30,12 @@ func (s *Slider) Unmounted() {
 
 func (s *Slider) Update(dt float64) {
 	ev := nodes.Events()
-	bounds := s.GetBounds()
+	size := s.Size()
 	if ev.Clicked(pixelgl.MouseButtonLeft, s) {
 		pos := ev.LocalMousePosition(s)
-		zblPos := pos.Sub(bounds.Min)
+		zblPos := pos // TODO
 		//fmt.Printf("clicked: %v %v %v %v\n", s.extraoffset, bounds, pos, zblPos)
-		s.current = s.min + (s.max-s.min)*float32(zblPos.X/bounds.W())
+		s.current = s.min + (s.max-s.min)*float32(zblPos.X/size.X)
 		s.dirty = true
 	} else if ev.MouseScroll().Y != 0 && ev.MouseHovering(s) {
 		s.current += float32(0.1 * ev.MouseScroll().Y)
@@ -49,7 +49,7 @@ func (s *Slider) Update(dt float64) {
 	}
 	if s.dirty {
 		styles := s.GetStyles()
-		bounds = s.canvas.Bounds()
+		bounds := s.canvas.Bounds()
 		s.onchange(s.current)
 		s.canvas.Clear(styles.Background.Color)
 		im := imdraw.New(nil)
@@ -97,10 +97,11 @@ func (s *Slider) OnChange(fn func(v float32)) {
 
 func NewSlider(name string, min, max, current float32) *Slider {
 	sl := &Slider{
-		BaseNode: *nodes.NewBaseNode(name),
-		min:      min, max: max, current: current,
+		UIBase: *NewUIBase(name),
+		min:    min, max: max, current: current,
 		onchange: func(_ float32) {},
 	}
 	sl.Self = sl
+	sl.UISelf = sl
 	return sl
 }

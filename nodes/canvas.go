@@ -18,16 +18,13 @@ func NewCanvas(name string, w, h float64) *Canvas {
 		canvas:   pixelgl.NewCanvas(pixel.R(0, 0, w, h)),
 	}
 	c.Self = c
-	c.Self.SetBounds(pixel.R(0, 0, w, h))
-	c.SetExtraOffset(pixel.V(w/2, h/2))
+	//c.SetExtraOffset(pixel.V(w/2, h/2))
 	return c
 }
 
-func (c *Canvas) SetBounds(r pixel.Rect) {
-	c.BaseNode.SetBounds(r)
-	bounds := c.GetBounds()
-	c.canvas.SetBounds(pixel.R(0, 0, bounds.W(), bounds.H()))
-	c.SetExtraOffset(pixel.V(bounds.W()/2, bounds.H()/2))
+func (c *Canvas) SetSize(size pixel.Vec) {
+	c.canvas.SetBounds(pixel.R(0, 0, size.X, size.Y))
+	//c.SetExtraOffset(pixel.V(size.X/2, size.Y/2))
 }
 
 func (c *Canvas) Draw(win *pixelgl.Window, mat pixel.Matrix) {

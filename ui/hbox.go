@@ -7,16 +7,17 @@ import (
 )
 
 type HBox struct {
-	nodes.BaseNode
+	UIBase
 	background *nodes.BorderBox
 }
 
 func NewHBox(name string) *HBox {
 	h := &HBox{
-		BaseNode:   *nodes.NewBaseNode(name),
+		UIBase:     *NewUIBase(name),
 		background: nodes.NewBorderBox("__bg", 1, 1),
 	}
 	h.Self = h
+	h.UISelf = h
 	return h
 }
 
@@ -32,19 +33,19 @@ func (h *HBox) recalcPositions() {
 	xpos := padding
 	maxy := 0.0
 	for _, child := range h.Children() {
-		if child.GetName() != "__bg" {
-			child.SetPos(pixel.V(xpos, padding))
-			childbounds := child.GetContainerBounds()
-			xpos += childbounds.W() + 2*padding
-			if childbounds.H() > maxy {
-				maxy = childbounds.H()
+		uichild, ok := child.(UINode)
+		if ok && child.GetName() != "__bg" {
+			uichild.SetPos(pixel.V(xpos, padding))
+			childbounds := uichild.Size()
+			xpos += childbounds.X + 2*padding
+			if childbounds.Y > maxy {
+				maxy = childbounds.Y
 			}
 		}
 	}
-	h.SetBounds(pixel.R(0, 0, 0, 0))
-	cb := pixel.R(-padding, -padding, xpos-padding, maxy+padding)
-	h.SetBounds(cb)
-	h.background.SetBounds(cb)
+	size := pixel.V(xpos-2*padding, maxy+2*padding)
+	h.SetSize(size)
+	h.background.SetSize(size)
 }
 
 func (h *HBox) AddChild(child nodes.Node) {

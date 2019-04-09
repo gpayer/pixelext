@@ -3,7 +3,7 @@ package ui
 import "pixelext/nodes"
 
 type ButtonGroup struct {
-	nodes.BaseNode
+	UIBase
 	hbox     *HBox
 	buttons  []*Button
 	current  *Button
@@ -13,12 +13,13 @@ type ButtonGroup struct {
 
 func NewButtonGroup(name string, h float64) *ButtonGroup {
 	g := &ButtonGroup{
-		BaseNode: *nodes.NewBaseNode(name),
+		UIBase: *NewUIBase(name),
 		hbox:     NewHBox("hbox"),
 		h:        h,
 		onchange: func(_ string) {},
 	}
 	g.Self = g
+	g.UISelf = g
 	g.AddChild(g.hbox)
 	return g
 }
@@ -44,9 +45,9 @@ func (g *ButtonGroup) AddButton(caption, value string, w float64) {
 	g.hbox.AddChild(btn)
 }
 
-func (g *ButtonGroup) SetZeroAlignment(a nodes.Alignment) {
-	g.BaseNode.SetZeroAlignment(a)
-	g.hbox.SetZeroAlignment(a)
+func (g *ButtonGroup) SetAlignment(a nodes.Alignment) {
+	g.UIBase.SetAlignment(a)
+	g.hbox.SetAlignment(a)
 }
 
 func (g *ButtonGroup) OnChange(fn func(v string)) {

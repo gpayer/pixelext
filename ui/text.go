@@ -1,7 +1,8 @@
-package nodes
+package ui
 
 import (
 	"fmt"
+	"pixelext/nodes"
 	"strings"
 
 	"github.com/faiface/pixel"
@@ -10,17 +11,18 @@ import (
 )
 
 type Text struct {
-	BaseNode
+	UIBase
 	txt     *text.Text
 	content strings.Builder
 }
 
 func NewText(name, atlasname string) *Text {
 	t := &Text{
-		BaseNode: *NewBaseNode(name),
-		txt:      text.New(pixel.ZV, FontService.Get(atlasname)),
+		UIBase: *NewUIBase(name),
+		txt:    text.New(pixel.ZV, nodes.FontService.Get(atlasname)),
 	}
 	t.Self = t
+	t.UISelf = t
 	return t
 }
 
@@ -32,7 +34,7 @@ func (t *Text) Printf(format string, a ...interface{}) {
 	fmt.Fprintf(&t.content, format, a...)
 	fmt.Fprintf(t.txt, format, a...)
 	t.SetExtraOffset(pixel.V(0, t.txt.Bounds().H()-t.txt.Atlas().LineHeight()))
-	t.SetBounds(t.txt.Bounds())
+	//t.SetBounds(t.txt.Bounds())
 }
 
 func (t *Text) Draw(win *pixelgl.Window, mat pixel.Matrix) {
@@ -44,7 +46,7 @@ func (t *Text) Clear() {
 	t.txt.Clear()
 }
 
-func (t *Text) SetStyles(styles *Styles) {
+func (t *Text) SetStyles(styles *nodes.Styles) {
 	redraw := false
 	if t.GetStyles().Text.Color != styles.Text.Color {
 		redraw = true
