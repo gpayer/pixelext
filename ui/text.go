@@ -33,8 +33,8 @@ func (t *Text) Text() *text.Text {
 func (t *Text) Printf(format string, a ...interface{}) {
 	fmt.Fprintf(&t.content, format, a...)
 	fmt.Fprintf(t.txt, format, a...)
-	t.SetExtraOffset(pixel.V(0, t.txt.Bounds().H()-t.txt.Atlas().LineHeight()))
-	//t.SetBounds(t.txt.Bounds())
+	t.SetExtraOffset(pixel.V(-t.txt.Bounds().W()/2, -t.txt.Bounds().H()/2 /*-t.txt.Atlas().LineHeight()*/))
+	t.SetSize(t.txt.Bounds().Size())
 }
 
 func (t *Text) Draw(win *pixelgl.Window, mat pixel.Matrix) {

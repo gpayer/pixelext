@@ -184,7 +184,7 @@ func (b *BaseNode) SetZIndex(z int) {
 }
 
 func (b *BaseNode) SetExtraOffset(extra pixel.Vec) {
-	b.extraoffset = extra
+	b.extraoffset = pixel.V(math.Round(extra.X), math.Round(extra.Y))
 	b.calcMat()
 }
 

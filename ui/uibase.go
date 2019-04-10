@@ -11,6 +11,7 @@ type UIBase struct {
 	alignment nodes.Alignment
 	UISelf    UINode
 	size      pixel.Vec
+	origpos   pixel.Vec
 }
 
 func NewUIBase(name string) *UIBase {
@@ -28,15 +29,42 @@ func (ui *UIBase) SetOrigin(origin pixel.Vec) {
 }
 
 func (ui *UIBase) SetPos(pos pixel.Vec) {
+	ui.origpos = pos
+	whalf := ui.size.X / 2
+	hhalf := ui.size.Y / 2
+	switch ui.alignment {
+	case nodes.AlignmentBottomLeft:
+		pos = pos.Add(pixel.V(whalf, hhalf))
+	case nodes.AlignmentCenterLeft:
+		pos = pos.Add(pixel.V(whalf, 0))
+	case nodes.AlignmentTopLeft:
+		pos = pos.Add(pixel.V(whalf, -hhalf))
+	case nodes.AlignmentBottomCenter:
+		pos = pos.Add(pixel.V(0, hhalf))
+	case nodes.AlignmentCenter:
+	case nodes.AlignmentTopCenter:
+		pos = pos.Add(pixel.V(0, -hhalf))
+	case nodes.AlignmentBottomRight:
+		pos = pos.Add(pixel.V(-whalf, hhalf))
+	case nodes.AlignmentCenterRight:
+		pos = pos.Add(pixel.V(-whalf, 0))
+	case nodes.AlignmentTopRight:
+		pos = pos.Add(pixel.V(-whalf, -hhalf))
+	default:
+	}
 	ui.BaseNode.SetPos(pos)
 }
 
+// Contains returns whether the given point (in local coordinates) lies within the
+// boundaries of this UI element
 func (ui *UIBase) Contains(point pixel.Vec) bool {
+	// TODO
 	return false
 }
 
 func (ui *UIBase) SetSize(size pixel.Vec) {
 	ui.size = size
+	ui.UISelf.SetPos(ui.origpos)
 }
 
 func (ui *UIBase) Size() pixel.Vec {
@@ -44,7 +72,6 @@ func (ui *UIBase) Size() pixel.Vec {
 }
 
 func (ui *UIBase) SetAlignment(a nodes.Alignment) {
-	oldpos := ui.UISelf.GetPos()
 	ui.alignment = a
-	ui.UISelf.SetPos(oldpos)
+	ui.UISelf.SetPos(ui.origpos)
 }
