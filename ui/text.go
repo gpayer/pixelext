@@ -19,7 +19,7 @@ type Text struct {
 func NewText(name, atlasname string) *Text {
 	t := &Text{
 		UIBase: *NewUIBase(name),
-		txt:    text.New(pixel.ZV, nodes.FontService.Get(atlasname)),
+		txt:    text.New(pixel.V(0, 2), nodes.FontService.Get(atlasname)), // TODO: correct this cheap workaround for real
 	}
 	t.Self = t
 	t.UISelf = t
@@ -33,7 +33,7 @@ func (t *Text) Text() *text.Text {
 func (t *Text) Printf(format string, a ...interface{}) {
 	fmt.Fprintf(&t.content, format, a...)
 	fmt.Fprintf(t.txt, format, a...)
-	t.SetExtraOffset(pixel.V(-t.txt.Bounds().W()/2, -t.txt.Bounds().H()/2 /*-t.txt.Atlas().LineHeight()*/))
+	t.SetExtraOffset(pixel.V(-t.txt.Bounds().W()/2, -t.txt.Bounds().H()/2+t.txt.Atlas().LineHeight()))
 	t.SetSize(t.txt.Bounds().Size())
 }
 

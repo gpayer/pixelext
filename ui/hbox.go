@@ -35,7 +35,6 @@ func (h *HBox) recalcPositions() {
 	for _, child := range h.Children() {
 		uichild, ok := child.(UINode)
 		if ok && child.GetName() != "__bg" {
-			uichild.SetPos(pixel.V(xpos, padding))
 			childbounds := uichild.Size()
 			xpos += childbounds.X + 2*padding
 			if childbounds.Y > maxy {
@@ -46,6 +45,17 @@ func (h *HBox) recalcPositions() {
 	size := pixel.V(xpos-2*padding, maxy+2*padding)
 	h.SetSize(size)
 	h.background.SetSize(size)
+
+	xpos = -size.X/2 + padding
+	for _, child := range h.Children() {
+		uichild, ok := child.(UINode)
+		if ok && child.GetName() != "__bg" {
+			uichild.SetAlignment(nodes.AlignmentCenterLeft)
+			uichild.SetPos(pixel.V(xpos, 0))
+			childbounds := uichild.Size()
+			xpos += childbounds.X + 2*padding
+		}
+	}
 }
 
 func (h *HBox) AddChild(child nodes.Node) {

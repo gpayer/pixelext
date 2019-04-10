@@ -4,6 +4,7 @@ import (
 	"flag"
 	"image/color"
 	"log"
+	"math"
 	"os"
 	"pixelext/nodes"
 	"pixelext/ui"
@@ -32,7 +33,7 @@ func newDemo() *demo {
 
 func makeText(x, y float64, name string, al nodes.Alignment) *ui.Text {
 	text := ui.NewText(name, "basic")
-	text.Printf("ABCDEF")
+	text.Printf("ABCDEF\nqpfjXX")
 	text.SetPos(pixel.V(x, y))
 	text.SetAlignment(al)
 	return text
@@ -120,37 +121,38 @@ func (d *demo) Init() {
 		sprite.SetPos(pixel.V(600, 300))
 		d.AddChild(sprite)
 		d.sprite = sprite
+	*/
+	hbox := ui.NewHBox("hbox1")
+	hbox.SetAlignment(nodes.AlignmentBottomLeft)
+	hbox.SetPos(pixel.V(100, 700))
+	hbox.SetStyles(styles)
+	d.AddChild(hbox)
 
-		hbox := ui.NewHBox("hbox1")
-		hbox.SetPos(pixel.V(100, 700))
-		hbox.SetStyles(styles)
-		d.AddChild(hbox)
+	text = ui.NewText("f1", "basic")
+	text.Printf("Field1")
+	hbox.AddChild(text)
+	text = ui.NewText("f2", "basic")
+	text.Printf("Field2")
+	txtstyle := text.GetStyles()
+	txtstyle.Text.Color = colornames.Gold
+	text.SetStyles(txtstyle)
+	hbox.AddChild(text)
+	text = ui.NewText("f3", "basic")
+	text.Printf("Field3")
+	hbox.AddChild(text)
 
-		text = ui.NewText("f1", "basic")
-		text.Printf("Field1")
-		hbox.AddChild(text)
-		text = ui.NewText("f2", "basic")
-		text.Printf("Field2")
-		txtstyle := text.GetStyles()
-		txtstyle.Text.Color = colornames.Gold
-		text.SetStyles(txtstyle)
-		hbox.AddChild(text)
-		text = ui.NewText("f3", "basic")
-		text.Printf("Field3")
-		hbox.AddChild(text)
+	bbox := nodes.NewBorderBox("bbox", 50, 50)
+	bbox.SetStyles(styles)
+	bbox.SetPos(pixel.V(500, 700))
+	bbox.SetZIndex(-1)
+	d.AddChild(bbox)
 
-		bbox := nodes.NewBorderBox("bbox", 50, 50)
-		bbox.SetStyles(styles)
-		bbox.SetPos(pixel.V(500, 700))
-		bbox.SetZIndex(-1)
-		d.AddChild(bbox)
-
-		canvas := nodes.NewCanvas("canvas", 100, 100)
-		canvas.Clear(colornames.Royalblue)
-		canvas.SetPos(pixel.V(200, 200))
-		canvas.SetZIndex(-1)
-		d.AddChild(canvas)
-
+	canvas := nodes.NewCanvas("canvas", 100, 100)
+	canvas.Clear(colornames.Royalblue)
+	canvas.SetPos(pixel.V(200, 200))
+	canvas.SetZIndex(-1)
+	d.AddChild(canvas)
+	/*
 		button := ui.NewButton("btn1", 75, 40, "Click me!")
 		button.SetPos(pixel.V(710, 710))
 		button.OnClick(func() {
@@ -190,18 +192,19 @@ func (d *demo) Init() {
 }
 
 func (d *demo) Update(dt float64) {
-	/*dphi := math.Pi * dt
+	dphi := math.Pi * dt
 	d.text1.SetRot(d.text1.GetRot() + dphi)
 	d.text2.SetRot(d.text2.GetRot() + dphi)
 	d.text3.SetRot(d.text3.GetRot() + dphi)
-	d.sprite.SetRot(d.sprite.GetRot() + dphi)
+	/*
+		d.sprite.SetRot(d.sprite.GetRot() + dphi)
 
-	dphi = math.Pi / 5.0 * dt
-	if nodes.Events().Pressed(pixelgl.KeyA) {
-		d.rotslider.SetRot(d.rotslider.GetRot() + dphi)
-	} else if nodes.Events().Pressed(pixelgl.KeyD) {
-		d.rotslider.SetRot(d.rotslider.GetRot() - dphi)
-	}*/
+		dphi = math.Pi / 5.0 * dt
+		if nodes.Events().Pressed(pixelgl.KeyA) {
+			d.rotslider.SetRot(d.rotslider.GetRot() + dphi)
+		} else if nodes.Events().Pressed(pixelgl.KeyD) {
+			d.rotslider.SetRot(d.rotslider.GetRot() - dphi)
+		}*/
 }
 
 var memprofile = flag.String("memprofile", "", "write memory profile to `file`")
