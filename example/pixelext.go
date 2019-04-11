@@ -2,11 +2,13 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"image/color"
 	"log"
 	"math"
 	"os"
 	"pixelext/nodes"
+	"pixelext/services"
 	"pixelext/ui"
 	"runtime"
 	"runtime/pprof"
@@ -51,77 +53,86 @@ func (d *demo) Init() {
 	d.AddChild(text)
 	d.text1 = text
 
-	text = makeText(100, 200, "text2", nodes.AlignmentBottomCenter)
+	text = makeText(200, 100, "text2", nodes.AlignmentBottomCenter)
 	d.AddChild(text)
 
-	text = makeText(100, 300, "text2", nodes.AlignmentBottomRight)
+	text = makeText(300, 100, "text3", nodes.AlignmentBottomRight)
 	d.AddChild(text)
 
-	text = makeText(100, 400, "text2", nodes.AlignmentCenterLeft)
+	text = makeText(100, 200, "text4", nodes.AlignmentCenterLeft)
 	d.AddChild(text)
 
-	text = makeText(100, 500, "text2", nodes.AlignmentCenter)
+	text = makeText(200, 200, "text5", nodes.AlignmentCenter)
 	d.AddChild(text)
 	d.text2 = text
 
-	text = makeText(200, 100, "text2", nodes.AlignmentCenterRight)
+	text = makeText(300, 200, "text6", nodes.AlignmentCenterRight)
+	text.Clear()
+	text.Printf("ABC\nqpg\nXYZ")
 	d.AddChild(text)
 
-	text = makeText(200, 200, "text2", nodes.AlignmentTopLeft)
+	text = makeText(100, 300, "text7", nodes.AlignmentTopLeft)
 	d.AddChild(text)
 
-	text = makeText(200, 300, "text2", nodes.AlignmentTopCenter)
+	text = makeText(200, 300, "text8", nodes.AlignmentTopCenter)
 	d.AddChild(text)
 
-	text = makeText(200, 400, "text2", nodes.AlignmentTopRight)
+	text = makeText(300, 300, "text9", nodes.AlignmentTopRight)
 	text.SetStyles(styles)
 	d.AddChild(text)
 	d.text3 = text
-	/*
-		sltext := nodes.NewBaseNode("sltext")
-		//sltext.SetSize(pixel.V(100, 30))
-		sltext.SetPos(pixel.V(400, 500))
-		sltext.SetRot(0.0)
-		d.AddChild(sltext)
 
-		slidertext := makeText(50, 15, "slidertext", nodes.AlignmentCenter)
-		slidertext.SetZIndex(10)
-		sltext.AddChild(slidertext)
-		d.rotslider = sltext
+	sltext := nodes.NewBaseNode("sltext")
+	//sltext.SetSize(pixel.V(100, 30))
+	sltext.SetPos(pixel.V(450, 515))
+	sltext.SetRot(0.0)
+	d.AddChild(sltext)
 
-		slider := ui.NewSlider("slider1", 0, 1, 0.5)
-		slider.SetSize(pixel.V(100, 30))
-		slider.SetAlignment(nodes.AlignmentBottomLeft)
-		slider.SetPos(pixel.V(0, 0))
-		slider.OnChange(func(v float32) {
-			slidertext.Text().Clear()
-			slidertext.Printf("%.2f", v)
-			fmt.Printf("new value: %.2f\n", v)
-		})
-		slider.SetStyles(styles)
-		sltext.AddChild(slider)
+	slidertext := makeText(0, 0, "slidertext", nodes.AlignmentCenter)
+	slidertext.SetZIndex(10)
+	sltext.AddChild(slidertext)
+	sltext.SetRotPoint(pixel.V(-50, -15))
+	d.rotslider = sltext
 
-		slider = ui.NewSlider("slider2", 0, 1, 0.5)
-		slider.SetSize(pixel.V(100, 30))
-		slider.SetPos(pixel.V(400, 400))
-		slider.SetAlignment(nodes.AlignmentCenter)
-		d.AddChild(slider)
+	slider := ui.NewSlider("slider1", 0, 1, 0.5)
+	slider.SetSize(pixel.V(100, 30))
+	slider.SetAlignment(nodes.AlignmentCenter)
+	slider.SetPos(pixel.V(0, 0))
+	slider.OnChange(func(v float32) {
+		slidertext.Text().Clear()
+		slidertext.Printf("%.2f", v)
+		fmt.Printf("new value: %.2f\n", v)
+	})
+	slider.SetStyles(styles)
+	sltext.AddChild(slider)
 
-		slider = ui.NewSlider("slider3", 0, 1, 0.5)
-		slider.SetSize(pixel.V(50, 20))
-		slider.SetPos(pixel.V(500, 300))
-		slider.SetAlignment(nodes.AlignmentTopRight)
-		d.AddChild(slider)
+	slider = ui.NewSlider("slider2", 0, 1, 0.5)
+	slider.SetSize(pixel.V(100, 30))
+	slider.SetPos(pixel.V(400, 400))
+	slider.SetAlignment(nodes.AlignmentCenter)
+	slider.OnChange(func(v float32) {
+		fmt.Printf("slider2: new value: %.2f\n", v)
+	})
+	d.AddChild(slider)
 
-		pic, err := services.ResourceManager().LoadPicture("gopher.png")
-		if err != nil {
-			panic(err)
-		}
-		sprite := nodes.NewSprite("sprite1", pic)
-		sprite.SetPos(pixel.V(600, 300))
-		d.AddChild(sprite)
-		d.sprite = sprite
-	*/
+	slider = ui.NewSlider("slider3", 0, 1, 0.5)
+	slider.SetSize(pixel.V(50, 20))
+	slider.SetPos(pixel.V(500, 300))
+	slider.SetAlignment(nodes.AlignmentTopRight)
+	slider.OnChange(func(v float32) {
+		fmt.Printf("slider3: new value: %.2f\n", v)
+	})
+	d.AddChild(slider)
+
+	pic, err := services.ResourceManager().LoadPicture("gopher.png")
+	if err != nil {
+		panic(err)
+	}
+	sprite := nodes.NewSprite("sprite1", pic)
+	sprite.SetPos(pixel.V(600, 300))
+	d.AddChild(sprite)
+	d.sprite = sprite
+
 	hbox := ui.NewHBox("hbox1")
 	hbox.SetAlignment(nodes.AlignmentBottomLeft)
 	hbox.SetPos(pixel.V(100, 700))
@@ -132,7 +143,7 @@ func (d *demo) Init() {
 	text.Printf("Field1")
 	hbox.AddChild(text)
 	text = ui.NewText("f2", "basic")
-	text.Printf("Field2")
+	text.Printf("Field2\nLine2")
 	txtstyle := text.GetStyles()
 	txtstyle.Text.Color = colornames.Gold
 	text.SetStyles(txtstyle)
@@ -196,15 +207,15 @@ func (d *demo) Update(dt float64) {
 	d.text1.SetRot(d.text1.GetRot() + dphi)
 	d.text2.SetRot(d.text2.GetRot() + dphi)
 	d.text3.SetRot(d.text3.GetRot() + dphi)
-	/*
-		d.sprite.SetRot(d.sprite.GetRot() + dphi)
 
-		dphi = math.Pi / 5.0 * dt
-		if nodes.Events().Pressed(pixelgl.KeyA) {
-			d.rotslider.SetRot(d.rotslider.GetRot() + dphi)
-		} else if nodes.Events().Pressed(pixelgl.KeyD) {
-			d.rotslider.SetRot(d.rotslider.GetRot() - dphi)
-		}*/
+	d.sprite.SetRot(d.sprite.GetRot() + dphi)
+
+	dphi = math.Pi / 5.0 * dt
+	if nodes.Events().Pressed(pixelgl.KeyA) {
+		d.rotslider.SetRot(d.rotslider.GetRot() + dphi)
+	} else if nodes.Events().Pressed(pixelgl.KeyD) {
+		d.rotslider.SetRot(d.rotslider.GetRot() - dphi)
+	}
 }
 
 var memprofile = flag.String("memprofile", "", "write memory profile to `file`")

@@ -33,8 +33,8 @@ func (s *Slider) Update(dt float64) {
 	size := s.Size()
 	if ev.Clicked(pixelgl.MouseButtonLeft, s) {
 		pos := ev.LocalMousePosition(s)
-		zblPos := pos // TODO
-		//fmt.Printf("clicked: %v %v %v %v\n", s.extraoffset, bounds, pos, zblPos)
+		zblPos := pos.Add(pixel.V(size.X/2, 0))
+		//fmt.Printf("clicked: %v %v %v %v\n", s.GetExtraOffset(), size, pos, zblPos)
 		s.current = s.min + (s.max-s.min)*float32(zblPos.X/size.X)
 		s.dirty = true
 	} else if ev.MouseScroll().Y != 0 && ev.MouseHovering(s) {
