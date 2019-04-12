@@ -11,8 +11,9 @@ import (
 
 type Grid struct {
 	UIBase
-	bbox *nodes.Canvas
-	cols int
+	bbox       *nodes.Canvas
+	cols       int
+	uichildren []UINode
 }
 
 func NewGrid(name string, cols int) *Grid {
@@ -38,14 +39,7 @@ func (g *Grid) recalcPositions() {
 	curcol := 0
 	var b pixel.Vec
 
-	for _, child := range g.Children() {
-		if child.GetName() == "__bbox" {
-			continue
-		}
-		uichild, ok := child.(UINode)
-		if !ok {
-			continue
-		}
+	for _, uichild := range g.uichildren {
 		uichild.SetAlignment(nodes.AlignmentTopLeft)
 		cb := uichild.Size()
 		if curcol >= len(maxx) {
@@ -54,11 +48,11 @@ func (g *Grid) recalcPositions() {
 		if row >= len(maxy) {
 			maxy = append(maxy, 0.0)
 		}
-		curw := cb.X + 2*child.GetStyles().Padding
+		curw := cb.X + 2*uichild.GetStyles().Padding
 		if curw > maxx[curcol] {
 			maxx[curcol] = curw
 		}
-		curh := cb.Y + 2*child.GetStyles().Padding
+		curh := cb.Y + 2*uichild.GetStyles().Padding
 		if curh > maxy[row] {
 			maxy[row] = curh
 		}
@@ -74,10 +68,7 @@ func (g *Grid) recalcPositions() {
 	curcol = 0
 	x := -b.X / 2
 	y := -b.Y / 2
-	for _, child := range g.Children() {
-		if child.GetName() == "__bbox" {
-			continue
-		}
+	for _, child := range g.uichildren {
 		x += child.GetStyles().Padding
 		y += child.GetStyles().Padding
 		child.SetPos(pixel.V(x, -y))
@@ -125,7 +116,11 @@ func sumSlice(sl []float64) float64 {
 
 func (g *Grid) AddChild(child nodes.Node) {
 	g.BaseNode.AddChild(child)
-	if len(g.Children()) > 1 {
+	uichild, ok := child.(UINode)
+	if ok {
+		g.uichildren = append(g.uichildren, uichild)
+	}
+	if len(g.uichildren) > 1 {
 		g.recalcPositions()
 	}
 }

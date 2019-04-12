@@ -26,14 +26,21 @@ func (b *BorderBox) redrawCanvas() {
 	if styles.Border.Width > 0 {
 		bounds := canvas.Bounds()
 		im.Color = styles.Border.Color
-		im.Push(pixel.V(0, 0), pixel.V(bounds.W(), 0), pixel.V(bounds.W(), bounds.H()), pixel.V(0, bounds.H()))
-		im.Polygon(styles.Border.Width)
+		bw := styles.Border.Width / 2
+		im.Push(pixel.V(0, bw), pixel.V(bounds.W(), bw))
+		im.Line(styles.Border.Width)
+		im.Push(pixel.V(bounds.W()-bw, 0), pixel.V(bounds.W()-bw, bounds.H()))
+		im.Line(styles.Border.Width)
+		im.Push(pixel.V(bounds.W(), bounds.H()-bw), pixel.V(0, bounds.H()-bw))
+		im.Line(styles.Border.Width)
+		im.Push(pixel.V(bw, bounds.H()), pixel.V(bw, 0))
+		im.Line(styles.Border.Width)
 		im.Draw(canvas)
 	}
 }
 
 func (b *BorderBox) SetSize(size pixel.Vec) {
-	b.canvas.SetBounds(pixel.R(0, 0, size.X, size.Y))
+	b.Canvas.SetSize(size)
 	b.redrawCanvas()
 }
 

@@ -160,6 +160,16 @@ func (d *demo) Init() {
 
 	canvas := nodes.NewCanvas("canvas", 100, 100)
 	canvas.Clear(colornames.Royalblue)
+	im := imdraw.New(nil)
+	im.Push(pixel.V(0, 2), pixel.V(100, 2))
+	im.Line(4)
+	im.Push(pixel.V(98, 0), pixel.V(98, 100))
+	im.Line(4)
+	im.Push(pixel.V(100, 98), pixel.V(0, 98))
+	im.Line(4)
+	im.Push(pixel.V(2, 0), pixel.V(2, 100))
+	im.Line(4)
+	im.Draw(canvas.Canvas())
 	canvas.SetPos(pixel.V(200, 200))
 	canvas.SetZIndex(-1)
 	d.AddChild(canvas)
@@ -172,7 +182,7 @@ func (d *demo) Init() {
 	})
 	d.AddChild(button)
 
-	btngroup := ui.NewButtonGroup("btngroup", 40)
+	btngroup := ui.NewButtonGroup("btngroup", 0)
 	btngroup.SetPos(pixel.V(710, 640))
 	btngroup.AddButton("First Choice", "1", 0)
 	btngroup.AddButton("Nr. 2", "2", 0)
@@ -220,8 +230,21 @@ func (d *demo) Update(dt float64) {
 }
 
 var memprofile = flag.String("memprofile", "", "write memory profile to `file`")
+var cpuprofile = flag.String("cpuprofile", "", "write cpu profile to `file`")
 
 func Run() {
+	if *cpuprofile != "" {
+		f, err := os.Create(*cpuprofile)
+		if err != nil {
+			panic(err)
+		}
+		defer f.Close()
+		err = pprof.StartCPUProfile(f)
+		if err != nil {
+			panic(err)
+		}
+		defer pprof.StopCPUProfile()
+	}
 	win, err := pixelgl.NewWindow(pixelgl.WindowConfig{
 		Title:  "pixelext example",
 		Bounds: pixel.R(0, 0, 1200, 800),

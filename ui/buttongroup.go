@@ -48,6 +48,7 @@ func (g *ButtonGroup) AddButton(caption, value string, w float64) {
 		g.onchange(value)
 	})
 	g.hbox.AddChild(btn)
+	g.UISelf.SetSize(g.hbox.Size())
 }
 
 func (g *ButtonGroup) SetAlignment(a nodes.Alignment) {

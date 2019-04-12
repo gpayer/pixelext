@@ -1,6 +1,7 @@
 package ui
 
 import (
+	"math"
 	"pixelext/nodes"
 
 	"github.com/faiface/pixel"
@@ -30,6 +31,7 @@ func (h *HBox) Init() {
 
 func (h *HBox) recalcPositions() {
 	padding := h.GetStyles().Padding
+	borderWidth := h.GetStyles().Border.Width
 	xpos := padding
 	maxy := 0.0
 	for _, child := range h.Children() {
@@ -42,11 +44,11 @@ func (h *HBox) recalcPositions() {
 			}
 		}
 	}
-	size := pixel.V(xpos-padding, maxy+2*padding)
+	size := pixel.V(math.Round(xpos-padding+borderWidth), math.Round(maxy+2*padding+borderWidth))
 	h.SetSize(size)
 	h.background.SetSize(size)
 
-	xpos = -size.X/2 + padding
+	xpos = -size.X/2 + padding + borderWidth/2
 	for _, child := range h.Children() {
 		uichild, ok := child.(UINode)
 		if ok && child.GetName() != "__bg" {
