@@ -1,6 +1,10 @@
 package ui
 
-import "pixelext/nodes"
+import (
+	"pixelext/nodes"
+
+	"github.com/faiface/pixel"
+)
 
 type ButtonGroup struct {
 	UIBase
@@ -13,7 +17,7 @@ type ButtonGroup struct {
 
 func NewButtonGroup(name string, h float64) *ButtonGroup {
 	g := &ButtonGroup{
-		UIBase: *NewUIBase(name),
+		UIBase:   *NewUIBase(name),
 		hbox:     NewHBox("hbox"),
 		h:        h,
 		onchange: func(_ string) {},
@@ -21,11 +25,12 @@ func NewButtonGroup(name string, h float64) *ButtonGroup {
 	g.Self = g
 	g.UISelf = g
 	g.AddChild(g.hbox)
+	g.hbox.SetPos(pixel.ZV)
 	return g
 }
 
 func (g *ButtonGroup) AddButton(caption, value string, w float64) {
-	btn := NewButton("", w, g.h, caption)
+	btn := NewButton("btn"+value, w, g.h, caption)
 	if g.current != nil {
 		btn.SetEnabled(true)
 	}
@@ -52,4 +57,9 @@ func (g *ButtonGroup) SetAlignment(a nodes.Alignment) {
 
 func (g *ButtonGroup) OnChange(fn func(v string)) {
 	g.onchange = fn
+}
+
+func (g *ButtonGroup) SetStyles(styles *nodes.Styles) {
+	g.UIBase.SetStyles(styles)
+	g.hbox.SetStyles(styles)
 }

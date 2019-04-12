@@ -63,7 +63,7 @@ func NewButton(name string, w, h float64, text string) *Button {
 	if h == 0 {
 		h = b.text.Size().Y + 2*b.GetStyles().Padding
 	}
-	b.text.SetPos(pixel.V(w/2, h/2))
+	//b.text.SetPos(pixel.V(w/2, h/2))
 	b.text.SetAlignment(nodes.AlignmentCenter)
 	b.text.SetZIndex(10)
 	b.AddChild(b.text)
@@ -91,6 +91,14 @@ func (b *Button) drawCanvases() {
 			im.Draw(canvas.Canvas())
 		}
 	}
+}
+
+func (b *Button) SetSize(size pixel.Vec) {
+	b.UIBase.SetSize(size)
+	for _, canvas := range b.canvases {
+		canvas.SetSize(size)
+	}
+	b.drawCanvases()
 }
 
 func (b *Button) SetButtonStyles(state ButtonState, styles *nodes.Styles) {

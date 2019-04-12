@@ -24,7 +24,7 @@ func NewHBox(name string) *HBox {
 func (h *HBox) Init() {
 	h.background.SetPos(pixel.ZV)
 	h.background.SetStyles(h.GetStyles())
-	h.SetZIndex(-1)
+	h.background.SetZIndex(-1)
 	h.AddChild(h.background)
 }
 
@@ -42,7 +42,7 @@ func (h *HBox) recalcPositions() {
 			}
 		}
 	}
-	size := pixel.V(xpos-2*padding, maxy+2*padding)
+	size := pixel.V(xpos-padding, maxy+2*padding)
 	h.SetSize(size)
 	h.background.SetSize(size)
 

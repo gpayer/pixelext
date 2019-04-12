@@ -163,43 +163,44 @@ func (d *demo) Init() {
 	canvas.SetPos(pixel.V(200, 200))
 	canvas.SetZIndex(-1)
 	d.AddChild(canvas)
-	/*
-		button := ui.NewButton("btn1", 75, 40, "Click me!")
-		button.SetPos(pixel.V(710, 710))
-		button.OnClick(func() {
-			fmt.Println("Button clicked!")
-		})
-		d.AddChild(button)
 
-		btngroup := ui.NewButtonGroup("btngroup", 40)
-		btngroup.SetPos(pixel.V(710, 640))
-		btngroup.AddButton("First Choice", "1", 0)
-		btngroup.AddButton("Nr. 2", "2", 0)
-		btngroup.AddButton("Three", "3", 0)
-		btngroup.OnChange(func(v string) {
-			fmt.Println(v)
-		})
-		d.AddChild(btngroup)
+	button := ui.NewButton("btn1", 75, 40, "Click me!")
+	button.SetAlignment(nodes.AlignmentBottomLeft)
+	button.SetPos(pixel.V(710, 710))
+	button.OnClick(func() {
+		fmt.Println("Button clicked!")
+	})
+	d.AddChild(button)
 
-		grid := ui.NewGrid("grid", 3)
-		grid.SetPos(pixel.V(910, 590))
-		d.AddChild(grid)
+	btngroup := ui.NewButtonGroup("btngroup", 40)
+	btngroup.SetPos(pixel.V(710, 640))
+	btngroup.AddButton("First Choice", "1", 0)
+	btngroup.AddButton("Nr. 2", "2", 0)
+	btngroup.AddButton("Three", "3", 0)
+	btngroup.OnChange(func(v string) {
+		fmt.Println(v)
+	})
+	d.AddChild(btngroup)
 
-		text = ui.NewText("", "basic")
-		text.Printf("One Field")
-		grid.AddChild(text)
+	grid := ui.NewGrid("grid", 3)
+	grid.SetAlignment(nodes.AlignmentTopLeft)
+	grid.SetPos(pixel.V(910, 590))
+	d.AddChild(grid)
 
-		button = ui.NewButton("btn1", 0, 0, "Btn!")
-		grid.AddChild(button)
+	text = ui.NewText("", "basic")
+	text.Printf("One Field")
+	grid.AddChild(text)
 
-		text = ui.NewText("", "basic")
-		text.Printf("Last")
-		grid.AddChild(text)
+	button = ui.NewButton("btn1", 0, 0, "Btn!")
+	grid.AddChild(button)
 
-		text = ui.NewText("", "basic")
-		text.Printf("Next line")
-		grid.AddChild(text)
-	*/
+	text = ui.NewText("", "basic")
+	text.Printf("Last")
+	grid.AddChild(text)
+
+	text = ui.NewText("", "basic")
+	text.Printf("Next line")
+	grid.AddChild(text)
 }
 
 func (d *demo) Update(dt float64) {

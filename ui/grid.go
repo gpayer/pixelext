@@ -36,7 +36,7 @@ func (g *Grid) recalcPositions() {
 	maxy := make([]float64, 1)
 	row := 0
 	curcol := 0
-	var b pixel.Rect
+	var b pixel.Vec
 
 	for _, child := range g.Children() {
 		if child.GetName() == "__bbox" {
@@ -46,6 +46,7 @@ func (g *Grid) recalcPositions() {
 		if !ok {
 			continue
 		}
+		uichild.SetAlignment(nodes.AlignmentTopLeft)
 		cb := uichild.Size()
 		if curcol >= len(maxx) {
 			maxx = append(maxx, 0.0)
@@ -68,10 +69,11 @@ func (g *Grid) recalcPositions() {
 		}
 	}
 
+	b = pixel.V(math.Round(sumSlice(maxx)), math.Round(sumSlice(maxy)))
 	row = 0
 	curcol = 0
-	x := 0.0
-	y := 0.0
+	x := -b.X / 2
+	y := -b.Y / 2
 	for _, child := range g.Children() {
 		if child.GetName() == "__bbox" {
 			continue
@@ -85,32 +87,32 @@ func (g *Grid) recalcPositions() {
 		if curcol == g.cols {
 			curcol = 0
 			y += maxy[row]
-			x = 0
+			x = -b.X / 2
 			row++
 		}
 	}
-	b = pixel.R(0, 0, math.Round(sumSlice(maxx)), math.Round(sumSlice(maxy))).Norm()
 
 	im := imdraw.New(nil)
 	im.Color = styles.Border.Color
-	im.Push(b.Min, pixel.V(b.Max.X, b.Min.Y), b.Max, pixel.V(b.Min.X, b.Max.Y))
+	im.Push(pixel.ZV, pixel.V(b.X, 0), b, pixel.V(0, b.Y))
 	im.Polygon(styles.Border.Width)
 	x = maxx[0]
 	for i := 1; i < len(maxx); i++ {
-		im.Push(pixel.V(x, b.Min.Y), pixel.V(x, b.Max.Y))
+		im.Push(pixel.V(x, 0), pixel.V(x, b.Y))
 		im.Line(1)
 		x += maxx[i]
 	}
-	y = b.Max.Y - maxy[0]
+	y = b.Y - maxy[0]
 	for i := 1; i < len(maxy); i++ {
-		im.Push(pixel.V(b.Min.X, y), pixel.V(b.Max.X, y))
+		im.Push(pixel.V(0, y), pixel.V(b.X, y))
 		im.Line(1)
 		y -= maxy[i]
 	}
+	g.bbox.SetSize(b)
 	g.bbox.Clear(styles.Background.Color)
 	im.Draw(g.bbox.Canvas())
 
-	g.SetSize(b.Size())
+	g.SetSize(b)
 }
 
 func sumSlice(sl []float64) float64 {
