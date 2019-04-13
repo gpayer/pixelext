@@ -13,7 +13,6 @@ type Sprite struct {
 
 func (s *Sprite) Init() {
 	s.sprite = pixel.NewSprite(s.pic, s.pic.Bounds())
-	//s.SetExtraOffset(pixel.V(s.pic.Bounds().W()/2, s.pic.Bounds().H()/2))
 }
 
 func (s *Sprite) Draw(win *pixelgl.Window, mat pixel.Matrix) {

@@ -60,6 +60,7 @@ func (b *BaseNode) _mount() {
 	if ok {
 		mountable.Mount()
 	}
+	SceneManager().Redraw()
 }
 
 func (b *BaseNode) _unmount() {
@@ -124,6 +125,7 @@ func NewBaseNode(name string) *BaseNode {
 
 func (b *BaseNode) calcMat() {
 	b.mat = pixel.IM.Moved(b.extraoffset).ScaledXY(b.origin, b.scale).Rotated(b.rotpoint, b.rot).Moved(b.pos)
+	SceneManager().Redraw()
 }
 
 func (b *BaseNode) GetName() string {
@@ -181,6 +183,7 @@ func (b *BaseNode) GetRotPoint() pixel.Vec {
 
 func (b *BaseNode) SetZIndex(z int) {
 	b.zindex = z
+	SceneManager().Redraw()
 }
 
 func (b *BaseNode) SetExtraOffset(extra pixel.Vec) {
@@ -194,14 +197,17 @@ func (b *BaseNode) GetExtraOffset() pixel.Vec {
 
 func (b *BaseNode) Show() {
 	b.show = true
+	SceneManager().Redraw()
 }
 
 func (b *BaseNode) Hide() {
 	b.show = false
+	SceneManager().Redraw()
 }
 
 func (b *BaseNode) SetActive(active bool) {
 	b.active = active
+	SceneManager().Redraw()
 }
 
 func (b *BaseNode) AddChild(child Node) {
@@ -211,6 +217,7 @@ func (b *BaseNode) AddChild(child Node) {
 		return less
 	})
 	child._init()
+	SceneManager().Redraw()
 }
 
 func (b *BaseNode) Children() []Node {
@@ -219,6 +226,7 @@ func (b *BaseNode) Children() []Node {
 
 func (b *BaseNode) SetStyles(styles *Styles) {
 	b.styles = styles
+	SceneManager().Redraw()
 }
 
 func (b *BaseNode) GetStyles() *Styles {

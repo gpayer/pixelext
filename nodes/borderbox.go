@@ -37,6 +37,7 @@ func (b *BorderBox) redrawCanvas() {
 		im.Line(styles.Border.Width)
 		im.Draw(canvas)
 	}
+	SceneManager().Redraw()
 }
 
 func (b *BorderBox) SetSize(size pixel.Vec) {

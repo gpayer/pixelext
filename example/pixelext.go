@@ -279,7 +279,6 @@ func Run() {
 		win.Clear(colornames.Black)
 		im.Draw(win)
 		nodes.SceneManager().Run(pixel.IM)
-		win.Update()
 	}
 	if *memprofile != "" {
 		fmemprofile, err := os.Create(*memprofile)

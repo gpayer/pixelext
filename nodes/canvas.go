@@ -18,13 +18,12 @@ func NewCanvas(name string, w, h float64) *Canvas {
 		canvas:   pixelgl.NewCanvas(pixel.R(0, 0, w, h)),
 	}
 	c.Self = c
-	//c.SetExtraOffset(pixel.V(w/2, h/2))
 	return c
 }
 
 func (c *Canvas) SetSize(size pixel.Vec) {
 	c.canvas.SetBounds(pixel.R(0, 0, size.X, size.Y))
-	//c.SetExtraOffset(pixel.V(size.X/2, size.Y/2))
+	SceneManager().Redraw()
 }
 
 func (c *Canvas) Draw(win *pixelgl.Window, mat pixel.Matrix) {
@@ -33,6 +32,7 @@ func (c *Canvas) Draw(win *pixelgl.Window, mat pixel.Matrix) {
 
 func (c *Canvas) Clear(color color.Color) {
 	c.canvas.Clear(color)
+	SceneManager().Redraw()
 }
 
 func (c *Canvas) Canvas() *pixelgl.Canvas {

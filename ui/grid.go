@@ -104,6 +104,7 @@ func (g *Grid) recalcPositions() {
 	im.Draw(g.bbox.Canvas())
 
 	g.SetSize(b)
+	nodes.SceneManager().Redraw()
 }
 
 func sumSlice(sl []float64) float64 {

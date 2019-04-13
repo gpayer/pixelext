@@ -91,6 +91,7 @@ func (b *Button) drawCanvases() {
 			im.Draw(canvas.Canvas())
 		}
 	}
+	nodes.SceneManager().Redraw()
 }
 
 func (b *Button) SetSize(size pixel.Vec) {

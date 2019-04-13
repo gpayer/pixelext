@@ -49,11 +49,13 @@ func (g *ButtonGroup) AddButton(caption, value string, w float64) {
 	})
 	g.hbox.AddChild(btn)
 	g.UISelf.SetSize(g.hbox.Size())
+	nodes.SceneManager().Redraw()
 }
 
 func (g *ButtonGroup) SetAlignment(a nodes.Alignment) {
 	g.UIBase.SetAlignment(a)
 	g.hbox.SetAlignment(a)
+	nodes.SceneManager().Redraw()
 }
 
 func (g *ButtonGroup) OnChange(fn func(v string)) {
@@ -63,4 +65,5 @@ func (g *ButtonGroup) OnChange(fn func(v string)) {
 func (g *ButtonGroup) SetStyles(styles *nodes.Styles) {
 	g.UIBase.SetStyles(styles)
 	g.hbox.SetStyles(styles)
+	nodes.SceneManager().Redraw()
 }

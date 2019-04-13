@@ -58,6 +58,7 @@ func (h *HBox) recalcPositions() {
 			xpos += childbounds.X + 2*padding
 		}
 	}
+	nodes.SceneManager().Redraw()
 }
 
 func (h *HBox) AddChild(child nodes.Node) {

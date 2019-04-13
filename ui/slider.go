@@ -68,6 +68,7 @@ func (s *Slider) Update(dt float64) {
 		im.Polygon(0)
 		im.Draw(s.canvas)
 		s.dirty = false
+		nodes.SceneManager().Redraw()
 	}
 }
 

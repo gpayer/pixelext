@@ -35,6 +35,7 @@ func (t *Text) Printf(format string, a ...interface{}) {
 	fmt.Fprintf(t.txt, format, a...)
 	t.SetExtraOffset(pixel.V(-t.txt.Bounds().W()/2, t.txt.Bounds().H()/2-t.txt.Atlas().LineHeight()))
 	t.SetSize(t.txt.Bounds().Size())
+	nodes.SceneManager().Redraw()
 }
 
 func (t *Text) Draw(win *pixelgl.Window, mat pixel.Matrix) {
@@ -44,6 +45,7 @@ func (t *Text) Draw(win *pixelgl.Window, mat pixel.Matrix) {
 func (t *Text) Clear() {
 	t.content.Reset()
 	t.txt.Clear()
+	nodes.SceneManager().Redraw()
 }
 
 func (t *Text) SetStyles(styles *nodes.Styles) {
@@ -56,5 +58,6 @@ func (t *Text) SetStyles(styles *nodes.Styles) {
 		t.txt.Color = styles.Text.Color
 		t.txt.Clear()
 		fmt.Fprint(t.txt, t.content.String())
+		nodes.SceneManager().Redraw()
 	}
 }
