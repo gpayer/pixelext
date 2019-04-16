@@ -77,7 +77,7 @@ func (s *Slider) SetStyles(styles *nodes.Styles) {
 	s.dirty = true
 }
 
-func (s *Slider) Draw(win *pixelgl.Window, mat pixel.Matrix) {
+func (s *Slider) Draw(win pixel.Target, mat pixel.Matrix) {
 	s.canvas.Draw(win, mat)
 }
 

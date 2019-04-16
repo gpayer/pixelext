@@ -2,7 +2,6 @@ package nodes
 
 import (
 	"github.com/faiface/pixel"
-	"github.com/faiface/pixel/pixelgl"
 )
 
 type Node interface {
@@ -10,9 +9,10 @@ type Node interface {
 	_mount()
 	_unmount()
 	_update(dt float64)
-	_draw(win *pixelgl.Window, mat pixel.Matrix)
+	_draw(win pixel.Target, mat pixel.Matrix)
 	_getMat() pixel.Matrix
 	_getLastMat() pixel.Matrix
+	_setLastMat(mat pixel.Matrix)
 	_getZindex() int
 	GetName() string
 	SetOrigin(origin pixel.Vec)
@@ -51,5 +51,5 @@ type Updateable interface {
 }
 
 type Drawable interface {
-	Draw(win *pixelgl.Window, mat pixel.Matrix)
+	Draw(win pixel.Target, mat pixel.Matrix)
 }

@@ -26,7 +26,7 @@ func (c *Canvas) SetSize(size pixel.Vec) {
 	SceneManager().Redraw()
 }
 
-func (c *Canvas) Draw(win *pixelgl.Window, mat pixel.Matrix) {
+func (c *Canvas) Draw(win pixel.Target, mat pixel.Matrix) {
 	c.canvas.Draw(win, mat)
 }
 
@@ -36,5 +36,9 @@ func (c *Canvas) Clear(color color.Color) {
 }
 
 func (c *Canvas) Canvas() *pixelgl.Canvas {
+	return c.canvas
+}
+
+func (c *Canvas) GetCanvas() *pixelgl.Canvas {
 	return c.canvas
 }

@@ -25,12 +25,42 @@ type demo struct {
 	text1, text2, text3 *ui.Text
 	sprite              *nodes.Sprite
 	rotslider           *nodes.BaseNode
+	sprite2             *nodes.Sprite
+	totalT              float64
 }
 
 func newDemo() *demo {
 	d := &demo{BaseNode: *nodes.NewBaseNode("demo")}
 	d.Self = d
 	return d
+}
+
+type backgroundGrid struct {
+	nodes.Canvas
+}
+
+func newBackgroundGrid(w, h float64) *backgroundGrid {
+	b := &backgroundGrid{
+		Canvas: *nodes.NewCanvas("backgroundGrid", w, h),
+	}
+	b.Self = b
+	return b
+}
+
+func (b *backgroundGrid) Init() {
+	size := b.GetCanvas().Bounds().Size()
+	im := imdraw.New(nil)
+	im.SetColorMask(colornames.Gray)
+	var i float64
+	for i = 100; i < size.X; i += 100 {
+		im.Push(pixel.V(i, 0), pixel.V(i, size.Y))
+		im.Line(1)
+	}
+	for i = 100; i < size.Y; i += 100 {
+		im.Push(pixel.V(0, i), pixel.V(size.X, i))
+		im.Line(1)
+	}
+	im.Draw(b.GetCanvas())
 }
 
 func makeText(x, y float64, name string, al nodes.Alignment) *ui.Text {
@@ -211,6 +241,46 @@ func (d *demo) Init() {
 	text = ui.NewText("", "basic")
 	text.Printf("Next line")
 	grid.AddChild(text)
+
+	subscene := nodes.NewSubScene("subscene1", 100, 100)
+	subscene.SetPos(pixel.V(1000, 200))
+	subscene.SetRot(3.14 / 4)
+	d.AddChild(subscene)
+
+	subroot := nodes.NewBaseNode("subroot")
+	d.sprite2 = nodes.NewSprite("sprite2", pic)
+	d.sprite2.SetPos(pixel.V(0, 0))
+	subroot.AddChild(d.sprite2)
+	subscene.SetRoot(subroot)
+
+	subscene = nodes.NewSubScene("subscene2", 100, 100)
+	subscene.SetPos(pixel.V(1100, 300))
+	subscene.SetRot(-3.14 / 4)
+	d.AddChild(subscene)
+
+	subroot = nodes.NewBaseNode("subroot2")
+
+	slider = ui.NewSlider("subslider", 0, 1, 0.5)
+	slider.SetSize(pixel.V(100, 30))
+	slider.SetPos(pixel.V(0, -20))
+	slider.SetAlignment(nodes.AlignmentCenter)
+	slider.OnChange(func(v float32) {
+		fmt.Printf("subslider: new value: %.2f\n", v)
+	})
+	subroot.AddChild(slider)
+	subscene.SetRoot(subroot)
+
+	vbox := ui.NewVBox("vbox1")
+	vbox.SetPos(pixel.V(1100, 400))
+
+	text = ui.NewText("", "basic")
+	text.Printf("Line 1")
+	vbox.AddChild(text)
+	text = ui.NewText("", "basic")
+	text.Printf("Line 2 is pretty long")
+	vbox.AddChild(text)
+
+	d.AddChild(vbox)
 }
 
 func (d *demo) Update(dt float64) {
@@ -220,6 +290,13 @@ func (d *demo) Update(dt float64) {
 	d.text3.SetRot(d.text3.GetRot() + dphi)
 
 	d.sprite.SetRot(d.sprite.GetRot() + dphi)
+
+	d.totalT += math.Pi * dt
+	newscale := 1.0 + math.Sin(d.totalT)*.5
+	d.sprite2.SetScale(pixel.V(newscale, newscale))
+	if d.totalT >= 2*math.Pi {
+		d.totalT -= 2 * math.Pi
+	}
 
 	dphi = math.Pi / 5.0 * dt
 	if nodes.Events().Pressed(pixelgl.KeyA) {
@@ -257,27 +334,17 @@ func Run() {
 	nodes.Events().SetWin(win)
 
 	root := newDemo()
+	bgGrid := newBackgroundGrid(win.Bounds().W(), win.Bounds().H())
+	bgGrid.SetZIndex(-2)
+	bgGrid.SetPos(pixel.V(600, 400))
+	root.AddChild(bgGrid)
 
 	nodes.SceneManager().SetRoot(root)
-
-	im := imdraw.New(nil)
-	im.SetColorMask(colornames.Gray)
-	var i float64
-	for i = 100; i < win.Bounds().W(); i += 100 {
-		im.Push(pixel.V(i, 0), pixel.V(i, win.Bounds().H()))
-		im.Line(1)
-	}
-	for i = 100; i < win.Bounds().H(); i += 100 {
-		im.Push(pixel.V(0, i), pixel.V(win.Bounds().W(), i))
-		im.Line(1)
-	}
 
 	for !win.Closed() {
 		if win.JustPressed(pixelgl.KeyEscape) {
 			break
 		}
-		win.Clear(colornames.Black)
-		im.Draw(win)
 		nodes.SceneManager().Run(pixel.IM)
 	}
 	if *memprofile != "" {

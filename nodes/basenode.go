@@ -5,7 +5,6 @@ import (
 	"sort"
 
 	"github.com/faiface/pixel"
-	"github.com/faiface/pixel/pixelgl"
 )
 
 type BaseNode struct {
@@ -32,6 +31,13 @@ func (b *BaseNode) _getMat() pixel.Matrix {
 
 func (b *BaseNode) _getLastMat() pixel.Matrix {
 	return b.lastmat
+}
+
+func (b *BaseNode) _setLastMat(mat pixel.Matrix) {
+	b.lastmat = mat
+	for _, child := range b.children {
+		child._setLastMat(child._getMat().Chained(mat))
+	}
 }
 
 func (b *BaseNode) _getZindex() int {
@@ -86,7 +92,7 @@ func (b *BaseNode) _update(dt float64) {
 	}
 }
 
-func (b *BaseNode) _draw(win *pixelgl.Window, mat pixel.Matrix) {
+func (b *BaseNode) _draw(win pixel.Target, mat pixel.Matrix) {
 	b.lastmat = mat
 	if !b.active || !b.show {
 		return

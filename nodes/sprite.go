@@ -2,7 +2,6 @@ package nodes
 
 import (
 	"github.com/faiface/pixel"
-	"github.com/faiface/pixel/pixelgl"
 )
 
 type Sprite struct {
@@ -15,7 +14,7 @@ func (s *Sprite) Init() {
 	s.sprite = pixel.NewSprite(s.pic, s.pic.Bounds())
 }
 
-func (s *Sprite) Draw(win *pixelgl.Window, mat pixel.Matrix) {
+func (s *Sprite) Draw(win pixel.Target, mat pixel.Matrix) {
 	s.sprite.Draw(win, mat)
 }
 

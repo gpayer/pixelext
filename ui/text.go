@@ -6,7 +6,6 @@ import (
 	"strings"
 
 	"github.com/faiface/pixel"
-	"github.com/faiface/pixel/pixelgl"
 	"github.com/faiface/pixel/text"
 )
 
@@ -38,7 +37,7 @@ func (t *Text) Printf(format string, a ...interface{}) {
 	nodes.SceneManager().Redraw()
 }
 
-func (t *Text) Draw(win *pixelgl.Window, mat pixel.Matrix) {
+func (t *Text) Draw(win pixel.Target, mat pixel.Matrix) {
 	t.txt.Draw(win, mat)
 }
 
