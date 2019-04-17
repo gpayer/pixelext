@@ -27,6 +27,11 @@ func (s *SubScene) SetRoot(root Node) {
 	s.root._mount()
 }
 
+func (s *SubScene) SetSize(size pixel.Vec) {
+	s.canvas.SetBounds(pixel.R(-size.X/2, -size.Y/2, size.X/2, size.Y/2))
+	SceneManager().Redraw()
+}
+
 func (s *SubScene) Update(dt float64) {
 	if s.root != nil {
 		s.root._update(dt)

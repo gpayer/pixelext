@@ -202,13 +202,17 @@ func (b *BaseNode) GetExtraOffset() pixel.Vec {
 }
 
 func (b *BaseNode) Show() {
-	b.show = true
-	SceneManager().Redraw()
+	if !b.show {
+		b.show = true
+		SceneManager().Redraw()
+	}
 }
 
 func (b *BaseNode) Hide() {
-	b.show = false
-	SceneManager().Redraw()
+	if b.show {
+		b.show = false
+		SceneManager().Redraw()
+	}
 }
 
 func (b *BaseNode) SetActive(active bool) {
