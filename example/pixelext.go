@@ -281,6 +281,29 @@ func (d *demo) Init() {
 	vbox.AddChild(text)
 
 	d.AddChild(vbox)
+
+	vscroll := ui.NewVScroll("vscroll", 100, 50)
+	vscroll.SetPos(pixel.V(150, 575))
+	d.AddChild(vscroll)
+	vbox = ui.NewVBox("innervbox")
+	text = ui.NewText("", "basic")
+	text.Printf("Line 1")
+	vbox.AddChild(text)
+	text = ui.NewText("", "basic")
+	text.Printf("Line 2 is pretty long")
+	vbox.AddChild(text)
+	text = ui.NewText("", "basic")
+	text.Printf("Line 3 is not long")
+	vbox.AddChild(text)
+	text = ui.NewText("", "basic")
+	text.Printf("And another line")
+	vbox.AddChild(text)
+
+	vscroll.SetInner(vbox)
+
+	dropdown := ui.NewDropDown("dropdown", "basic", 100, 20, 60)
+	dropdown.SetPos(pixel.V(150, 490))
+	d.AddChild(dropdown)
 }
 
 func (d *demo) Update(dt float64) {

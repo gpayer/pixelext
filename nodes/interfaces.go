@@ -31,6 +31,8 @@ type Node interface {
 	Hide()
 	AddChild(child Node)
 	Children() []Node
+	RemoveChild(child Node)
+	RemoveChildren()
 	SetStyles(styles *Styles)
 	GetStyles() *Styles
 	SetSize(size pixel.Vec)

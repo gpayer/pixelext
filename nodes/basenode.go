@@ -220,14 +220,40 @@ func (b *BaseNode) SetActive(active bool) {
 	SceneManager().Redraw()
 }
 
-func (b *BaseNode) AddChild(child Node) {
-	b.children = append(b.children, child)
+func (b *BaseNode) sortChildren() {
 	sort.SliceStable(b.children, func(i, j int) bool {
 		less := (b.children[i]._getZindex() < b.children[j]._getZindex())
 		return less
 	})
+}
+
+func (b *BaseNode) AddChild(child Node) {
+	b.children = append(b.children, child)
+	b.sortChildren()
 	child._init()
 	SceneManager().Redraw()
+}
+
+func (b *BaseNode) RemoveChild(child Node) {
+	for i, ch := range b.children {
+		if child == ch {
+			b.children[i] = b.children[len(b.children)-1]
+			b.children[len(b.children)-1] = nil
+			b.children = b.children[:len(b.children)-1]
+			b.sortChildren()
+			child._unmount()
+			SceneManager().Redraw()
+			break
+		}
+	}
+}
+
+func (b *BaseNode) RemoveChildren() {
+	for i, ch := range b.children {
+		b.children[i] = nil
+		ch._unmount()
+	}
+	b.children = make([]Node, 0)
 }
 
 func (b *BaseNode) Children() []Node {

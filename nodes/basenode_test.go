@@ -127,3 +127,27 @@ func TestSortSlice(t *testing.T) {
 	})
 	assert.Equal(sl, []int{-1, 0, 2, 3, 6, 23})
 }
+
+func TestRemoveChild(t *testing.T) {
+	assert := assert.New(t)
+	b := NewBaseNode("root")
+	c := NewBaseNode("child")
+	o := NewBaseNode("otherchild")
+	b.AddChild(c)
+	b.AddChild(o)
+	assert.Len(b.children, 2)
+	b.RemoveChild(c)
+	assert.Len(b.children, 1)
+	assert.Equal("otherchild", b.children[0].GetName())
+}
+
+func TestRemoveChildren(t *testing.T) {
+	assert := assert.New(t)
+	b := NewBaseNode("root")
+	c := NewBaseNode("child")
+	o := NewBaseNode("otherchild")
+	b.AddChild(c)
+	b.AddChild(o)
+	b.RemoveChildren()
+	assert.Len(b.children, 0)
+}
