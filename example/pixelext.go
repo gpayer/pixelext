@@ -303,7 +303,13 @@ func (d *demo) Init() {
 
 	dropdown := ui.NewDropDown("dropdown", "basic", 100, 20, 60)
 	dropdown.SetPos(pixel.V(150, 490))
+	dropdown.OnChange(func(v string) {
+		fmt.Printf("dropdown: %s\n", v)
+	})
 	d.AddChild(dropdown)
+	dropdown.AddValue("Choice 1", "c1")
+	dropdown.AddValue("Another one", "c2")
+	dropdown.AddValue("One really long choice!!", "c3")
 }
 
 func (d *demo) Update(dt float64) {

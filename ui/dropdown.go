@@ -4,6 +4,8 @@ import (
 	"math"
 	"pixelext/nodes"
 
+	"github.com/faiface/pixel/pixelgl"
+
 	"github.com/faiface/pixel/imdraw"
 
 	"github.com/faiface/pixel"
@@ -22,6 +24,7 @@ type DropDown struct {
 	dropdown        *nodes.BorderBox
 	vscroll         *VScroll
 	list            *VBox
+	onchange        func(v string)
 }
 
 func NewDropDown(name, atlasname string, w, h, hdropdown float64) *DropDown {
@@ -33,6 +36,7 @@ func NewDropDown(name, atlasname string, w, h, hdropdown float64) *DropDown {
 		current:   "",
 		atlasname: atlasname,
 		values:    make(map[string]string),
+		onchange:  func(v string) {},
 	}
 	d.Self = d
 	d.UISelf = d
@@ -61,7 +65,7 @@ func (d *DropDown) Init() {
 	d.AddChild(d.btn)
 
 	d.dropdown = nodes.NewBorderBox("dropdown", size.X, d.hdropdown+4)
-	d.dropdown.SetPos(pixel.V(0, size.Y/2-d.hdropdown/2))
+	d.dropdown.SetPos(pixel.V(0, -size.Y/2-d.hdropdown/2))
 	d.dropdown.Hide()
 	d.AddChild(d.dropdown)
 
@@ -75,8 +79,30 @@ func (d *DropDown) Init() {
 func (d *DropDown) AddValue(text, value string) {
 	btn := NewButton("btn", 0, 0, text)
 	btn.OnClick(func() {
-
+		d.onchange(value)
+		d.value.Clear()
+		d.value.Printf("%s", text)
+		d.opened = false
+		d.dropdown.Hide()
 	})
 	d.list.AddChild(btn)
 	d.vscroll.SetInner(d.list)
+}
+
+func (d *DropDown) OnChange(fn func(string)) {
+	d.onchange = fn
+}
+
+func (d *DropDown) Update(dt float64) {
+	if nodes.Events().Clicked(pixelgl.MouseButtonLeft, d) {
+		if d.opened {
+			d.dropdown.Hide()
+		} else {
+			d.dropdown.Show()
+		}
+		d.opened = !d.opened
+	} else if d.opened && nodes.Events().JustPressed(pixelgl.MouseButtonLeft) {
+		d.dropdown.Hide()
+		d.opened = false
+	}
 }

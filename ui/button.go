@@ -15,7 +15,8 @@ import (
 type ButtonState int
 
 const (
-	ButtonEnabled ButtonState = iota
+	ButtonInit ButtonState = iota
+	ButtonEnabled
 	ButtonDisabled
 	ButtonHover
 	ButtonPressed
@@ -33,7 +34,7 @@ type Button struct {
 func NewButton(name string, w, h float64, text string) *Button {
 	b := &Button{
 		UIBase:   *NewUIBase(name),
-		state:    ButtonEnabled,
+		state:    ButtonInit,
 		canvases: make(map[ButtonState]*nodes.Canvas, 4),
 		enabled:  true,
 		onclick:  func() {},
@@ -116,6 +117,7 @@ func (b *Button) SetEnabled(enabled bool) {
 }
 
 func (b *Button) Update(dt float64) {
+	oldstate := b.state
 	if b.enabled {
 		if nodes.Events().Clicked(pixelgl.MouseButtonLeft, b) {
 			b.state = ButtonPressed
@@ -132,6 +134,10 @@ func (b *Button) Update(dt float64) {
 		}
 	} else {
 		b.state = ButtonDisabled
+	}
+
+	if b.state == oldstate {
+		return
 	}
 
 	for state, canvas := range b.canvases {
