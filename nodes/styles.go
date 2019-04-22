@@ -37,3 +37,9 @@ func DefaultStyles() *Styles {
 	s.RoundToPixels = true
 	return s
 }
+
+func (s *Styles) Clone() *Styles {
+	clonedStyle := &Styles{}
+	*clonedStyle = *s
+	return clonedStyle
+}

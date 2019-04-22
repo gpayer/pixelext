@@ -206,6 +206,7 @@ func (b *BaseNode) Show() {
 		b.show = true
 		SceneManager().Redraw()
 	}
+	b.active = true
 }
 
 func (b *BaseNode) Hide() {
@@ -213,6 +214,7 @@ func (b *BaseNode) Hide() {
 		b.show = false
 		SceneManager().Redraw()
 	}
+	b.active = false
 }
 
 func (b *BaseNode) SetActive(active bool) {

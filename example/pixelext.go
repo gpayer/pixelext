@@ -306,10 +306,10 @@ func (d *demo) Init() {
 	dropdown.OnChange(func(v string) {
 		fmt.Printf("dropdown: %s\n", v)
 	})
-	d.AddChild(dropdown)
 	dropdown.AddValue("Choice 1", "c1")
 	dropdown.AddValue("Another one", "c2")
 	dropdown.AddValue("One really long choice!!", "c3")
+	d.AddChild(dropdown)
 }
 
 func (d *demo) Update(dt float64) {

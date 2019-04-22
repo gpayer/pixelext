@@ -1,37 +1,47 @@
 package ui
 
 import (
+	"image/color"
 	"math"
 	"pixelext/nodes"
 
 	"github.com/faiface/pixel/pixelgl"
+	"golang.org/x/image/colornames"
 
 	"github.com/faiface/pixel/imdraw"
 
 	"github.com/faiface/pixel"
 )
 
+type dropDownState int
+
+const (
+	dropDownClosed dropDownState = iota
+	dropDownOpening
+	dropDownOpened
+)
+
 type DropDown struct {
 	UIBase
-	hdropdown       float64
-	cleared, opened bool
-	current         string
-	atlasname       string
-	values          map[string]string
-	value           *Text
-	background      *nodes.BorderBox
-	btn             *nodes.Canvas
-	dropdown        *nodes.BorderBox
-	vscroll         *VScroll
-	list            *VBox
-	onchange        func(v string)
+	hdropdown  float64
+	cleared    bool
+	state      dropDownState
+	current    string
+	atlasname  string
+	values     map[string]string
+	value      *Text
+	background *nodes.BorderBox
+	btn        *nodes.Canvas
+	dropdown   *nodes.BorderBox
+	vscroll    *VScroll
+	list       *VBox
+	onchange   func(v string)
 }
 
 func NewDropDown(name, atlasname string, w, h, hdropdown float64) *DropDown {
 	d := &DropDown{
 		UIBase:    *NewUIBase(name),
 		cleared:   true,
-		opened:    false,
 		hdropdown: hdropdown,
 		current:   "",
 		atlasname: atlasname,
@@ -73,20 +83,50 @@ func (d *DropDown) Init() {
 	d.dropdown.AddChild(d.vscroll)
 
 	d.list = NewVBox("dropdownvbox")
+	listStyles := d.list.GetStyles()
+	listStyles.Border.Width = 0
+	listStyles.Padding = 2
 	d.vscroll.SetInner(d.list)
+
+	for val, txt := range d.values {
+		d.initValue(txt, val)
+	}
 }
 
-func (d *DropDown) AddValue(text, value string) {
+func (d *DropDown) initValue(text, value string) {
 	btn := NewButton("btn", 0, 0, text)
 	btn.OnClick(func() {
 		d.onchange(value)
 		d.value.Clear()
 		d.value.Printf("%s", text)
-		d.opened = false
-		d.dropdown.Hide()
+		d.state = dropDownClosed
+		d.vscroll.SetScroll(0)
 	})
+
+	baseStyle := nodes.DefaultStyles()
+	baseStyle.Border.Width = 0
+	baseStyle.Padding = 0
+
+	enabledStyle := baseStyle.Clone()
+	enabledStyle.Element.EnabledColor = colornames.Black
+	btn.SetButtonStyles(ButtonEnabled, enabledStyle)
+
+	hoverStyle := baseStyle.Clone()
+	hoverStyle.Element.EnabledColor = color.RGBA{64, 64, 64, 255}
+	btn.SetButtonStyles(ButtonHover, hoverStyle)
+
+	pressedStyle := baseStyle.Clone()
+	pressedStyle.Element.EnabledColor = colornames.White
+	pressedStyle.Text.Color = colornames.Black
+	btn.SetButtonStyles(ButtonPressed, pressedStyle)
+
 	d.list.AddChild(btn)
 	d.vscroll.SetInner(d.list)
+	d.dropdown.SetSize(d.vscroll.Size().Add(pixel.V(2, 2)))
+}
+
+func (d *DropDown) AddValue(text, value string) {
+	d.values[value] = text
 }
 
 func (d *DropDown) OnChange(fn func(string)) {
@@ -95,14 +135,18 @@ func (d *DropDown) OnChange(fn func(string)) {
 
 func (d *DropDown) Update(dt float64) {
 	if nodes.Events().Clicked(pixelgl.MouseButtonLeft, d) {
-		if d.opened {
-			d.dropdown.Hide()
-		} else {
+		if d.state == dropDownClosed {
 			d.dropdown.Show()
+			d.state = dropDownOpening
 		}
-		d.opened = !d.opened
-	} else if d.opened && nodes.Events().JustPressed(pixelgl.MouseButtonLeft) {
+	} else if nodes.Events().JustReleased(pixelgl.MouseButtonLeft) {
+		if d.state == dropDownOpening {
+			d.state = dropDownOpened
+		} else if d.state == dropDownOpened {
+			d.vscroll.SetScroll(0)
+			d.state = dropDownClosed
+		}
+	} else if d.state == dropDownClosed {
 		d.dropdown.Hide()
-		d.opened = false
 	}
 }

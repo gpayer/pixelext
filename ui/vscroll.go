@@ -97,3 +97,15 @@ func (v *VScroll) Update(dt float64) {
 		v.scrollbar.Hide()
 	}
 }
+
+func (v *VScroll) SetScroll(scroll float64) {
+	maxscroll := v.innerh - v.h
+	if scroll > maxscroll {
+		v.scroll = scroll
+	} else if scroll < 0 {
+		v.scroll = 0
+	} else {
+		v.scroll = scroll
+	}
+	v.recalcScrollbar()
+}
