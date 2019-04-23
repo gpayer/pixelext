@@ -62,12 +62,22 @@ func (v *VBox) recalcPositions() {
 }
 
 func (v *VBox) AddChild(child nodes.Node) {
-	v.BaseNode.AddChild(child)
+	v.UIBase.AddChild(child)
 	v.recalcPositions()
 }
 
 func (v *VBox) SetStyles(styles *nodes.Styles) {
-	v.BaseNode.SetStyles(styles)
+	v.UIBase.SetStyles(styles)
 	v.background.SetStyles(styles)
+	v.recalcPositions()
+}
+
+func (v *VBox) RemoveChild(child nodes.Node) {
+	v.UIBase.RemoveChild(child)
+	v.recalcPositions()
+}
+
+func (v *VBox) RemoveChildren() {
+	v.UIBase.RemoveChildren()
 	v.recalcPositions()
 }

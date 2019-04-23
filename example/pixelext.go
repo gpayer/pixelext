@@ -301,7 +301,7 @@ func (d *demo) Init() {
 
 	vscroll.SetInner(vbox)
 
-	dropdown := ui.NewDropDown("dropdown", "basic", 100, 20, 60)
+	dropdown := ui.NewDropDown("dropdown", "basic", 100, 20, 150)
 	dropdown.SetPos(pixel.V(150, 490))
 	dropdown.OnChange(func(v string) {
 		fmt.Printf("dropdown: %s\n", v)

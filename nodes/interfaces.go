@@ -14,6 +14,7 @@ type Node interface {
 	_getLastMat() pixel.Matrix
 	_setLastMat(mat pixel.Matrix)
 	_getZindex() int
+	Initialized() bool
 	GetName() string
 	SetOrigin(origin pixel.Vec)
 	GetOrigin() pixel.Vec

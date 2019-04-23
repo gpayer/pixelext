@@ -73,7 +73,11 @@ func (v *VScroll) recalcScrollbar() {
 		diff := v.innerh - v.h
 		v.inner.SetPos(pixel.V(0, -diff/2+v.scroll))
 	} else {
-		v.scrollbar.SetSize(pixel.V(10, v.h))
+		scrollbarh := v.h
+		if scrollbarh > v.Size().Y {
+			scrollbarh = v.Size().Y
+		}
+		v.scrollbar.SetSize(pixel.V(10, scrollbarh))
 		v.scrollbar.SetPos(pixel.V(v.w/2-5, 0))
 	}
 	nodes.SceneManager().Redraw()

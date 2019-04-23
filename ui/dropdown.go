@@ -24,7 +24,6 @@ const (
 type DropDown struct {
 	UIBase
 	hdropdown  float64
-	cleared    bool
 	state      dropDownState
 	current    string
 	atlasname  string
@@ -41,7 +40,6 @@ type DropDown struct {
 func NewDropDown(name, atlasname string, w, h, hdropdown float64) *DropDown {
 	d := &DropDown{
 		UIBase:    *NewUIBase(name),
-		cleared:   true,
 		hdropdown: hdropdown,
 		current:   "",
 		atlasname: atlasname,
@@ -75,7 +73,6 @@ func (d *DropDown) Init() {
 	d.AddChild(d.btn)
 
 	d.dropdown = nodes.NewBorderBox("dropdown", size.X, d.hdropdown+4)
-	d.dropdown.SetPos(pixel.V(0, -size.Y/2-d.hdropdown/2))
 	d.dropdown.Hide()
 	d.AddChild(d.dropdown)
 
@@ -86,11 +83,8 @@ func (d *DropDown) Init() {
 	listStyles := d.list.GetStyles()
 	listStyles.Border.Width = 0
 	listStyles.Padding = 2
-	d.vscroll.SetInner(d.list)
 
-	for val, txt := range d.values {
-		d.initValue(txt, val)
-	}
+	d.createDropdown()
 }
 
 func (d *DropDown) initValue(text, value string) {
@@ -101,6 +95,7 @@ func (d *DropDown) initValue(text, value string) {
 		d.value.Printf("%s", text)
 		d.state = dropDownClosed
 		d.vscroll.SetScroll(0)
+		d.current = value
 	})
 
 	baseStyle := nodes.DefaultStyles()
@@ -121,12 +116,55 @@ func (d *DropDown) initValue(text, value string) {
 	btn.SetButtonStyles(ButtonPressed, pressedStyle)
 
 	d.list.AddChild(btn)
+}
+
+func (d *DropDown) createDropdown() {
+	d.list.RemoveChildren()
+	for val, txt := range d.values {
+		d.initValue(txt, val)
+	}
 	d.vscroll.SetInner(d.list)
-	d.dropdown.SetSize(d.vscroll.Size().Add(pixel.V(2, 2)))
+	size := d.vscroll.Size().Add(pixel.V(2, 2))
+	d.dropdown.SetSize(size)
+	d.dropdown.SetPos(pixel.V(0, -d.Size().Y/2-size.Y/2))
 }
 
 func (d *DropDown) AddValue(text, value string) {
 	d.values[value] = text
+	if d.Initialized() {
+		d.createDropdown()
+	}
+}
+
+func (d *DropDown) SetValue(value string) {
+	text, ok := d.values[value]
+	if ok {
+		d.value.Clear()
+		d.value.Printf("%s", text)
+		d.current = value
+	}
+}
+
+func (d *DropDown) RemoveValue(value string) {
+	delete(d.values, value)
+	if d.current == value {
+		d.value.Clear()
+		d.value.Printf("---")
+		d.current = ""
+	}
+	if d.Initialized() {
+		d.createDropdown()
+	}
+}
+
+func (d *DropDown) Clear() {
+	d.values = make(map[string]string, 0)
+	d.value.Clear()
+	d.value.Printf("---")
+	d.current = ""
+	if d.Initialized() {
+		d.createDropdown()
+	}
 }
 
 func (d *DropDown) OnChange(fn func(string)) {

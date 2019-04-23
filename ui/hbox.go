@@ -62,12 +62,22 @@ func (h *HBox) recalcPositions() {
 }
 
 func (h *HBox) AddChild(child nodes.Node) {
-	h.BaseNode.AddChild(child)
+	h.UIBase.AddChild(child)
 	h.recalcPositions()
 }
 
 func (h *HBox) SetStyles(styles *nodes.Styles) {
-	h.BaseNode.SetStyles(styles)
+	h.UIBase.SetStyles(styles)
 	h.background.SetStyles(styles)
+	h.recalcPositions()
+}
+
+func (h *HBox) RemoveChild(child nodes.Node) {
+	h.UIBase.RemoveChild(child)
+	h.recalcPositions()
+}
+
+func (h *HBox) RemoveChildren() {
+	h.UIBase.RemoveChildren()
 	h.recalcPositions()
 }

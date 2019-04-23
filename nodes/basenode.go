@@ -134,6 +134,10 @@ func (b *BaseNode) calcMat() {
 	SceneManager().Redraw()
 }
 
+func (b *BaseNode) Initialized() bool {
+	return b.initialized
+}
+
 func (b *BaseNode) GetName() string {
 	return b.Name
 }
