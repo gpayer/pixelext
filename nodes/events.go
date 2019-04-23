@@ -76,6 +76,10 @@ func (e *EventManager) MousePreviousPosition() pixel.Vec {
 	return e.win.MousePreviousPosition()
 }
 
+func (e *EventManager) Typed() string {
+	return e.win.Typed()
+}
+
 func init() {
 	events = &EventManager{}
 }

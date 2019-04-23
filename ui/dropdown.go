@@ -30,6 +30,7 @@ type DropDown struct {
 	values     map[string]string
 	value      *Text
 	background *nodes.BorderBox
+	sub        *nodes.SubScene
 	btn        *nodes.Canvas
 	dropdown   *nodes.BorderBox
 	vscroll    *VScroll
@@ -56,13 +57,23 @@ func (d *DropDown) Init() {
 	size := d.Size()
 	styles := d.GetStyles()
 	d.background = nodes.NewBorderBox("background", size.X, size.Y)
+	d.background.SetZIndex(-1)
 	d.AddChild(d.background)
+
+	subscenewidth := size.X - 15 - styles.Padding
+	d.sub = nodes.NewSubScene("subscene", subscenewidth, size.Y-4)
+	d.sub.SetPos(pixel.V(-5, 0))
+	d.AddChild(d.sub)
+
+	subroot := nodes.NewBaseNode("subroot")
+	d.sub.SetRoot(subroot)
+
 	d.value = NewText("value", d.atlasname)
 	d.value.Printf("---")
 	d.value.SetAlignment(nodes.AlignmentCenterLeft)
-	d.value.SetPos(pixel.V(-size.X/2+styles.Padding, 0))
+	d.value.SetPos(pixel.V(-subscenewidth/2+2, 0))
 	d.value.SetZIndex(10)
-	d.AddChild(d.value)
+	subroot.AddChild(d.value)
 
 	d.btn = nodes.NewCanvas("btn", 15, size.Y)
 	im := imdraw.New(nil)
@@ -116,6 +127,17 @@ func (d *DropDown) initValue(text, value string) {
 	btn.SetButtonStyles(ButtonPressed, pressedStyle)
 
 	d.list.AddChild(btn)
+}
+
+func (d *DropDown) SetSize(size pixel.Vec) {
+	d.UIBase.SetSize(size)
+	if d.Initialized() {
+		styles := d.GetStyles()
+		d.background.SetSize(size)
+		subscenewidth := size.X - 15 - styles.Padding
+		d.sub.SetSize(pixel.V(subscenewidth, size.Y-4))
+		d.value.SetPos(pixel.V(-subscenewidth/2+2, 0))
+	}
 }
 
 func (d *DropDown) createDropdown() {

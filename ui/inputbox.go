@@ -51,12 +51,18 @@ func (i *InputBox) Init() {
 	size := i.Size()
 	i.background.SetZIndex(-1)
 	i.AddChild(i.background)
+	i.text.SetAlignment(nodes.AlignmentCenterLeft)
 	i.text.SetPos(pixel.V(-size.X/2+padding, 0))
 	i.AddChild(i.text)
 	i.cursor.SetZIndex(1)
-	i.SetPos(pixel.V(-size.X/2+padding+i.text.Size().X+2, 0))
+	i.calcCursorPosition()
 	i.AddChild(i.cursor)
 	i.cursor.Hide()
+}
+
+func (i *InputBox) calcCursorPosition() {
+	// TODO: take cursor position into account
+	i.cursor.SetPos(pixel.V(-i.Size().X/2+i.GetStyles().Padding+i.text.Size().X+2, 0))
 }
 
 func (i *InputBox) Update(dt float64) {
@@ -67,7 +73,14 @@ func (i *InputBox) Update(dt float64) {
 			i.cursorshown = false
 			return
 		}
-		// TODO: key input
+		// TODO: backspace, cursor keys
+		typed := nodes.Events().Typed()
+		if len(typed) > 0 {
+			i.content += typed // TODO: take cursor position into account
+			i.text.Clear()
+			i.text.Printf(i.content)
+			i.calcCursorPosition()
+		}
 		i.totaltime += dt
 		if i.totaltime > 0.5 {
 			i.totaltime = 0

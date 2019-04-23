@@ -113,8 +113,7 @@ func (d *demo) Init() {
 	d.text3 = text
 
 	sltext := nodes.NewBaseNode("sltext")
-	//sltext.SetSize(pixel.V(100, 30))
-	sltext.SetPos(pixel.V(450, 515))
+	sltext.SetPos(pixel.V(550, 515))
 	sltext.SetRot(0.0)
 	d.AddChild(sltext)
 
@@ -283,7 +282,7 @@ func (d *demo) Init() {
 	d.AddChild(vbox)
 
 	vscroll := ui.NewVScroll("vscroll", 100, 50)
-	vscroll.SetPos(pixel.V(150, 575))
+	vscroll.SetPos(pixel.V(150, 650))
 	d.AddChild(vscroll)
 	vbox = ui.NewVBox("innervbox")
 	text = ui.NewText("", "basic")
@@ -301,8 +300,9 @@ func (d *demo) Init() {
 
 	vscroll.SetInner(vbox)
 
-	dropdown := ui.NewDropDown("dropdown", "basic", 100, 20, 150)
-	dropdown.SetPos(pixel.V(150, 490))
+	dropdown := ui.NewDropDown("dropdown", "basic", 100, 30, 150)
+	dropdown.SetPos(pixel.V(100, 500))
+	dropdown.SetAlignment(nodes.AlignmentBottomLeft)
 	dropdown.OnChange(func(v string) {
 		fmt.Printf("dropdown: %s\n", v)
 	})
@@ -310,6 +310,11 @@ func (d *demo) Init() {
 	dropdown.AddValue("Another one", "c2")
 	dropdown.AddValue("One really long choice!!", "c3")
 	d.AddChild(dropdown)
+
+	inputbox := ui.NewInputBox("input1", "basic", 200, 26)
+	inputbox.SetPos(pixel.V(250, 500))
+	inputbox.SetAlignment(nodes.AlignmentBottomLeft)
+	d.AddChild(inputbox)
 }
 
 func (d *demo) Update(dt float64) {
