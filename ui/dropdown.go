@@ -35,7 +35,7 @@ type DropDown struct {
 	dropdown   *nodes.BorderBox
 	vscroll    *VScroll
 	list       *VBox
-	onchange   func(v string)
+	onchange   func(value string, text string)
 }
 
 func NewDropDown(name, atlasname string, w, h, hdropdown float64) *DropDown {
@@ -45,7 +45,7 @@ func NewDropDown(name, atlasname string, w, h, hdropdown float64) *DropDown {
 		current:   "",
 		atlasname: atlasname,
 		values:    make(map[string]string),
-		onchange:  func(v string) {},
+		onchange:  func(_ string, _ string) {},
 	}
 	d.Self = d
 	d.UISelf = d
@@ -101,7 +101,7 @@ func (d *DropDown) Init() {
 func (d *DropDown) initValue(text, value string) {
 	btn := NewButton("btn", 0, 0, text)
 	btn.OnClick(func() {
-		d.onchange(value)
+		d.onchange(value, text)
 		d.value.Clear()
 		d.value.Printf("%s", text)
 		d.state = dropDownClosed
@@ -162,7 +162,7 @@ func (d *DropDown) SetValue(value string) {
 	text, ok := d.values[value]
 	if ok {
 		d.value.Clear()
-		d.value.Printf("%s", text)
+		d.value.Printf(text)
 		d.current = value
 	}
 }
@@ -179,6 +179,22 @@ func (d *DropDown) RemoveValue(value string) {
 	}
 }
 
+func (d *DropDown) ChangeValue(value, text string) {
+	_, ok := d.values[value]
+	if ok {
+		d.values[value] = text
+		if d.current == value {
+			d.value.Clear()
+			d.value.Printf(text)
+		}
+		if d.Initialized() {
+			d.createDropdown()
+		}
+	} else {
+		d.AddValue(text, value)
+	}
+}
+
 func (d *DropDown) Clear() {
 	d.values = make(map[string]string, 0)
 	d.value.Clear()
@@ -189,7 +205,7 @@ func (d *DropDown) Clear() {
 	}
 }
 
-func (d *DropDown) OnChange(fn func(string)) {
+func (d *DropDown) OnChange(fn func(string, string)) {
 	d.onchange = fn
 }
 

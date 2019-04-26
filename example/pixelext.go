@@ -12,6 +12,7 @@ import (
 	"pixelext/ui"
 	"runtime"
 	"runtime/pprof"
+	"strconv"
 
 	"github.com/faiface/pixel/imdraw"
 
@@ -113,7 +114,7 @@ func (d *demo) Init() {
 	d.text3 = text
 
 	sltext := nodes.NewBaseNode("sltext")
-	sltext.SetPos(pixel.V(550, 515))
+	sltext.SetPos(pixel.V(750, 515))
 	sltext.SetRot(0.0)
 	d.AddChild(sltext)
 
@@ -300,21 +301,58 @@ func (d *demo) Init() {
 
 	vscroll.SetInner(vbox)
 
+	var inputbox *ui.InputBox
+	var currentDropDownValue string
+
+	hbox = ui.NewHBox("dropdowntest")
+	hbox.SetAlignment(nodes.AlignmentBottomLeft)
+	hbox.SetPos(pixel.V(100, 500))
+	d.AddChild(hbox)
+
 	dropdown := ui.NewDropDown("dropdown", "basic", 100, 30, 150)
-	dropdown.SetPos(pixel.V(100, 500))
-	dropdown.SetAlignment(nodes.AlignmentBottomLeft)
-	dropdown.OnChange(func(v string) {
+	dropdown.OnChange(func(v, txt string) {
 		fmt.Printf("dropdown: %s\n", v)
+		currentDropDownValue = v
+		inputbox.SetValue(txt)
 	})
 	dropdown.AddValue("Choice 1", "c1")
 	dropdown.AddValue("Another one", "c2")
 	dropdown.AddValue("One really long choice!!", "c3")
-	d.AddChild(dropdown)
+	hbox.AddChild(dropdown)
 
-	inputbox := ui.NewInputBox("input1", "basic", 200, 26)
-	inputbox.SetPos(pixel.V(250, 500))
-	inputbox.SetAlignment(nodes.AlignmentBottomLeft)
-	d.AddChild(inputbox)
+	valuecounter := 4
+	inputbox = ui.NewInputBox("input1", "basic", 200, 26)
+	inputbox.OnEnter(func(v string) {
+		if currentDropDownValue != "" {
+			dropdown.ChangeValue(currentDropDownValue, v)
+			currentDropDownValue = ""
+		} else {
+			val := "c" + strconv.Itoa(valuecounter)
+			dropdown.AddValue(v, val)
+			valuecounter++
+			dropdown.SetValue(val)
+		}
+		inputbox.SetValue("")
+	})
+	hbox.AddChild(inputbox)
+
+	button = ui.NewButton("remove", 0, 0, "Remove")
+	button.OnClick(func() {
+		if currentDropDownValue != "" {
+			dropdown.RemoveValue(currentDropDownValue)
+			currentDropDownValue = ""
+			inputbox.SetValue("")
+		}
+	})
+	hbox.AddChild(button)
+
+	button = ui.NewButton("New", 0, 0, "New")
+	button.OnClick(func() {
+		currentDropDownValue = ""
+		inputbox.SetValue("")
+		inputbox.Focus()
+	})
+	hbox.AddChild(button)
 }
 
 func (d *demo) Update(dt float64) {

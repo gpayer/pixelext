@@ -1,6 +1,7 @@
 package ui
 
 import (
+	"math"
 	"pixelext/nodes"
 
 	"github.com/faiface/pixel/pixelgl"
@@ -69,6 +70,28 @@ func (i *InputBox) Init() {
 	i.recalc()
 }
 
+func (i *InputBox) OnChange(onchange func(string)) {
+	i.onchange = onchange
+}
+
+func (i *InputBox) OnEnter(onenter func(string)) {
+	i.onenter = onenter
+}
+
+func (i *InputBox) SetValue(value string) {
+	i.content = value
+	i.recalc()
+}
+
+func (i *InputBox) Focus() {
+	if !i.focused {
+		i.focused = true
+		i.totaltime = 0
+		i.cursor.Show()
+		i.cursorshown = true
+	}
+}
+
 func (i *InputBox) recalc() {
 	if i.cursorpos > len(i.content) {
 		i.cursorpos = len(i.content)
@@ -81,7 +104,7 @@ func (i *InputBox) recalc() {
 	i.text.Clear()
 	i.text.Printf(i.content)
 	leftcursorcontent := i.content[0:i.cursorpos]
-	cursoroffset := i.text.Text().BoundsOf(leftcursorcontent).W() + 2
+	cursoroffset := i.text.Text().BoundsOf(leftcursorcontent).W() + 1
 	cursorposx := -subwhalf - i.textscroll + cursoroffset
 	if cursorposx < -subwhalf || cursorposx > subwhalf {
 		i.textscroll = -subwhalf + cursoroffset
@@ -102,7 +125,11 @@ func (i *InputBox) Update(dt float64) {
 			i.focused = false
 			i.cursor.Hide()
 			i.cursorshown = false
+			i.cursorpos = 0
+			i.recalc()
 			return
+		} else if ev.Clicked(pixelgl.MouseButtonLeft, i) {
+			i.setCursorAfterClick()
 		}
 		if ev.JustPressed(pixelgl.KeyBackspace) || ev.Repeated(pixelgl.KeyBackspace) {
 			if i.cursorpos > 0 {
@@ -114,6 +141,19 @@ func (i *InputBox) Update(dt float64) {
 					i.content = i.content[:i.cursorpos-1]
 				}
 				i.cursorpos--
+				i.onchange(i.content)
+				i.recalc()
+			}
+		} else if ev.JustPressed(pixelgl.KeyDelete) || ev.Repeated(pixelgl.KeyDelete) {
+			if i.cursorpos < len(i.content) {
+				if i.cursorpos == 0 {
+					i.content = i.content[1:]
+				} else if i.cursorpos < len(i.content)-1 {
+					i.content = i.content[:i.cursorpos] + i.content[i.cursorpos+1:]
+				} else {
+					i.content = i.content[:i.cursorpos]
+				}
+				i.onchange(i.content)
 				i.recalc()
 			}
 		} else if ev.JustPressed(pixelgl.KeyLeft) || ev.Repeated(pixelgl.KeyLeft) {
@@ -122,7 +162,20 @@ func (i *InputBox) Update(dt float64) {
 		} else if ev.JustPressed(pixelgl.KeyRight) || ev.Repeated(pixelgl.KeyRight) {
 			i.cursorpos++
 			i.recalc()
-		} else { // TODO: more cursor keys
+		} else if ev.JustPressed(pixelgl.KeyHome) {
+			i.cursorpos = 0
+			i.recalc()
+		} else if ev.JustPressed(pixelgl.KeyEnd) {
+			i.cursorpos = len(i.content)
+			i.recalc()
+		} else if ev.JustPressed(pixelgl.KeyEnter) {
+			i.onenter(i.content)
+			i.focused = false
+			i.cursor.Hide()
+			i.cursorpos = 0
+			i.recalc()
+			return
+		} else {
 			typed := ev.Typed()
 			if len(typed) > 0 && len(i.content) < i.maxlen {
 				if i.cursorpos == 0 {
@@ -136,6 +189,7 @@ func (i *InputBox) Update(dt float64) {
 				if len(i.content) > i.maxlen {
 					i.content = i.content[:i.maxlen]
 				}
+				i.onchange(i.content)
 				i.recalc()
 			}
 		}
@@ -151,13 +205,49 @@ func (i *InputBox) Update(dt float64) {
 		}
 	} else {
 		if ev.Clicked(pixelgl.MouseButtonLeft, i) {
-			if !i.focused {
-				i.focused = true
-				i.totaltime = 0
-				i.cursor.Show()
-				i.cursorshown = true
+			i.Focus()
+			i.setCursorAfterClick()
+		}
+	}
+}
+
+func (i *InputBox) setCursorAfterClick() {
+	clickposx := nodes.Events().LocalMousePosition(i).X
+	size := i.Size()
+	subwhalf := (size.X - 21) / 2
+	cursoroffset := subwhalf + i.textscroll + clickposx
+	// Recursively find cursorpos most closely to cursoroffset
+	i.cursorpos = i.findCursorPos(0, len(i.content), cursoroffset)
+	i.recalc()
+}
+
+func (i *InputBox) findCursorPos(s, e int, cursoroffset float64) int {
+	precision := i.text.Text().BoundsOf("X").W() / 2
+	if s == e {
+		return s
+	} else {
+		var m int
+		if e == s+1 {
+			leftcursorcontent := i.content[0:s]
+			startoffset := i.text.Text().BoundsOf(leftcursorcontent).W() + 1
+			leftcursorcontent = i.content[0:e]
+			endoffset := i.text.Text().BoundsOf(leftcursorcontent).W() + 1
+			if math.Abs(cursoroffset-startoffset) < math.Abs(cursoroffset-endoffset) {
+				return s
+			} else {
+				return e
 			}
-			// TODO: calculate click location and set cursor accordingly
+		}
+		m = (s + e) / 2
+		leftcursorcontent := i.content[0:m]
+		middleoffset := i.text.Text().BoundsOf(leftcursorcontent).W() + 1
+		if math.Abs(cursoroffset-middleoffset) < precision {
+			return m
+		}
+		if cursoroffset > middleoffset {
+			return i.findCursorPos(m, e, cursoroffset)
+		} else {
+			return i.findCursorPos(s, m, cursoroffset)
 		}
 	}
 }
