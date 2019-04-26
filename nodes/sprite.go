@@ -8,10 +8,11 @@ type Sprite struct {
 	BaseNode
 	pic    pixel.Picture
 	sprite *pixel.Sprite
+	bounds pixel.Rect
 }
 
 func (s *Sprite) Init() {
-	s.sprite = pixel.NewSprite(s.pic, s.pic.Bounds())
+	s.sprite = pixel.NewSprite(s.pic, s.bounds)
 }
 
 func (s *Sprite) Draw(win pixel.Target, mat pixel.Matrix) {
@@ -29,6 +30,11 @@ func NewSprite(name string, pic pixel.Picture) *Sprite {
 		BaseNode: *NewBaseNode(name),
 		pic:      pic,
 	}
+	s.bounds = s.pic.Bounds()
 	s.Self = s
 	return s
+}
+
+func (s *Sprite) SetBounds(bounds pixel.Rect) {
+	s.bounds = bounds
 }

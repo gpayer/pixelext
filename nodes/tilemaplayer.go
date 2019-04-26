@@ -1,0 +1,54 @@
+package nodes
+
+import (
+	"github.com/faiface/pixel"
+)
+
+type TileInfo struct {
+	x, y  float64
+	idx   int
+	drawn bool
+}
+
+type TileMapLayer struct {
+	BaseNode
+	batch       *pixel.Batch
+	spritesheet *SpriteSheet
+	dx, dy      int
+	tiles       []TileInfo
+	dirty       bool
+}
+
+func NewTileMapLayer(name string, pic pixel.Picture, dx, dy int) *TileMapLayer {
+	t := &TileMapLayer{
+		BaseNode:    *NewBaseNode(name),
+		batch:       pixel.NewBatch(&pixel.TrianglesData{}, pic),
+		spritesheet: NewSpriteSheet(pic, dx, dy),
+		dx:          dx,
+		dy:          dy,
+		dirty:       false,
+	}
+	t.Self = t
+	return t
+}
+
+func (t *TileMapLayer) AddTile(x, y, idx int) {
+	t.tiles = append(t.tiles, TileInfo{float64(x * t.dx), float64(y * t.dy), idx, false})
+	t.dirty = true
+}
+
+func (t *TileMapLayer) Draw(win pixel.Target, mat pixel.Matrix) {
+	if t.dirty {
+		for i, tile := range t.tiles {
+			if !tile.drawn {
+				spr := t.spritesheet.NewSprite(tile.idx)
+				spr.Init()
+				spr.Draw(t.batch, pixel.IM.Moved(pixel.V(tile.x, tile.y)).Chained(mat))
+				t.tiles[i].drawn = true
+			}
+		}
+		t.dirty = false
+	}
+	t.batch.SetMatrix(mat)
+	t.batch.Draw(win)
+}
