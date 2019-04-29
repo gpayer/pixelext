@@ -6,6 +6,7 @@ import (
 	"image/color"
 	"log"
 	"math"
+	"math/rand"
 	"os"
 	"pixelext/nodes"
 	"pixelext/services"
@@ -353,6 +354,29 @@ func (d *demo) Init() {
 		inputbox.Focus()
 	})
 	hbox.AddChild(button)
+
+	spritesheet, err := services.ResourceManager().LoadPicture("ProjectUtumno_full.png")
+	if err == nil {
+		tilemaplayer := nodes.NewTileMapLayer("tilemaplayer1", spritesheet, 32, 32)
+		tilemaplayer.SetPos(pixel.V(1200, 100))
+		d.AddChild(tilemaplayer)
+		info := tilemaplayer.SpriteSheet().Info()
+		for x := 0; x < 10; x++ {
+			for y := 0; y < 10; y++ {
+				tilemaplayer.AddTileGrid(x, y, info.Idx(int(rand.Int31n(64)), 90))
+			}
+		}
+		tilemaplayer2 := nodes.NewTileMapLayer("tilemaplayer2", spritesheet, 32, 32)
+		tilemaplayer2.SetPos(pixel.V(1200, 100))
+		tilemaplayer2.SetZIndex(1)
+		for x := 0; x < 10; x++ {
+			for y := 0; y < 10; y++ {
+				if rand.Intn(20) >= 14 {
+					tilemaplayer.AddTileGrid(x, y, info.Idx(rand.Intn(64), rand.Intn(19)+12))
+				}
+			}
+		}
+	}
 }
 
 func (d *demo) Update(dt float64) {
@@ -396,7 +420,7 @@ func Run() {
 	}
 	win, err := pixelgl.NewWindow(pixelgl.WindowConfig{
 		Title:  "pixelext example",
-		Bounds: pixel.R(0, 0, 1200, 800),
+		Bounds: pixel.R(0, 0, 1600, 900),
 		VSync:  true,
 	})
 	if err != nil {
@@ -408,7 +432,7 @@ func Run() {
 	root := newDemo()
 	bgGrid := newBackgroundGrid(win.Bounds().W(), win.Bounds().H())
 	bgGrid.SetZIndex(-2)
-	bgGrid.SetPos(pixel.V(600, 400))
+	bgGrid.SetPos(pixel.V(800, 450))
 	root.AddChild(bgGrid)
 
 	nodes.SceneManager().SetRoot(root)

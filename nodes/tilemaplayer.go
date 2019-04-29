@@ -32,9 +32,16 @@ func NewTileMapLayer(name string, pic pixel.Picture, dx, dy int) *TileMapLayer {
 	return t
 }
 
-func (t *TileMapLayer) AddTile(x, y, idx int) {
-	t.tiles = append(t.tiles, TileInfo{float64(x * t.dx), float64(y * t.dy), idx, false})
+func (t *TileMapLayer) AddTileGrid(x, y, idx int) {
+	t.tiles = append(t.tiles, TileInfo{float64(x*t.dx + t.dx/2), float64(y*t.dy + t.dy/2), idx, false})
 	t.dirty = true
+	SceneManager().Redraw()
+}
+
+func (t *TileMapLayer) AddTile(x, y float64, idx int) {
+	t.tiles = append(t.tiles, TileInfo{x, y, idx, false})
+	t.dirty = true
+	SceneManager().Redraw()
 }
 
 func (t *TileMapLayer) Draw(win pixel.Target, mat pixel.Matrix) {
@@ -51,4 +58,8 @@ func (t *TileMapLayer) Draw(win pixel.Target, mat pixel.Matrix) {
 	}
 	t.batch.SetMatrix(mat)
 	t.batch.Draw(win)
+}
+
+func (t *TileMapLayer) SpriteSheet() *SpriteSheet {
+	return t.spritesheet
 }
