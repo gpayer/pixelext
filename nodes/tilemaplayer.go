@@ -2,7 +2,7 @@ package nodes
 
 import (
 	"github.com/faiface/pixel"
-	"github.com/lafriks/go-tiled"
+	"github.com/gpayer/go-tiled"
 )
 
 type TileInfo struct {
