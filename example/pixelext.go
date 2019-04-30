@@ -15,6 +15,8 @@ import (
 	"runtime/pprof"
 	"strconv"
 
+	"github.com/gpayer/go-tiled"
+
 	"github.com/faiface/pixel/imdraw"
 
 	"github.com/faiface/pixel"
@@ -375,6 +377,14 @@ func (d *demo) Init() {
 					tilemaplayer.AddTileGrid(x, y, info.Idx(rand.Intn(64), rand.Intn(19)+12))
 				}
 			}
+		}
+
+		tmx, err := tiled.LoadFromFile("10x10_right_down.tmx")
+		if err == nil {
+			layertile, _ := tmx.TileGIDToTile(10)
+			fmt.Println(layertile.Tileset.Image.Source)
+		} else {
+			fmt.Printf("ERROR: could not load tmx: %v\n", err)
 		}
 	}
 }

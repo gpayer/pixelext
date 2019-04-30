@@ -2,6 +2,7 @@ package nodes
 
 import (
 	"github.com/faiface/pixel"
+	"github.com/lafriks/go-tiled"
 )
 
 type TileInfo struct {
@@ -62,4 +63,19 @@ func (t *TileMapLayer) Draw(win pixel.Target, mat pixel.Matrix) {
 
 func (t *TileMapLayer) SpriteSheet() *SpriteSheet {
 	return t.spritesheet
+}
+
+func TileMapsFromTmx(tmx *tiled.Map) []*TileMapLayer {
+	var tilemaplayers []*TileMapLayer
+	for _, layer := range tmx.Layers {
+		t := &TileMapLayer{
+			BaseNode: *NewBaseNode(layer.Name),
+			dx:       tmx.TileWidth,
+			dy:       tmx.TileHeight,
+			dirty:    false,
+		}
+		t.Self = t
+
+	}
+	return tilemaplayers
 }
