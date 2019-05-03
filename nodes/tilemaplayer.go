@@ -1,6 +1,10 @@
 package nodes
 
 import (
+	"fmt"
+	"image/color"
+	"pixelext/services"
+
 	"github.com/faiface/pixel"
 	"github.com/gpayer/go-tiled"
 )
@@ -65,17 +69,76 @@ func (t *TileMapLayer) SpriteSheet() *SpriteSheet {
 	return t.spritesheet
 }
 
-func TileMapsFromTmx(tmx *tiled.Map) []*TileMapLayer {
+func TileMapsFromTmx(tmx *tiled.Map) ([]*TileMapLayer, error) {
+	if tmx.Orientation != "orthogonal" {
+		return nil, fmt.Errorf("only orthogonal tilemaps supported")
+	}
 	var tilemaplayers []*TileMapLayer
-	for _, layer := range tmx.Layers {
+	for z, layer := range tmx.Layers {
+		// TODO: only tilemap layers
+		tileset := layer.Tiles[0].Tileset
+		fmt.Println("tileset.Image.Source: ", tileset.Image.Source)
+		pic, err := services.ResourceManager().LoadPicture(tileset.Image.Source)
+		if err != nil {
+			return nil, err
+		}
 		t := &TileMapLayer{
-			BaseNode: *NewBaseNode(layer.Name),
-			dx:       tmx.TileWidth,
-			dy:       tmx.TileHeight,
-			dirty:    false,
+			BaseNode:    *NewBaseNode(layer.Name),
+			batch:       pixel.NewBatch(&pixel.TrianglesData{}, pic),
+			spritesheet: NewSpriteSheet(pic, tmx.TileWidth, tmx.TileHeight),
+			dx:          tmx.TileWidth,
+			dy:          tmx.TileHeight,
+			dirty:       false,
 		}
 		t.Self = t
+		t.SetZIndex(z)
+		t.batch.SetColorMask(color.RGBA{255, 255, 255, uint8(255.0 * layer.Opacity)})
 
+		w := float64(tmx.Width * tmx.TileWidth)
+		h := float64(tmx.Height * tmx.TileHeight)
+		tw := float64(tmx.TileWidth)
+		th := float64(tmx.TileHeight)
+		tw2 := float64(tmx.TileWidth) / 2
+		th2 := float64(tmx.TileHeight) / 2
+		var x, y, dx, dy float64
+		switch tmx.RenderOrder {
+		case "right-down":
+			x = -w/2 + tw2
+			y = h/2 - th2
+			dx = tw
+			dy = -th
+		case "right-up":
+			x = -w/2 + tw2
+			y = -h/2 + th2
+			dx = tw
+			dy = th
+		case "left-down":
+			x = w/2 - tw2
+			y = h/2 - th2
+			dx = -tw
+			dy = -th
+		case "left-up":
+			x = w/2 - tw2
+			y = -h/2 + th2
+			dx = -tw
+			dy = th
+		}
+
+		inity := y
+		for tx := 0; tx < tmx.Width; tx++ {
+			y = inity
+			for ty := 0; ty < tmx.Height; ty++ {
+				tile, err := tmx.TileGIDToTile(layer.Tiles[ty*tmx.Width+tx].ID)
+				if err != nil {
+					return nil, err
+				}
+				t.AddTile(x, y, int(tile.ID)) // TODO: mapping for RenderOrder
+				y += dy
+			}
+			x += dx
+		}
+
+		tilemaplayers = append(tilemaplayers, t)
 	}
-	return tilemaplayers
+	return tilemaplayers, nil
 }

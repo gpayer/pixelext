@@ -122,6 +122,10 @@ func (r *ResourceManagerStruct) LoadSample(path string) (*snd.Samples, error) {
 	return nil, fmt.Errorf("unsupported sound file format")
 }
 
+func (r *ResourceManagerStruct) SetBasePath(basepath string) {
+	r.basepath = basepath
+}
+
 var resourceManager *ResourceManagerStruct
 
 func ResourceManager() *ResourceManagerStruct {

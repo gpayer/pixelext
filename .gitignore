@@ -1,3 +1,4 @@
 profile*.svg
 example/pixelext
+example/debug
 *.prof

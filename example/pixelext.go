@@ -6,7 +6,6 @@ import (
 	"image/color"
 	"log"
 	"math"
-	"math/rand"
 	"os"
 	"pixelext/nodes"
 	"pixelext/services"
@@ -357,35 +356,22 @@ func (d *demo) Init() {
 	})
 	hbox.AddChild(button)
 
-	spritesheet, err := services.ResourceManager().LoadPicture("ProjectUtumno_full.png")
-	if err == nil {
-		tilemaplayer := nodes.NewTileMapLayer("tilemaplayer1", spritesheet, 32, 32)
-		tilemaplayer.SetPos(pixel.V(1200, 100))
-		d.AddChild(tilemaplayer)
-		info := tilemaplayer.SpriteSheet().Info()
-		for x := 0; x < 10; x++ {
-			for y := 0; y < 10; y++ {
-				tilemaplayer.AddTileGrid(x, y, info.Idx(int(rand.Int31n(64)), 90))
-			}
-		}
-		tilemaplayer2 := nodes.NewTileMapLayer("tilemaplayer2", spritesheet, 32, 32)
-		tilemaplayer2.SetPos(pixel.V(1200, 100))
-		tilemaplayer2.SetZIndex(1)
-		for x := 0; x < 10; x++ {
-			for y := 0; y < 10; y++ {
-				if rand.Intn(20) >= 14 {
-					tilemaplayer.AddTileGrid(x, y, info.Idx(rand.Intn(64), rand.Intn(19)+12))
-				}
-			}
-		}
+	tilemaproot := nodes.NewBaseNode("tilemaproot")
+	tilemaproot.SetPos(pixel.V(1350, 200))
+	d.AddChild(tilemaproot)
 
-		tmx, err := tiled.LoadFromFile("10x10_right_down.tmx")
+	tmx, err := tiled.LoadFromFile("10x10_right_down.tmx")
+	if err == nil {
+		tmlayers, err := nodes.TileMapsFromTmx(tmx)
 		if err == nil {
-			layertile, _ := tmx.TileGIDToTile(10)
-			fmt.Println(layertile.Tileset.Image.Source)
+			for _, layer := range tmlayers {
+				tilemaproot.AddChild(layer)
+			}
 		} else {
-			fmt.Printf("ERROR: could not load tmx: %v\n", err)
+			fmt.Printf("ERROR: could not create tilemap layers: %v\n", err)
 		}
+	} else {
+		fmt.Printf("ERROR: could not load tmx: %v\n", err)
 	}
 }
 
