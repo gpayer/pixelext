@@ -30,6 +30,10 @@
 </data>
  </layer>
  <objectgroup id="3" name="Off-tile objects">
-  <object id="1" gid="8" x="146.667" y="108" width="32" height="32"/>
+  <object id="1" gid="8" x="146.667" y="108" width="32" height="32">
+   <properties>
+    <property name="trap" type="bool" value="true"/>
+   </properties>
+  </object>
  </objectgroup>
 </map>
