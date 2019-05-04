@@ -23,8 +23,8 @@ func NewSpriteSheet(spritesheet pixel.Picture, dx int, dy int) *SpriteSheet {
 		pic: spritesheet,
 	}
 	fx, fy := float64(dx), float64(dy)
-	for x := spritesheet.Bounds().Min.X; x < spritesheet.Bounds().Max.X; x += fx {
-		for y := spritesheet.Bounds().Min.Y; y < spritesheet.Bounds().Max.Y; y += fy {
+	for y := spritesheet.Bounds().Max.Y - fy; y >= spritesheet.Bounds().Min.Y; y -= fy {
+		for x := spritesheet.Bounds().Min.X; x < spritesheet.Bounds().Max.X; x += fx {
 			o.rects = append(o.rects, pixel.R(x, y, x+fx, y+fy))
 		}
 	}

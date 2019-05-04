@@ -76,8 +76,12 @@ func TileMapsFromTmx(tmx *tiled.Map) ([]*TileMapLayer, error) {
 	var tilemaplayers []*TileMapLayer
 	for z, layer := range tmx.Layers {
 		// TODO: only tilemap layers
-		tileset := layer.Tiles[0].Tileset
-		fmt.Println("tileset.Image.Source: ", tileset.Image.Source)
+		var tileset *tiled.Tileset
+		for _, tile := range layer.Tiles {
+			if tile.ID > 0 {
+				tileset = tile.Tileset
+			}
+		}
 		pic, err := services.ResourceManager().LoadPicture(tileset.Image.Source)
 		if err != nil {
 			return nil, err
@@ -128,11 +132,8 @@ func TileMapsFromTmx(tmx *tiled.Map) ([]*TileMapLayer, error) {
 		for tx := 0; tx < tmx.Width; tx++ {
 			y = inity
 			for ty := 0; ty < tmx.Height; ty++ {
-				tile, err := tmx.TileGIDToTile(layer.Tiles[ty*tmx.Width+tx].ID)
-				if err != nil {
-					return nil, err
-				}
-				t.AddTile(x, y, int(tile.ID)) // TODO: mapping for RenderOrder
+				tileid := layer.Tiles[ty*tmx.Width+tx].ID
+				t.AddTile(x, y, int(tileid))
 				y += dy
 			}
 			x += dx
