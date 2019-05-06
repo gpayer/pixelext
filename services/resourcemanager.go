@@ -2,7 +2,6 @@ package services
 
 import (
 	"fmt"
-	"go-audio-service/snd"
 	"image"
 	_ "image/gif"
 	_ "image/jpeg"
@@ -10,6 +9,8 @@ import (
 	"io"
 	"os"
 	"strings"
+
+	"github.com/gpayer/go-audio-service/snd"
 
 	"github.com/faiface/pixel"
 	"github.com/go-audio/wav"

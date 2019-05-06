@@ -3,7 +3,7 @@ package nodes
 import (
 	"fmt"
 	"image/color"
-	"pixelext/services"
+	"github.com/gpayer/pixelext/services"
 
 	"github.com/faiface/pixel"
 	"github.com/gpayer/go-tiled"

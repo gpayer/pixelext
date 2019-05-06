@@ -2,7 +2,7 @@ package ui
 
 import (
 	"fmt"
-	"pixelext/nodes"
+	"github.com/gpayer/pixelext/nodes"
 	"strings"
 
 	"github.com/faiface/pixel"

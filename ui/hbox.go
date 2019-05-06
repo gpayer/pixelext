@@ -2,7 +2,7 @@ package ui
 
 import (
 	"math"
-	"pixelext/nodes"
+	"github.com/gpayer/pixelext/nodes"
 
 	"github.com/faiface/pixel"
 )

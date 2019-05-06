@@ -3,7 +3,7 @@ package ui
 import (
 	"image/color"
 	"math"
-	"pixelext/nodes"
+	"github.com/gpayer/pixelext/nodes"
 
 	"github.com/faiface/pixel/pixelgl"
 	"golang.org/x/image/colornames"

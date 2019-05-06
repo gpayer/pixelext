@@ -1,7 +1,7 @@
 package ui
 
 import (
-	"pixelext/nodes"
+	"github.com/gpayer/pixelext/nodes"
 
 	"github.com/faiface/pixel"
 	"github.com/faiface/pixel/imdraw"
