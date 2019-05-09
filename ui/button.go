@@ -25,20 +25,25 @@ const (
 
 type Button struct {
 	UIBase
-	state    ButtonState
-	canvases map[ButtonState]*nodes.Canvas
-	text     *Text
-	enabled  bool
-	onclick  func()
+	state       ButtonState
+	canvases    map[ButtonState]*nodes.Canvas
+	text        *Text
+	enabled     bool
+	w, h        float64
+	textcontent string
+	onclick     func()
 }
 
 func NewButton(name string, w, h float64, text string) *Button {
 	b := &Button{
-		UIBase:   *NewUIBase(name),
-		state:    ButtonInit,
-		canvases: make(map[ButtonState]*nodes.Canvas, 4),
-		enabled:  true,
-		onclick:  func() {},
+		UIBase:      *NewUIBase(name),
+		state:       ButtonInit,
+		canvases:    make(map[ButtonState]*nodes.Canvas, 4),
+		enabled:     true,
+		w:           w,
+		h:           h,
+		textcontent: text,
+		onclick:     func() {},
 	}
 	b.Self = b
 	b.UISelf = b
@@ -57,8 +62,15 @@ func NewButton(name string, w, h float64, text string) *Button {
 	b.canvases[ButtonPressed].GetStyles().Element.EnabledColor = colornames.Darkblue
 	b.canvases[ButtonPressed].GetStyles().Border.Color = colornames.Gray
 
-	b.text = NewText("buttontxt", "basic")
-	b.text.Printf(text)
+	b.createText()
+	return b
+}
+
+func (b *Button) createText() {
+	w := b.w
+	h := b.h
+	b.text = NewText("buttontxt", b.GetStyles().Text.Atlas)
+	b.text.Printf(b.textcontent)
 	if w == 0 {
 		w = b.text.Size().X + 2*b.GetStyles().Padding
 	}
@@ -70,7 +82,6 @@ func NewButton(name string, w, h float64, text string) *Button {
 	b.text.SetZIndex(10)
 	b.AddChild(b.text)
 	b.SetSize(pixel.V(w, h))
-	return b
 }
 
 func (b *Button) drawCanvases() {
@@ -106,7 +117,15 @@ func (b *Button) SetSize(size pixel.Vec) {
 
 func (b *Button) SetButtonStyles(state ButtonState, styles *nodes.Styles) {
 	b.canvases[state].SetStyles(styles)
-	b.drawCanvases()
+}
+
+func (b *Button) SetStyles(styles *nodes.Styles) {
+	oldatlas := b.GetStyles().Text.Atlas
+	b.UIBase.SetStyles(styles)
+	if oldatlas != styles.Text.Atlas {
+		b.RemoveChild(b.text)
+		b.createText()
+	}
 }
 
 func (b *Button) OnClick(fn func()) {

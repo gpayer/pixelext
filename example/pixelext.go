@@ -4,15 +4,17 @@ import (
 	"flag"
 	"fmt"
 	"image/color"
+	"io/ioutil"
 	"log"
 	"math"
 	"os"
-	"github.com/gpayer/pixelext/nodes"
-	"github.com/gpayer/pixelext/services"
-	"github.com/gpayer/pixelext/ui"
 	"runtime"
 	"runtime/pprof"
 	"strconv"
+
+	"github.com/gpayer/pixelext/nodes"
+	"github.com/gpayer/pixelext/services"
+	"github.com/gpayer/pixelext/ui"
 
 	"github.com/gpayer/go-tiled"
 
@@ -26,7 +28,8 @@ import (
 type demo struct {
 	nodes.BaseNode
 	text1, text2, text3 *ui.Text
-	sprite              *nodes.Sprite
+	sprite              nodes.Node
+	spriteTime          float32
 	rotslider           *nodes.BaseNode
 	sprite2             *nodes.Sprite
 	totalT              float64
@@ -67,7 +70,7 @@ func (b *backgroundGrid) Init() {
 }
 
 func makeText(x, y float64, name string, al nodes.Alignment) *ui.Text {
-	text := ui.NewText(name, "basic")
+	text := ui.NewText(name, "standard")
 	text.Printf("ABCDEF\nqpfjXX")
 	text.SetPos(pixel.V(x, y))
 	text.SetAlignment(al)
@@ -75,6 +78,12 @@ func makeText(x, y float64, name string, al nodes.Alignment) *ui.Text {
 }
 
 func (d *demo) Init() {
+	ttfface, err := services.ResourceManager().LoadTTF("Crimson-Roman.ttf", 18)
+	if err != nil {
+		panic(err)
+	}
+	nodes.FontService.AddAtlas("standard", ttfface)
+
 	styles := nodes.DefaultStyles()
 	styles.Text.Color = colornames.Chartreuse
 	styles.Border.Width = 5
@@ -156,14 +165,30 @@ func (d *demo) Init() {
 	})
 	d.AddChild(slider)
 
+	fragfile, err := os.Open("waves.glsl")
+	if err != nil {
+		panic(err)
+	}
+	defer fragfile.Close()
+	fragmentShader, err := ioutil.ReadAll(fragfile)
+	if err != nil {
+		panic(err)
+	}
+
 	pic, err := services.ResourceManager().LoadPicture("gopher.png")
 	if err != nil {
 		panic(err)
 	}
 	sprite := nodes.NewSprite("sprite1", pic)
-	sprite.SetPos(pixel.V(600, 300))
-	d.AddChild(sprite)
-	d.sprite = sprite
+	spritesubscene := nodes.NewSubScene("spritesubscene", pic.Bounds().W(), pic.Bounds().H())
+	spritesubscene.SetPos(pixel.V(600, 300))
+	spritesubscene.SetRoot(sprite)
+	d.AddChild(spritesubscene)
+	spritesubscene.SetUniform("uTime", &d.spriteTime)
+	spritesubscene.SetUniform("uSpeed", float32(5.0))
+	spritesubscene.SetFragmentShader(string(fragmentShader))
+	spritesubscene.GetStyles().Background.Color = color.Alpha{0}
+	d.sprite = spritesubscene
 
 	hbox := ui.NewHBox("hbox1")
 	hbox.SetAlignment(nodes.AlignmentBottomLeft)
@@ -311,7 +336,7 @@ func (d *demo) Init() {
 	hbox.SetPos(pixel.V(100, 500))
 	d.AddChild(hbox)
 
-	dropdown := ui.NewDropDown("dropdown", "basic", 100, 30, 150)
+	dropdown := ui.NewDropDown("dropdown", "standard", 100, 30, 150)
 	dropdown.OnChange(func(v, txt string) {
 		fmt.Printf("dropdown: %s\n", v)
 		currentDropDownValue = v
@@ -323,7 +348,7 @@ func (d *demo) Init() {
 	hbox.AddChild(dropdown)
 
 	valuecounter := 4
-	inputbox = ui.NewInputBox("input1", "basic", 200, 26)
+	inputbox = ui.NewInputBox("input1", "standard", 200, 26)
 	inputbox.OnEnter(func(v string) {
 		if currentDropDownValue != "" {
 			dropdown.ChangeValue(currentDropDownValue, v)
@@ -338,6 +363,8 @@ func (d *demo) Init() {
 	})
 	hbox.AddChild(inputbox)
 
+	dropdownbtnstyle := nodes.DefaultStyles()
+	dropdownbtnstyle.Text.Atlas = "standard"
 	button = ui.NewButton("remove", 0, 0, "Remove")
 	button.OnClick(func() {
 		if currentDropDownValue != "" {
@@ -346,6 +373,7 @@ func (d *demo) Init() {
 			inputbox.SetValue("")
 		}
 	})
+	button.SetStyles(dropdownbtnstyle)
 	hbox.AddChild(button)
 
 	button = ui.NewButton("New", 0, 0, "New")
@@ -354,6 +382,7 @@ func (d *demo) Init() {
 		inputbox.SetValue("")
 		inputbox.Focus()
 	})
+	button.SetStyles(dropdownbtnstyle)
 	hbox.AddChild(button)
 
 	tilemaproot := nodes.NewBaseNode("tilemaproot")
@@ -373,15 +402,29 @@ func (d *demo) Init() {
 	} else {
 		fmt.Printf("ERROR: could not load tmx: %v\n", err)
 	}
+
+	ttfface, err = services.ResourceManager().LoadTTF("GreatVibes-Regular.ttf", 30)
+	if err != nil {
+		panic(err)
+	}
+	nodes.FontService.AddAtlas("great30", ttfface)
+
+	ttftext := ui.NewText("ttftext", "great30")
+	ttftext.SetPos(pixel.V(1200, 800))
+	ttftext.SetAlignment(nodes.AlignmentBottomLeft)
+	ttftext.Printf("The quick fox jumped over the lazy dog!")
+	d.AddChild(ttftext)
 }
 
 func (d *demo) Update(dt float64) {
+	d.spriteTime += float32(dt)
+
 	dphi := math.Pi * dt
 	d.text1.SetRot(d.text1.GetRot() + dphi)
 	d.text2.SetRot(d.text2.GetRot() + dphi)
 	d.text3.SetRot(d.text3.GetRot() + dphi)
 
-	d.sprite.SetRot(d.sprite.GetRot() + dphi)
+	d.sprite.SetRot(d.sprite.GetRot() + dphi/3)
 
 	d.totalT += math.Pi * dt
 	newscale := 1.0 + math.Sin(d.totalT)*.5
@@ -423,7 +466,7 @@ func Run() {
 		panic(err)
 	}
 	win.SetSmooth(true)
-	nodes.Events().SetWin(win)
+	nodes.SceneManager().SetWin(win)
 
 	root := newDemo()
 	bgGrid := newBackgroundGrid(win.Bounds().W(), win.Bounds().H())

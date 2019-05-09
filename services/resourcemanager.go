@@ -7,19 +7,35 @@ import (
 	_ "image/jpeg"
 	_ "image/png"
 	"io"
+	"io/ioutil"
 	"os"
 	"strings"
 
+	"github.com/golang/freetype/truetype"
 	"github.com/gpayer/go-audio-service/snd"
+	"golang.org/x/image/font"
 
 	"github.com/faiface/pixel"
 	"github.com/go-audio/wav"
 	"github.com/hajimehoshi/go-mp3"
 )
 
+type fontFaces struct {
+	font  *truetype.Font
+	faces map[float64]font.Face
+}
+
+func newFontFaces(fnt *truetype.Font) *fontFaces {
+	return &fontFaces{
+		font:  fnt,
+		faces: make(map[float64]font.Face, 0),
+	}
+}
+
 type ResourceManagerStruct struct {
 	pics     map[string]pixel.Picture
 	samples  map[string]*snd.Samples
+	fonts    map[string]*fontFaces
 	basepath string
 }
 
@@ -123,6 +139,51 @@ func (r *ResourceManagerStruct) LoadSample(path string) (*snd.Samples, error) {
 	return nil, fmt.Errorf("unsupported sound file format")
 }
 
+func (r *ResourceManagerStruct) LoadTTF(path string, size float64) (font.Face, error) {
+	if len(r.basepath) > 0 {
+		var sb strings.Builder
+		sb.WriteString(r.basepath)
+		sb.WriteRune('/')
+		sb.WriteString(path)
+		path = sb.String()
+	}
+
+	font, ok := r.fonts[path]
+	if ok {
+		face, ok := font.faces[size]
+		if ok {
+			return face, nil
+		}
+	} else {
+
+		file, err := os.Open(path)
+		if err != nil {
+			return nil, err
+		}
+		defer file.Close()
+
+		bytes, err := ioutil.ReadAll(file)
+		if err != nil {
+			return nil, err
+		}
+
+		font, err := truetype.Parse(bytes)
+		if err != nil {
+			return nil, err
+		}
+		r.fonts[path] = newFontFaces(font)
+	}
+
+	face := truetype.NewFace(r.fonts[path].font, &truetype.Options{
+		Size:              size,
+		GlyphCacheEntries: 1,
+	})
+
+	r.fonts[path].faces[size] = face
+
+	return face, nil
+}
+
 func (r *ResourceManagerStruct) SetBasePath(basepath string) {
 	r.basepath = basepath
 }
@@ -137,6 +198,7 @@ func init() {
 	resourceManager = &ResourceManagerStruct{
 		pics:     make(map[string]pixel.Picture, 0),
 		samples:  make(map[string]*snd.Samples, 0),
+		fonts:    make(map[string]*fontFaces),
 		basepath: "",
 	}
 }

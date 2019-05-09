@@ -16,6 +16,7 @@ type Styles struct {
 	}
 	Text struct {
 		Color color.Color
+		Atlas string
 	}
 	Element struct {
 		EnabledColor  color.Color
@@ -31,6 +32,7 @@ func DefaultStyles() *Styles {
 	s.Border.Color = colornames.White
 	s.Background.Color = colornames.Black
 	s.Text.Color = colornames.White
+	s.Text.Atlas = "basic"
 	s.Element.EnabledColor = colornames.Steelblue
 	s.Element.DisabledColor = colornames.Darkgray
 	s.Padding = 5

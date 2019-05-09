@@ -42,3 +42,11 @@ func (c *Canvas) Canvas() *pixelgl.Canvas {
 func (c *Canvas) GetCanvas() *pixelgl.Canvas {
 	return c.canvas
 }
+
+func (c *Canvas) SetUniform(name string, value interface{}) {
+	c.canvas.SetUniform(name, value)
+}
+
+func (c *Canvas) SetFragmentShader(src string) {
+	c.canvas.SetFragmentShader(src)
+}

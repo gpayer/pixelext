@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/faiface/pixel"
+	"github.com/faiface/pixel/pixelgl"
 )
 
 var sceneManager *SceneManagerStruct
@@ -20,6 +21,16 @@ type SceneManagerStruct struct {
 	redraw      bool
 	clearColor  color.Color
 	redrawCount int
+	win         *pixelgl.Window
+}
+
+func (s *SceneManagerStruct) SetWin(win *pixelgl.Window) {
+	s.win = win
+	Events().setWin(win)
+}
+
+func (s *SceneManagerStruct) Win() *pixelgl.Window {
+	return s.win
 }
 
 func (s *SceneManagerStruct) Redraw() {
@@ -54,12 +65,12 @@ func (s *SceneManagerStruct) Run(mat pixel.Matrix) {
 		s.redrawCount++
 	}
 	if s.redraw {
-		Events().win.Clear(s.clearColor)
+		s.win.Clear(s.clearColor)
 		s.root._draw(Events().win, mat)
-		Events().win.Update()
+		s.win.Update()
 		s.redraw = false
 	} else {
-		Events().win.UpdateInput()
+		s.win.UpdateInput()
 		sleepRemaining := time.Until(s.last.Add(17 * time.Millisecond))
 		if sleepRemaining > 0 {
 			time.Sleep(sleepRemaining)

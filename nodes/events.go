@@ -15,7 +15,7 @@ type EventManager struct {
 	win *pixelgl.Window
 }
 
-func (e *EventManager) SetWin(win *pixelgl.Window) {
+func (e *EventManager) setWin(win *pixelgl.Window) {
 	e.win = win
 }
 

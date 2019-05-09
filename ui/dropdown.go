@@ -3,6 +3,7 @@ package ui
 import (
 	"image/color"
 	"math"
+
 	"github.com/gpayer/pixelext/nodes"
 
 	"github.com/faiface/pixel/pixelgl"
@@ -110,6 +111,7 @@ func (d *DropDown) initValue(text, value string) {
 	})
 
 	baseStyle := nodes.DefaultStyles()
+	baseStyle.Text.Atlas = d.atlasname
 	baseStyle.Border.Width = 0
 	baseStyle.Padding = 0
 
@@ -125,6 +127,7 @@ func (d *DropDown) initValue(text, value string) {
 	pressedStyle.Element.EnabledColor = colornames.White
 	pressedStyle.Text.Color = colornames.Black
 	btn.SetButtonStyles(ButtonPressed, pressedStyle)
+	btn.SetStyles(baseStyle)
 
 	d.list.AddChild(btn)
 }
