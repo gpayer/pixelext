@@ -22,6 +22,7 @@ type SceneManagerStruct struct {
 	clearColor  color.Color
 	redrawCount int
 	win         *pixelgl.Window
+	theme       *Theme
 }
 
 func (s *SceneManagerStruct) SetWin(win *pixelgl.Window) {
@@ -48,6 +49,7 @@ func (s *SceneManagerStruct) SetRoot(root Node) {
 	root._init()
 	s.root = root
 	root._mount()
+	root._updateFromTheme(s.theme)
 	s.Redraw()
 }
 
@@ -78,6 +80,18 @@ func (s *SceneManagerStruct) Run(mat pixel.Matrix) {
 	}
 }
 
+func (s *SceneManagerStruct) SetTheme(theme *Theme) {
+	s.theme = theme
+	if s.root != nil {
+		s.root._updateFromTheme(theme)
+	}
+	s.redraw = true
+}
+
+func (s *SceneManagerStruct) Theme() *Theme {
+	return s.theme
+}
+
 func init() {
-	sceneManager = &SceneManagerStruct{first: true, clearColor: color.RGBA{0, 0, 0, 1}}
+	sceneManager = &SceneManagerStruct{first: true, clearColor: color.RGBA{0, 0, 0, 1}, theme: DefaultTheme()}
 }

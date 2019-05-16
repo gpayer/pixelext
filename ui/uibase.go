@@ -8,17 +8,19 @@ import (
 
 type UIBase struct {
 	nodes.BaseNode
-	alignment nodes.Alignment
-	UISelf    UINode
-	size      pixel.Vec
-	origpos   pixel.Vec
-	offset    pixel.Vec
+	alignment      nodes.Alignment
+	UISelf         UINode
+	size           pixel.Vec
+	origpos        pixel.Vec
+	offset         pixel.Vec
+	overrideStyles bool
 }
 
 func NewUIBase(name string) *UIBase {
 	ui := &UIBase{
-		BaseNode:  *nodes.NewBaseNode(name),
-		alignment: nodes.AlignmentCenter,
+		BaseNode:       *nodes.NewBaseNode(name),
+		alignment:      nodes.AlignmentCenter,
+		overrideStyles: false,
 	}
 	ui.Self = ui
 	ui.UISelf = ui
@@ -77,4 +79,9 @@ func (ui *UIBase) Size() pixel.Vec {
 func (ui *UIBase) SetAlignment(a nodes.Alignment) {
 	ui.alignment = a
 	ui.UISelf.SetPos(ui.origpos)
+}
+
+func (ui *UIBase) OverrideStyles(styles *nodes.Styles) {
+	ui.overrideStyles = true
+	ui.Self.SetStyles(styles)
 }

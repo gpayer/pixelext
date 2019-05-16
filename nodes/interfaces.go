@@ -38,6 +38,8 @@ type Node interface {
 	GetStyles() *Styles
 	SetSize(size pixel.Vec)
 	Contains(point pixel.Vec) bool
+	_updateFromTheme(theme *Theme)
+	UpdateFromTheme(theme *Theme)
 }
 
 type Initializable interface {

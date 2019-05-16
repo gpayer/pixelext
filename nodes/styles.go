@@ -14,13 +14,13 @@ type Styles struct {
 	Background struct {
 		Color color.Color
 	}
-	Text struct {
+	Foreground struct {
 		Color color.Color
-		Atlas string
 	}
-	Element struct {
-		EnabledColor  color.Color
-		DisabledColor color.Color
+	Text struct {
+		Color   color.Color
+		Atlas   string
+		OffsetY float64
 	}
 	Padding       float64
 	RoundToPixels bool
@@ -31,10 +31,10 @@ func DefaultStyles() *Styles {
 	s.Border.Width = 2
 	s.Border.Color = colornames.White
 	s.Background.Color = colornames.Black
+	s.Foreground.Color = colornames.Steelblue
 	s.Text.Color = colornames.White
 	s.Text.Atlas = "basic"
-	s.Element.EnabledColor = colornames.Steelblue
-	s.Element.DisabledColor = colornames.Darkgray
+	s.Text.OffsetY = 0
 	s.Padding = 5
 	s.RoundToPixels = true
 	return s

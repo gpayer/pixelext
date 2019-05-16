@@ -10,4 +10,5 @@ type UINode interface {
 	nodes.Node
 	Size() pixel.Vec
 	SetAlignment(a nodes.Alignment)
+	OverrideStyles(styles *nodes.Styles)
 }

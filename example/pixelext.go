@@ -88,7 +88,7 @@ func (d *demo) Init() {
 	styles.Text.Color = colornames.Chartreuse
 	styles.Border.Width = 5
 	styles.Border.Color = colornames.Fuchsia
-	styles.Element.EnabledColor = colornames.Darkgreen
+	//styles.Background.Color = colornames.Darkgreen
 	styles.Background.Color = color.RGBA{R: 30, G: 30, B: 30, A: 128}
 
 	text := makeText(100, 100, "text1", nodes.AlignmentBottomLeft)

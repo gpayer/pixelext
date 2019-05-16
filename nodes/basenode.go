@@ -280,3 +280,12 @@ func (b *BaseNode) SetSize(size pixel.Vec) {}
 func (b *BaseNode) Contains(point pixel.Vec) bool {
 	return false
 }
+
+func (b *BaseNode) _updateFromTheme(theme *Theme) {
+	b.Self.UpdateFromTheme(theme)
+	for _, ch := range b.children {
+		ch._updateFromTheme(theme)
+	}
+}
+
+func (b *BaseNode) UpdateFromTheme(theme *Theme) {}

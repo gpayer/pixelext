@@ -2,8 +2,9 @@ package ui
 
 import (
 	"fmt"
-	"github.com/gpayer/pixelext/nodes"
 	"strings"
+
+	"github.com/gpayer/pixelext/nodes"
 
 	"github.com/faiface/pixel"
 	"github.com/faiface/pixel/text"
@@ -59,4 +60,11 @@ func (t *Text) SetStyles(styles *nodes.Styles) {
 		fmt.Fprint(t.txt, t.content.String())
 		nodes.SceneManager().Redraw()
 	}
+}
+
+func (t *Text) UpdateFromTheme(theme *nodes.Theme) {
+	if t.overrideStyles {
+		return
+	}
+	t.SetStyles(theme.Text)
 }

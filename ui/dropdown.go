@@ -116,15 +116,15 @@ func (d *DropDown) initValue(text, value string) {
 	baseStyle.Padding = 0
 
 	enabledStyle := baseStyle.Clone()
-	enabledStyle.Element.EnabledColor = colornames.Black
+	enabledStyle.Background.Color = colornames.Black
 	btn.SetButtonStyles(ButtonEnabled, enabledStyle)
 
 	hoverStyle := baseStyle.Clone()
-	hoverStyle.Element.EnabledColor = color.RGBA{64, 64, 64, 255}
+	hoverStyle.Background.Color = color.RGBA{64, 64, 64, 255}
 	btn.SetButtonStyles(ButtonHover, hoverStyle)
 
 	pressedStyle := baseStyle.Clone()
-	pressedStyle.Element.EnabledColor = colornames.White
+	pressedStyle.Background.Color = colornames.White
 	pressedStyle.Text.Color = colornames.Black
 	btn.SetButtonStyles(ButtonPressed, pressedStyle)
 	btn.SetStyles(baseStyle)

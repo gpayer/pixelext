@@ -54,12 +54,12 @@ func NewButton(name string, w, h float64, text string) *Button {
 		b.AddChild(b.canvases[state])
 	}
 
-	b.canvases[ButtonHover].GetStyles().Element.EnabledColor = colornames.Lightblue
+	b.canvases[ButtonHover].GetStyles().Background.Color = colornames.Lightblue
 	b.canvases[ButtonHover].GetStyles().Text.Color = colornames.Black
 	b.canvases[ButtonEnabled].GetStyles().Text.Color = colornames.Black
 	b.canvases[ButtonPressed].GetStyles().Border.Width = 5
 	b.canvases[ButtonPressed].GetStyles().Border.Color = color.RGBA{10, 10, 10, 255}
-	b.canvases[ButtonPressed].GetStyles().Element.EnabledColor = colornames.Darkblue
+	b.canvases[ButtonPressed].GetStyles().Background.Color = colornames.Darkblue
 	b.canvases[ButtonPressed].GetStyles().Border.Color = colornames.Gray
 
 	b.createText()
@@ -67,31 +67,28 @@ func NewButton(name string, w, h float64, text string) *Button {
 }
 
 func (b *Button) createText() {
+	styles := b.canvases[ButtonEnabled].GetStyles()
 	w := b.w
 	h := b.h
-	b.text = NewText("buttontxt", b.GetStyles().Text.Atlas)
+	b.text = NewText("buttontxt", styles.Text.Atlas)
 	b.text.Printf(b.textcontent)
 	if w == 0 {
-		w = b.text.Size().X + 2*b.GetStyles().Padding
+		w = b.text.Size().X + 2*styles.Padding
 	}
 	if h == 0 {
-		h = b.text.Size().Y + 2*b.GetStyles().Padding
+		h = b.text.Size().Y + 2*styles.Padding
 	}
-	//b.text.SetPos(pixel.V(w/2, h/2))
 	b.text.SetAlignment(nodes.AlignmentCenter)
+	b.text.SetPos(pixel.V(0, styles.Text.OffsetY))
 	b.text.SetZIndex(10)
 	b.AddChild(b.text)
 	b.SetSize(pixel.V(w, h))
 }
 
 func (b *Button) drawCanvases() {
-	for state, canvas := range b.canvases {
+	for _, canvas := range b.canvases {
 		styles := canvas.GetStyles()
-		if state == ButtonDisabled {
-			canvas.Clear(styles.Element.DisabledColor)
-		} else {
-			canvas.Clear(styles.Element.EnabledColor)
-		}
+		canvas.Clear(styles.Background.Color)
 		if styles.Border.Width > 0 {
 			bounds := b.Size()
 			im := imdraw.New(nil)
@@ -116,13 +113,32 @@ func (b *Button) SetSize(size pixel.Vec) {
 }
 
 func (b *Button) SetButtonStyles(state ButtonState, styles *nodes.Styles) {
+	b.overrideStyles = true
 	b.canvases[state].SetStyles(styles)
 }
 
 func (b *Button) SetStyles(styles *nodes.Styles) {
-	oldatlas := b.GetStyles().Text.Atlas
+	oldatlas := b.canvases[ButtonEnabled].GetStyles().Text.Atlas
 	b.UIBase.SetStyles(styles)
 	if oldatlas != styles.Text.Atlas {
+		b.RemoveChild(b.text)
+		b.createText()
+	}
+}
+
+func (b *Button) UpdateFromTheme(theme *nodes.Theme) {
+	if b.overrideStyles {
+		return
+	}
+	oldAtlas := b.canvases[ButtonEnabled].GetStyles().Text.Atlas
+	b.canvases[ButtonEnabled].SetStyles(theme.Button.Enabled)
+	b.canvases[ButtonDisabled].SetStyles(theme.Button.Disabled)
+	b.canvases[ButtonHover].SetStyles(theme.Button.Hover)
+	b.canvases[ButtonPressed].SetStyles(theme.Button.Pressed)
+
+	b.drawCanvases()
+
+	if oldAtlas != theme.Button.Enabled.Text.Atlas {
 		b.RemoveChild(b.text)
 		b.createText()
 	}

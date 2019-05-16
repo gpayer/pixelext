@@ -62,7 +62,7 @@ func (s *Slider) Update(dt float64) {
 			im.Polygon(bw)
 		}
 		currentw := (bounds.W() - 2) * float64(s.current/(s.max-s.min))
-		im.Color = styles.Element.EnabledColor
+		im.Color = styles.Foreground.Color
 		innerOrig := min.Add(pixel.V(bw/2, bw/2))
 		im.Push(innerOrig, innerOrig.Add(pixel.V(currentw, 0)), innerOrig.Add(pixel.V(currentw, bounds.H()-bw)), innerOrig.Add(pixel.V(0, bounds.H()-bw)))
 		im.Polygon(0)
