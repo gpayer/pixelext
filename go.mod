@@ -11,6 +11,7 @@ require (
 	github.com/go-gl/gl v0.0.0-20190320180904-bf2b1f2f34d7 // indirect
 	github.com/go-gl/glfw v0.0.0-20190409004039-e6da0acd62b1 // indirect
 	github.com/go-gl/mathgl v0.0.0-20190416160123-c4601bc793c7 // indirect
+	github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0
 	github.com/gpayer/go-audio-service v0.0.0-20190506210151-39cb6d5e8768
 	github.com/gpayer/go-tiled v0.0.0-20190508184148-bc8d80546253
 	github.com/hajimehoshi/go-mp3 v0.2.0
