@@ -2,6 +2,7 @@ package ui
 
 import (
 	"math"
+
 	"github.com/gpayer/pixelext/nodes"
 
 	"github.com/faiface/pixel/pixelgl"
@@ -12,7 +13,7 @@ import (
 type InputBox struct {
 	UIBase
 	background    *nodes.BorderBox
-	content       string
+	content       []rune
 	sub           *nodes.SubScene
 	text          *Text
 	cursor        *nodes.Canvas
@@ -35,7 +36,6 @@ func NewInputBox(name, atlasname string, w, h float64) *InputBox {
 		sub:           nodes.NewSubScene("sub", w-8, h-6),
 		text:          NewText("txt", atlasname),
 		cursor:        nodes.NewCanvas("cursor", 2, h-6),
-		content:       "",
 		textscroll:    0,
 		blinkduration: 0.5,
 		cursorpos:     0,
@@ -79,7 +79,7 @@ func (i *InputBox) OnEnter(onenter func(string)) {
 }
 
 func (i *InputBox) SetValue(value string) {
-	i.content = value
+	i.content = []rune(value)
 	i.recalc()
 }
 
@@ -102,9 +102,9 @@ func (i *InputBox) recalc() {
 	size := i.Size()
 	subwhalf := (size.X - 21) / 2
 	i.text.Clear()
-	i.text.Printf(i.content)
+	i.text.Printf(string(i.content))
 	leftcursorcontent := i.content[0:i.cursorpos]
-	cursoroffset := i.text.Text().BoundsOf(leftcursorcontent).W() + 1
+	cursoroffset := i.text.Text().BoundsOf(string(leftcursorcontent)).W() + 1
 	cursorposx := -subwhalf - i.textscroll + cursoroffset
 	if cursorposx < -subwhalf || cursorposx > subwhalf {
 		i.textscroll = -subwhalf + cursoroffset
@@ -136,12 +136,12 @@ func (i *InputBox) Update(dt float64) {
 				if i.cursorpos == 1 {
 					i.content = i.content[1:]
 				} else if i.cursorpos < len(i.content) {
-					i.content = i.content[:i.cursorpos-1] + i.content[i.cursorpos:]
+					i.content = append(i.content[:i.cursorpos-1], i.content[i.cursorpos:]...)
 				} else {
 					i.content = i.content[:i.cursorpos-1]
 				}
 				i.cursorpos--
-				i.onchange(i.content)
+				i.onchange(string(i.content))
 				i.recalc()
 			}
 		} else if ev.JustPressed(pixelgl.KeyDelete) || ev.Repeated(pixelgl.KeyDelete) {
@@ -149,11 +149,11 @@ func (i *InputBox) Update(dt float64) {
 				if i.cursorpos == 0 {
 					i.content = i.content[1:]
 				} else if i.cursorpos < len(i.content)-1 {
-					i.content = i.content[:i.cursorpos] + i.content[i.cursorpos+1:]
+					i.content = append(i.content[:i.cursorpos], i.content[i.cursorpos+1:]...)
 				} else {
 					i.content = i.content[:i.cursorpos]
 				}
-				i.onchange(i.content)
+				i.onchange(string(i.content))
 				i.recalc()
 			}
 		} else if ev.JustPressed(pixelgl.KeyLeft) || ev.Repeated(pixelgl.KeyLeft) {
@@ -169,7 +169,7 @@ func (i *InputBox) Update(dt float64) {
 			i.cursorpos = len(i.content)
 			i.recalc()
 		} else if ev.JustPressed(pixelgl.KeyEnter) {
-			i.onenter(i.content)
+			i.onenter(string(i.content))
 			i.focused = false
 			i.cursor.Hide()
 			i.cursorpos = 0
@@ -178,18 +178,20 @@ func (i *InputBox) Update(dt float64) {
 		} else {
 			typed := ev.Typed()
 			if len(typed) > 0 && len(i.content) < i.maxlen {
+				typedRunes := []rune(typed)
 				if i.cursorpos == 0 {
-					i.content = typed + i.content
+					i.content = append(typedRunes, i.content...)
 				} else if i.cursorpos < len(i.content) {
-					i.content = i.content[:i.cursorpos] + typed + i.content[i.cursorpos:]
+					i.content = append(i.content[:i.cursorpos], typedRunes...)
+					i.content = append(i.content, i.content[i.cursorpos:]...)
 				} else {
-					i.content += typed
+					i.content = append(i.content, typedRunes...)
 				}
 				i.cursorpos += len(typed)
 				if len(i.content) > i.maxlen {
 					i.content = i.content[:i.maxlen]
 				}
-				i.onchange(i.content)
+				i.onchange(string(i.content))
 				i.recalc()
 			}
 		}
@@ -229,9 +231,11 @@ func (i *InputBox) findCursorPos(s, e int, cursoroffset float64) int {
 		var m int
 		if e == s+1 {
 			leftcursorcontent := i.content[0:s]
-			startoffset := i.text.Text().BoundsOf(leftcursorcontent).W() + 1
+			sleft := string(leftcursorcontent)
+			startoffset := i.text.Text().BoundsOf(sleft).W() + 1
 			leftcursorcontent = i.content[0:e]
-			endoffset := i.text.Text().BoundsOf(leftcursorcontent).W() + 1
+			sleft = string(leftcursorcontent)
+			endoffset := i.text.Text().BoundsOf(sleft).W() + 1
 			if math.Abs(cursoroffset-startoffset) < math.Abs(cursoroffset-endoffset) {
 				return s
 			} else {
@@ -240,7 +244,7 @@ func (i *InputBox) findCursorPos(s, e int, cursoroffset float64) int {
 		}
 		m = (s + e) / 2
 		leftcursorcontent := i.content[0:m]
-		middleoffset := i.text.Text().BoundsOf(leftcursorcontent).W() + 1
+		middleoffset := i.text.Text().BoundsOf(string(leftcursorcontent)).W() + 1
 		if math.Abs(cursoroffset-middleoffset) < precision {
 			return m
 		}
@@ -250,4 +254,10 @@ func (i *InputBox) findCursorPos(s, e int, cursoroffset float64) int {
 			return i.findCursorPos(s, m, cursoroffset)
 		}
 	}
+}
+
+func (i *InputBox) SetStyles(styles *nodes.Styles) {
+	i.UIBase.SetStyles(styles)
+	i.text.SetStyles(styles)
+	i.background.SetStyles(styles)
 }
