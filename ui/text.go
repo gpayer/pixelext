@@ -33,8 +33,7 @@ func (t *Text) Text() *text.Text {
 func (t *Text) Printf(format string, a ...interface{}) {
 	fmt.Fprintf(&t.content, format, a...)
 	fmt.Fprintf(t.txt, format, a...)
-	tH := t.txt.Atlas().Descent() + t.txt.Atlas().Ascent()
-	t.SetExtraOffset(pixel.V(-t.txt.Bounds().W()/2, -tH/2+t.txt.Atlas().Descent()))
+	t.SetExtraOffset(pixel.V(-t.txt.Bounds().W()/2, -t.txt.Bounds().H()/2-t.txt.Dot.Y+t.txt.Atlas().Descent()))
 	t.SetSize(t.txt.Bounds().Size())
 	nodes.SceneManager().Redraw()
 }

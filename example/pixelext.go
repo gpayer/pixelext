@@ -71,7 +71,7 @@ func (b *backgroundGrid) Init() {
 
 func makeText(x, y float64, name string, al nodes.Alignment) *ui.Text {
 	text := ui.NewText(name, "standard")
-	text.Printf("ABCDEF\nqpfjXX")
+	text.Printf("AyPQ\nyFQB")
 	text.SetPos(pixel.V(x, y))
 	text.SetAlignment(al)
 	return text
@@ -411,6 +411,18 @@ func (d *demo) Init() {
 
 	ttftext := ui.NewText("ttftext", "great30")
 	ttftext.SetPos(pixel.V(1200, 800))
+	ttftext.SetAlignment(nodes.AlignmentBottomLeft)
+	ttftext.Printf("The quick fox jumped over the lazy dog!")
+	d.AddChild(ttftext)
+
+	ttfface, err = services.ResourceManager().LoadTTF("Crimson-Roman.ttf", 30)
+	if err != nil {
+		panic(err)
+	}
+	nodes.FontService.AddAtlas("standard30", ttfface)
+
+	ttftext = ui.NewText("ttftext2", "standard30")
+	ttftext.SetPos(pixel.V(1200, 700))
 	ttftext.SetAlignment(nodes.AlignmentBottomLeft)
 	ttftext.Printf("The quick fox jumped over the lazy dog!")
 	d.AddChild(ttftext)

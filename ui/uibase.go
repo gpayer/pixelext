@@ -1,6 +1,8 @@
 package ui
 
 import (
+	"math"
+
 	"github.com/gpayer/pixelext/nodes"
 
 	"github.com/faiface/pixel"
@@ -33,8 +35,14 @@ func (ui *UIBase) SetOrigin(origin pixel.Vec) {
 
 func (ui *UIBase) SetPos(pos pixel.Vec) {
 	ui.origpos = pos
-	whalf := ui.size.X / 2
-	hhalf := ui.size.Y / 2
+	var whalf, hhalf float64
+	if ui.UISelf.GetStyles().RoundToPixels {
+		whalf = math.Round(ui.size.X / 2)
+		hhalf = math.Round(ui.size.Y / 2)
+	} else {
+		whalf = ui.size.X / 2
+		hhalf = ui.size.Y / 2
+	}
 	switch ui.alignment {
 	case nodes.AlignmentBottomLeft:
 		ui.offset = pixel.V(whalf, hhalf)
