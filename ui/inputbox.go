@@ -258,6 +258,15 @@ func (i *InputBox) findCursorPos(s, e int, cursoroffset float64) int {
 
 func (i *InputBox) SetStyles(styles *nodes.Styles) {
 	i.UIBase.SetStyles(styles)
-	i.text.SetStyles(styles)
+	i.text.OverrideStyles(styles)
 	i.background.SetStyles(styles)
+	i.sub.SetStyles(styles)
+	i.cursor.Clear(styles.Text.Color)
+}
+
+func (i *InputBox) UpdateFromTheme(theme *nodes.Theme) {
+	if i.overrideStyles {
+		return
+	}
+	i.SetStyles(theme.InputBox)
 }

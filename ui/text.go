@@ -2,6 +2,7 @@ package ui
 
 import (
 	"fmt"
+	"image/color"
 	"strings"
 
 	"github.com/gpayer/pixelext/nodes"
@@ -19,10 +20,23 @@ type Text struct {
 func NewText(name, atlasname string) *Text {
 	t := &Text{
 		UIBase: *NewUIBase(name),
-		txt:    text.New(pixel.ZV, nodes.FontService.Get(atlasname)), // TODO: correct this cheap workaround for real
+		txt:    text.New(pixel.ZV, nodes.FontService.Get(atlasname)),
 	}
 	t.Self = t
 	t.UISelf = t
+	t.overrideStyles = true // TODO: make this method without atlas parameter
+	styles := t.GetStyles()
+	styles.Text.Atlas = atlasname
+	return t
+}
+
+func NewTextCustom(name, atlasname string, textcolor color.Color) *Text {
+	t := NewText(name, atlasname)
+	t.overrideStyles = true
+	t.txt.Color = textcolor
+	styles := t.GetStyles()
+	styles.Text.Color = textcolor
+	styles.Text.Atlas = atlasname
 	return t
 }
 
@@ -54,10 +68,14 @@ func (t *Text) SetStyles(styles *nodes.Styles) {
 	if oldstyles.Text.Color != styles.Text.Color || oldstyles.Text.OffsetY != styles.Text.OffsetY {
 		redraw = true
 	}
-	t.BaseNode.SetStyles(styles)
+	if oldstyles.Text.Atlas != styles.Text.Atlas {
+		t.txt = text.New(pixel.ZV, nodes.FontService.Get(styles.Text.Atlas))
+		redraw = true
+	}
+	t.UIBase.SetStyles(styles)
 	if redraw {
 		t.txt.Color = styles.Text.Color
-		t.txt.Orig = pixel.V(0, styles.Text.OffsetY)
+		t.txt.Orig = pixel.ZV
 		t.txt.Clear()
 		fmt.Fprint(t.txt, t.content.String())
 		nodes.SceneManager().Redraw()

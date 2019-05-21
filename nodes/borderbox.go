@@ -22,7 +22,7 @@ func (b *BorderBox) redrawCanvas() {
 	styles := b.GetStyles()
 	im := imdraw.New(nil)
 	canvas := b.Canvas.Canvas()
-	canvas.Clear(styles.Background.Color)
+	b.Clear(styles.Background.Color)
 	if styles.Border.Width > 0 {
 		bounds := canvas.Bounds()
 		im.Color = styles.Border.Color
@@ -45,7 +45,7 @@ func (b *BorderBox) SetSize(size pixel.Vec) {
 	b.redrawCanvas()
 }
 
-func (b *BorderBox) SetStyles(style *Styles) {
-	b.Canvas.SetStyles(style)
+func (b *BorderBox) SetStyles(styles *Styles) {
+	b.Canvas.SetStyles(styles)
 	b.redrawCanvas()
 }

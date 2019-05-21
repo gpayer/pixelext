@@ -22,9 +22,10 @@ func (s *SubScene) SetRoot(root Node) {
 	if s.root != nil {
 		root._unmount()
 	}
+	root._init()
 	s.root = root
-	s.root._init()
 	s.root._mount()
+	s.root._updateFromTheme(SceneManager().Theme())
 }
 
 func (s *SubScene) SetSize(size pixel.Vec) {

@@ -10,14 +10,18 @@ type Theme struct {
 	Button struct {
 		Enabled, Disabled, Hover, Pressed *Styles
 	}
-	Text   *Styles
-	Slider *Styles
+	Text     *Styles
+	Slider   *Styles
+	Grid     *Styles
+	InputBox *Styles
 }
 
 func DefaultTheme() *Theme {
 	t := &Theme{
-		Text:   DefaultStyles(),
-		Slider: DefaultStyles(),
+		Text:     DefaultStyles(),
+		Slider:   DefaultStyles(),
+		Grid:     DefaultStyles(),
+		InputBox: DefaultStyles(),
 	}
 	baseStyle := DefaultStyles()
 	baseStyle.Border.Width = 2

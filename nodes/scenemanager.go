@@ -93,5 +93,5 @@ func (s *SceneManagerStruct) Theme() *Theme {
 }
 
 func init() {
-	sceneManager = &SceneManagerStruct{first: true, clearColor: color.RGBA{0, 0, 0, 1}, theme: DefaultTheme()}
+	sceneManager = &SceneManagerStruct{first: true, clearColor: color.RGBA{0, 0, 0, 255}, theme: DefaultTheme()}
 }

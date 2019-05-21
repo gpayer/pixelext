@@ -12,6 +12,7 @@ import (
 	"runtime/pprof"
 	"strconv"
 
+	"github.com/gpayer/go-audio-service/snd"
 	"github.com/gpayer/pixelext/nodes"
 	"github.com/gpayer/pixelext/services"
 	"github.com/gpayer/pixelext/ui"
@@ -426,6 +427,40 @@ func (d *demo) Init() {
 	ttftext.SetAlignment(nodes.AlignmentBottomLeft)
 	ttftext.Printf("The quick fox jumped over the lazy dog!")
 	d.AddChild(ttftext)
+
+	var mp3 *snd.Samples
+	var mp3loaded chan struct{} = make(chan struct{})
+	go func() {
+		mp3, err = services.ResourceManager().LoadSample("River Meditation.mp3")
+		if err != nil {
+			panic(err)
+		}
+		mp3loaded <- struct{}{}
+	}()
+
+	btnFadeIn := ui.NewButton("fadein", 0, 0, "Fade in")
+	btnFadeIn.SetEnabled(false)
+	btnFadeIn.SetPos(pixel.V(1200, 600))
+	btnFadeIn.SetAlignment(nodes.AlignmentBottomLeft)
+	btnFadeIn.OnClick(func() {
+		services.AudioManager().PlayMusic(mp3, 144100, true)
+	})
+	d.AddChild(btnFadeIn)
+
+	btnFadeOut := ui.NewButton("fadeout", 0, 0, "Fade out")
+	btnFadeOut.SetEnabled(false)
+	btnFadeOut.SetPos(pixel.V(1280, 600))
+	btnFadeOut.SetAlignment(nodes.AlignmentBottomLeft)
+	btnFadeOut.OnClick(func() {
+		services.AudioManager().FadeOut(44100)
+	})
+	d.AddChild(btnFadeOut)
+
+	go func() {
+		<-mp3loaded
+		btnFadeIn.SetEnabled(true)
+		btnFadeOut.SetEnabled(true)
+	}()
 }
 
 func (d *demo) Update(dt float64) {
