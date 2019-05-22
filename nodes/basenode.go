@@ -282,6 +282,9 @@ func (b *BaseNode) Contains(point pixel.Vec) bool {
 }
 
 func (b *BaseNode) _updateFromTheme(theme *Theme) {
+	if theme == nil {
+		return
+	}
 	b.Self.UpdateFromTheme(theme)
 	for _, ch := range b.children {
 		ch._updateFromTheme(theme)
