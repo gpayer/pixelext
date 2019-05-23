@@ -65,6 +65,10 @@ func (r *ResourceManagerStruct) LoadPicture(path string) (pixel.Picture, error) 
 	return p, nil
 }
 
+// LoadAsync controls whether sound samples are loaded asynchronously in the background.
+// After the first 44000 frames a goroutine is spawned to load the rest.
+var LoadAsync bool = true
+
 func (r *ResourceManagerStruct) LoadSample(path string) (*snd.Samples, error) {
 	if len(r.basepath) > 0 {
 		var sb strings.Builder
@@ -106,30 +110,53 @@ func (r *ResourceManagerStruct) LoadSample(path string) (*snd.Samples, error) {
 		if err != nil {
 			return nil, err
 		}
-		defer f.Close()
 
 		d, err := mp3.NewDecoder(f)
 		if err != nil {
+			f.Close()
 			return nil, err
 		}
 
 		samples := snd.NewSamples(uint32(d.SampleRate()), int(d.Length()/4))
 
-		intbytes := make([]byte, 4)
-		for i := 0; i < len(samples.Frames); i++ {
-			_, err := d.Read(intbytes)
-			if err == io.EOF {
-				break
-			} else if err != nil {
-				return nil, err
-			}
-			intvalL := int16(intbytes[0]) | int16(intbytes[1])<<8
-			intvalR := int16(intbytes[2]) | int16(intbytes[3])<<8
+		errCh := make(chan error, 0)
 
-			samples.Frames[i] = snd.Sample{
-				L: float32(intvalL) / 32768.0,
-				R: float32(intvalR) / 32768.0,
+		go func() {
+			defer f.Close()
+			intbytes := make([]byte, 4)
+			sentOk := false
+			for i := 0; i < len(samples.Frames); i++ {
+				_, err := d.Read(intbytes)
+				if err == io.EOF {
+					if !sentOk {
+						errCh <- io.EOF
+					}
+					return
+				} else if err != nil {
+					if !sentOk {
+						errCh <- err
+					}
+					return
+				}
+				intvalL := int16(intbytes[0]) | int16(intbytes[1])<<8
+				intvalR := int16(intbytes[2]) | int16(intbytes[3])<<8
+
+				samples.Frames[i] = snd.Sample{
+					L: float32(intvalL) / 32768.0,
+					R: float32(intvalR) / 32768.0,
+				}
+				if i > 144000 && !sentOk {
+					sentOk = true
+					errCh <- io.EOF
+				}
 			}
+			if !sentOk {
+				errCh <- io.EOF
+			}
+		}()
+		err = <-errCh
+		if err != nil && err != io.EOF {
+			return nil, err
 		}
 		r.samples[path] = samples
 
