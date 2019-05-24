@@ -7,7 +7,7 @@ import (
 )
 
 type AudioManagerStruct struct {
-	music        *generators.Sample
+	music        snd.Readable
 	musicfader   *Fader
 	musicchannel *mix.Channel
 	mixer        *mix.Mixer
@@ -36,11 +36,33 @@ func AudioManager() *AudioManagerStruct {
 	return audioManager
 }
 
+func (a *AudioManagerStruct) PlayMusicFromPath(path string, fadein uint32, loop bool) {
+	if ResourceManager().HasSample(path) {
+		s, _ := ResourceManager().LoadSample(path)
+		a.PlayMusic(s, fadein, loop)
+	} else {
+		m, err := ResourceManager().CreateMp3Streamer(path)
+		if err != nil {
+			panic(err)
+		}
+		audioManager.musicfader.SetOn(false)
+		audioManager.musicfader.SetLoop(loop)
+		audioManager.music = m
+		audioManager.musicfader.SetReadable(audioManager.music)
+		if fadein == 0 {
+			fadein = 1
+		}
+		audioManager.musicfader.FadeIn(fadein)
+		_ = audioManager.output.Start()
+	}
+}
+
 func (a *AudioManagerStruct) PlayMusic(samples *snd.Samples, fadein uint32, loop bool) {
 	audioManager.musicfader.SetOn(false)
 	audioManager.musicfader.SetLoop(loop)
-	audioManager.music = generators.NewSample(samples)
-	audioManager.music.SetPlayFull(true)
+	g := generators.NewSample(samples)
+	g.SetPlayFull(true)
+	audioManager.music = g
 	audioManager.musicfader.SetReadable(audioManager.music)
 	if fadein == 0 {
 		fadein = 1
