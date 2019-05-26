@@ -22,6 +22,9 @@ type Styles struct {
 		Atlas   string
 		OffsetY float64
 	}
+	Sound struct {
+		Click string
+	}
 	Padding       float64
 	RoundToPixels bool
 }

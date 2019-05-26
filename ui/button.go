@@ -4,6 +4,7 @@ import (
 	"image/color"
 
 	"github.com/gpayer/pixelext/nodes"
+	"github.com/gpayer/pixelext/services"
 
 	"github.com/faiface/pixel/pixelgl"
 
@@ -161,6 +162,10 @@ func (b *Button) Update(dt float64) {
 			b.state = ButtonPressed
 		} else if b.state == ButtonPressed && nodes.Events().JustReleased(pixelgl.MouseButtonLeft) {
 			b.state = ButtonEnabled
+			clicksample := b.canvases[ButtonPressed].GetStyles().Sound.Click
+			if len(clicksample) > 0 {
+				services.AudioManager().PlaySample(clicksample, 1.0)
+			}
 			b.onclick()
 		} else {
 			b.state = ButtonEnabled
