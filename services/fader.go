@@ -40,6 +40,7 @@ func (f *Fader) Read(samples *snd.Samples) {
 			samples.Frames[i].L = 0
 			samples.Frames[i].R = 0
 		}
+		return
 	}
 
 	noteaware, isNoteAware := f.readable.(notes.NoteAware)

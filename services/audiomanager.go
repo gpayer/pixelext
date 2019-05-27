@@ -7,15 +7,21 @@ import (
 	"github.com/gpayer/go-audio-service/snd"
 )
 
+type samplesConfig struct {
+	ch           *mix.Channel
+	mx           *notes.NoteMultiplexer
+	secondChance bool
+}
+
 type AudioManagerStruct struct {
-	music               snd.Readable
-	musicfader          *Fader
-	musicchannel        *mix.Channel
-	sampleschannels     map[string]*mix.Channel
-	samplesmultiplexers map[string]*notes.NoteMultiplexer
-	samplesgain         float32
-	mixer               *mix.Mixer
-	output              *snd.Output
+	maxsamples    int
+	music         snd.Readable
+	musicfader    *Fader
+	musicchannel  *mix.Channel
+	samplesconfig map[string]*samplesConfig
+	samplesgain   float32
+	mixer         *mix.Mixer
+	output        *snd.Output
 }
 
 var audioManager *AudioManagerStruct
@@ -23,10 +29,10 @@ var audioManager *AudioManagerStruct
 func AudioManager() *AudioManagerStruct {
 	if audioManager == nil {
 		audioManager = &AudioManagerStruct{
-			mixer:               mix.NewMixer(44100),
-			sampleschannels:     make(map[string]*mix.Channel),
-			samplesmultiplexers: make(map[string]*notes.NoteMultiplexer),
-			samplesgain:         0.5,
+			mixer:         mix.NewMixer(44100),
+			samplesconfig: make(map[string]*samplesConfig),
+			samplesgain:   0.5,
+			maxsamples:    20,
 		}
 		output, err := snd.NewOutput(44100, 2048)
 		if err != nil {
@@ -41,6 +47,23 @@ func AudioManager() *AudioManagerStruct {
 		audioManager.musicchannel.SetReadable(audioManager.musicfader)
 	}
 	return audioManager
+}
+
+func (a *AudioManagerStruct) newSamplesConfig(samples *snd.Samples) *samplesConfig {
+	c := &samplesConfig{
+		ch:           a.mixer.GetChannel(),
+		mx:           notes.NewNoteMultiplexer(),
+		secondChance: false,
+	}
+	c.ch.SetReadable(c.mx)
+	gen := generators.NewSample(samples)
+	gen.SetPlayFull(true)
+	c.mx.SetReadable(gen)
+	return c
+}
+
+func (a *AudioManagerStruct) SetMaxSamples(max int) {
+	a.maxsamples = max
 }
 
 func (a *AudioManagerStruct) SetMusicGain(gain float32) {
@@ -61,8 +84,8 @@ func (a *AudioManagerStruct) MasterGain() float32 {
 
 func (a *AudioManagerStruct) SetSamplesGain(gain float32) {
 	a.samplesgain = gain
-	for _, ch := range a.sampleschannels {
-		ch.SetGain(gain)
+	for _, config := range a.samplesconfig {
+		config.ch.SetGain(gain)
 	}
 }
 
@@ -75,19 +98,37 @@ func (a AudioManagerStruct) PlaySample(name string, gain float32) {
 	if err != nil {
 		panic(err)
 	}
-	ch, ok := a.sampleschannels[name]
+	_, ok := a.samplesconfig[name]
 	if !ok {
-		ch = a.mixer.GetChannel()
-		ch.SetGain(a.samplesgain)
-		a.sampleschannels[name] = ch
-		gen := generators.NewSample(samples)
-		gen.SetPlayFull(true)
-		mx := notes.NewNoteMultiplexer()
-		mx.SetReadable(gen)
-		ch.SetReadable(mx)
-		a.samplesmultiplexers[name] = mx
+		checkAll := false
+		for len(a.samplesconfig) >= a.maxsamples {
+			removed := false
+			for name, config := range a.samplesconfig {
+				if checkAll || config.mx.ActiveNotes() == 0 {
+					if config.secondChance {
+						removed = true
+						delete(a.samplesconfig, name)
+						break
+					} else {
+						config.secondChance = true
+					}
+				}
+			}
+			if !removed {
+				checkAll = true
+			}
+		}
+		a.samplesconfig[name] = a.newSamplesConfig(samples)
 	}
-	a.samplesmultiplexers[name].SendNoteEvent(notes.NewNoteEvent(notes.Pressed, 440, gain))
+	a.samplesconfig[name].ch.SetEnabled(true)
+	a.samplesconfig[name].secondChance = false
+	a.samplesconfig[name].mx.SendNoteEvent(notes.NewNoteEvent(notes.Pressed, 440, gain))
+
+	for _, config := range a.samplesconfig {
+		if config.mx.ActiveNotes() == 0 {
+			config.ch.SetEnabled(false)
+		}
+	}
 }
 
 func (a *AudioManagerStruct) PlayMusicFromPath(path string, fadein uint32, loop bool) {
