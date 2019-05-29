@@ -23,6 +23,7 @@ type BaseNode struct {
 	zeroalignment             Alignment
 	extraoffset               pixel.Vec
 	styles                    *Styles
+	pausable, paused          bool
 }
 
 func (b *BaseNode) _getMat() pixel.Matrix {
@@ -86,6 +87,9 @@ func (b *BaseNode) _update(dt float64) {
 	for _, child := range b.children {
 		child._update(dt)
 	}
+	if b.paused {
+		return
+	}
 	updateable, ok := b.Self.(Updateable)
 	if ok {
 		updateable.Update(dt)
@@ -123,6 +127,8 @@ func NewBaseNode(name string) *BaseNode {
 		zeroalignment: AlignmentBottomLeft,
 		extraoffset:   pixel.ZV,
 		styles:        DefaultStyles(),
+		pausable:      true,
+		paused:        false,
 	}
 	b.Self = b
 	b.calcMat()
@@ -292,3 +298,25 @@ func (b *BaseNode) _updateFromTheme(theme *Theme) {
 }
 
 func (b *BaseNode) UpdateFromTheme(theme *Theme) {}
+
+func (b *BaseNode) SetPausable(pausable bool) {
+	b.pausable = pausable
+}
+
+func (b *BaseNode) Pause() {
+	if b.pausable {
+		b.paused = true
+		for _, c := range b.children {
+			c.Pause()
+		}
+	}
+}
+
+func (b *BaseNode) Unpause() {
+	if b.pausable {
+		b.paused = false
+		for _, c := range b.children {
+			c.Unpause()
+		}
+	}
+}

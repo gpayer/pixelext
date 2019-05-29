@@ -40,6 +40,9 @@ type Node interface {
 	Contains(point pixel.Vec) bool
 	_updateFromTheme(theme *Theme)
 	UpdateFromTheme(theme *Theme)
+	SetPausable(pausable bool)
+	Pause()
+	Unpause()
 }
 
 type Initializable interface {

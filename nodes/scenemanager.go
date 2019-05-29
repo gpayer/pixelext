@@ -92,6 +92,22 @@ func (s *SceneManagerStruct) Theme() *Theme {
 	return s.theme
 }
 
+func (s *SceneManagerStruct) SetClearColor(color color.Color) {
+	s.clearColor = color
+}
+
+func (s *SceneManagerStruct) Pause() {
+	if s.root != nil {
+		s.root.Pause()
+	}
+}
+
+func (s *SceneManagerStruct) Unpause() {
+	if s.root != nil {
+		s.root.Unpause()
+	}
+}
+
 func init() {
 	sceneManager = &SceneManagerStruct{first: true, clearColor: color.RGBA{0, 0, 0, 255}, theme: DefaultTheme()}
 }
