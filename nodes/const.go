@@ -14,3 +14,11 @@ const (
 	AlignmentCenterRight
 	AlignmentTopRight
 )
+
+type HorizontalAlignment int
+
+const (
+	HAlignmentLeft HorizontalAlignment = iota
+	HAlignmentCenter
+	HAlignmentRight
+)

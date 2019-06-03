@@ -3,10 +3,11 @@ package nodes
 import (
 	"fmt"
 	"image/color"
+
 	"github.com/gpayer/pixelext/services"
 
 	"github.com/faiface/pixel"
-	"github.com/gpayer/go-tiled"
+	"github.com/lafriks/go-tiled"
 )
 
 type TileInfo struct {
@@ -75,11 +76,12 @@ func TileMapsFromTmx(tmx *tiled.Map) ([]*TileMapLayer, error) {
 	}
 	var tilemaplayers []*TileMapLayer
 	for z, layer := range tmx.Layers {
-		// TODO: only tilemap layers
+		// TODO: support more than one tile set, support single images per tile
 		var tileset *tiled.Tileset
 		for _, tile := range layer.Tiles {
 			if tile.ID > 0 {
 				tileset = tile.Tileset
+				break
 			}
 		}
 		pic, err := services.ResourceManager().LoadPicture(tileset.Image.Source)

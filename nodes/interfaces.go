@@ -9,6 +9,8 @@ type Node interface {
 	_mount()
 	_unmount()
 	_update(dt float64)
+	IsRemove() bool
+	SetRemove(bool)
 	_draw(win pixel.Target, mat pixel.Matrix)
 	_getMat() pixel.Matrix
 	_getLastMat() pixel.Matrix

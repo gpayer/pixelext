@@ -1,7 +1,9 @@
 package ui
 
 import (
+	"fmt"
 	"math"
+
 	"github.com/gpayer/pixelext/nodes"
 
 	"github.com/faiface/pixel"
@@ -34,9 +36,10 @@ func (v *VBox) recalcPositions() {
 	borderWidth := v.GetStyles().Border.Width
 	ypos := padding
 	maxx := 0.0
+	fmt.Printf("num children: %d\n", len(v.Children()))
 	for _, child := range v.Children() {
 		uichild, ok := child.(UINode)
-		if ok && child.GetName() != "__bg" {
+		if ok && child.GetName() != "__bg" && !child.IsRemove() {
 			childbounds := uichild.Size()
 			ypos += childbounds.Y + 2*padding
 			if childbounds.X > maxx {
@@ -45,15 +48,26 @@ func (v *VBox) recalcPositions() {
 		}
 	}
 	size := pixel.V(math.Round(maxx+2*padding+borderWidth), math.Round(ypos-padding+borderWidth))
+	fmt.Printf("vbox size: %v\n", size)
 	v.SetSize(size)
 	v.background.SetSize(size)
 
-	ypos = size.Y/2 - padding - borderWidth/2
+	ypos = math.Round(size.Y/2 - padding - borderWidth/2)
+	maxxHalf := math.Round(maxx / 2)
 	for _, child := range v.Children() {
 		uichild, ok := child.(UINode)
-		if ok && child.GetName() != "__bg" {
-			uichild.SetAlignment(nodes.AlignmentTopCenter)
-			uichild.SetPos(pixel.V(0, ypos))
+		if ok && child.GetName() != "__bg" && !child.IsRemove() {
+			switch v.halignment {
+			case nodes.HAlignmentLeft:
+				uichild.SetAlignment(nodes.AlignmentTopLeft)
+				uichild.SetPos(pixel.V(-maxxHalf, ypos))
+			case nodes.HAlignmentCenter:
+				uichild.SetAlignment(nodes.AlignmentTopCenter)
+				uichild.SetPos(pixel.V(0, ypos))
+			case nodes.HAlignmentRight:
+				uichild.SetAlignment(nodes.AlignmentTopRight)
+				uichild.SetPos(pixel.V(maxxHalf, ypos))
+			}
 			childbounds := uichild.Size()
 			ypos -= childbounds.Y + 2*padding
 		}
@@ -78,6 +92,10 @@ func (v *VBox) RemoveChild(child nodes.Node) {
 }
 
 func (v *VBox) RemoveChildren() {
-	v.UIBase.RemoveChildren()
+	for _, ch := range v.Children() {
+		if ch.GetName() != "__bg" {
+			ch.SetRemove(true)
+		}
+	}
 	v.recalcPositions()
 }

@@ -24,6 +24,7 @@ type BaseNode struct {
 	extraoffset               pixel.Vec
 	styles                    *Styles
 	pausable, paused          bool
+	remove                    bool
 }
 
 func (b *BaseNode) _getMat() pixel.Matrix {
@@ -94,11 +95,31 @@ func (b *BaseNode) _update(dt float64) {
 	if ok {
 		updateable.Update(dt)
 	}
+
+	sortchildren := false
+restart:
+	for i, child := range b.children {
+		if child.IsRemove() {
+			b.children[i] = b.children[len(b.children)-1]
+			b.children[len(b.children)-1] = nil
+			b.children = b.children[:len(b.children)-1]
+			newChildren := make([]Node, len(b.children)-1)
+			copy(newChildren, b.children[:len(b.children)-1])
+			b.children = newChildren
+			child._unmount()
+			sortchildren = true
+			goto restart
+		}
+	}
+
+	if sortchildren {
+		b.sortChildren()
+	}
 }
 
 func (b *BaseNode) _draw(win pixel.Target, mat pixel.Matrix) {
 	b.lastmat = mat
-	if !b.active || !b.show {
+	if !b.active || !b.show || b.remove {
 		return
 	}
 	drawable, ok := b.Self.(Drawable)
@@ -108,6 +129,14 @@ func (b *BaseNode) _draw(win pixel.Target, mat pixel.Matrix) {
 	for _, child := range b.children {
 		child._draw(win, child._getMat().Chained(mat))
 	}
+}
+
+func (b *BaseNode) IsRemove() bool {
+	return b.remove
+}
+
+func (b *BaseNode) SetRemove(remove bool) {
+	b.remove = remove
 }
 
 func NewBaseNode(name string) *BaseNode {
@@ -129,6 +158,7 @@ func NewBaseNode(name string) *BaseNode {
 		styles:        DefaultStyles(),
 		pausable:      true,
 		paused:        false,
+		remove:        false,
 	}
 	b.Self = b
 	b.calcMat()
@@ -240,6 +270,7 @@ func (b *BaseNode) sortChildren() {
 }
 
 func (b *BaseNode) AddChild(child Node) {
+	child.SetRemove(false)
 	b.children = append(b.children, child)
 	b.sortChildren()
 	child._init()
@@ -247,13 +278,9 @@ func (b *BaseNode) AddChild(child Node) {
 }
 
 func (b *BaseNode) RemoveChild(child Node) {
-	for i, ch := range b.children {
+	for _, ch := range b.children {
 		if child == ch {
-			b.children[i] = b.children[len(b.children)-1]
-			b.children[len(b.children)-1] = nil
-			b.children = b.children[:len(b.children)-1]
-			b.sortChildren()
-			child._unmount()
+			child.SetRemove(true)
 			SceneManager().Redraw()
 			break
 		}
@@ -261,11 +288,10 @@ func (b *BaseNode) RemoveChild(child Node) {
 }
 
 func (b *BaseNode) RemoveChildren() {
-	for i, ch := range b.children {
-		b.children[i] = nil
-		ch._unmount()
+	for _, ch := range b.children {
+		ch.SetRemove(true)
 	}
-	b.children = make([]Node, 0)
+	SceneManager().Redraw()
 }
 
 func (b *BaseNode) Children() []Node {

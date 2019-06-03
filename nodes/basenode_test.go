@@ -137,6 +137,7 @@ func TestRemoveChild(t *testing.T) {
 	b.AddChild(o)
 	assert.Len(b.children, 2)
 	b.RemoveChild(c)
+	b._update(0.1)
 	assert.Len(b.children, 1)
 	assert.Equal("otherchild", b.children[0].GetName())
 }
@@ -149,5 +150,6 @@ func TestRemoveChildren(t *testing.T) {
 	b.AddChild(c)
 	b.AddChild(o)
 	b.RemoveChildren()
+	b._update(0.1)
 	assert.Len(b.children, 0)
 }

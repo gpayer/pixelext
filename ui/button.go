@@ -116,6 +116,7 @@ func (b *Button) SetSize(size pixel.Vec) {
 func (b *Button) SetButtonStyles(state ButtonState, styles *nodes.Styles) {
 	b.overrideStyles = true
 	b.canvases[state].SetStyles(styles)
+	b.drawCanvases()
 }
 
 func (b *Button) SetStyles(styles *nodes.Styles) {
@@ -151,6 +152,12 @@ func (b *Button) OnClick(fn func()) {
 
 func (b *Button) SetEnabled(enabled bool) {
 	b.enabled = enabled
+}
+
+func (b *Button) SetText(text string) {
+	b.textcontent = text
+	b.text.Clear()
+	b.text.Printf(text)
 }
 
 func (b *Button) Update(dt float64) {

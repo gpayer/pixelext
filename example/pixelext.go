@@ -17,7 +17,7 @@ import (
 	"github.com/gpayer/pixelext/services"
 	"github.com/gpayer/pixelext/ui"
 
-	"github.com/gpayer/go-tiled"
+	"github.com/lafriks/go-tiled"
 
 	"github.com/faiface/pixel/imdraw"
 

@@ -2,6 +2,7 @@ package ui
 
 import (
 	"image/color"
+
 	"github.com/gpayer/pixelext/nodes"
 
 	"github.com/faiface/pixel"
