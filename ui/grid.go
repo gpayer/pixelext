@@ -134,3 +134,26 @@ func (g *Grid) SetStyles(styles *nodes.Styles) {
 	g.BaseNode.SetStyles(styles)
 	g.bbox.SetStyles(styles)
 }
+
+func (g *Grid) RemoveChild(child nodes.Node) {
+	g.UIBase.RemoveChild(child)
+	uichild, ok := child.(UINode)
+	if ok {
+		for i, uic := range g.uichildren {
+			if uichild == uic {
+				l := len(g.uichildren)
+				g.uichildren[i] = nil
+				copy(g.uichildren[i:l-1], g.uichildren[i+1:l])
+				g.uichildren = g.uichildren[:l-1]
+				break
+			}
+		}
+	}
+
+	g.recalcPositions()
+}
+
+func (g *Grid) RemoveChildren() {
+	g.UIBase.RemoveChildren()
+	g.recalcPositions()
+}

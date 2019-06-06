@@ -24,7 +24,6 @@ type BaseNode struct {
 	extraoffset               pixel.Vec
 	styles                    *Styles
 	pausable, paused          bool
-	remove                    bool
 }
 
 func (b *BaseNode) _getMat() pixel.Matrix {
@@ -38,6 +37,9 @@ func (b *BaseNode) _getLastMat() pixel.Matrix {
 func (b *BaseNode) _setLastMat(mat pixel.Matrix) {
 	b.lastmat = mat
 	for _, child := range b.children {
+		if child == nil {
+			continue
+		}
 		child._setLastMat(child._getMat().Chained(mat))
 	}
 }
@@ -51,6 +53,9 @@ func (b *BaseNode) _init() {
 		return
 	}
 	for _, child := range b.children {
+		if child == nil {
+			continue
+		}
 		child._init()
 	}
 	init, ok := b.Self.(Initializable)
@@ -62,6 +67,9 @@ func (b *BaseNode) _init() {
 
 func (b *BaseNode) _mount() {
 	for _, child := range b.children {
+		if child == nil {
+			continue
+		}
 		child._mount()
 	}
 	mountable, ok := b.Self.(Mountable)
@@ -73,6 +81,9 @@ func (b *BaseNode) _mount() {
 
 func (b *BaseNode) _unmount() {
 	for _, child := range b.children {
+		if child == nil {
+			continue
+		}
 		child._unmount()
 	}
 	mountable, ok := b.Self.(Mountable)
@@ -86,23 +97,24 @@ func (b *BaseNode) _update(dt float64) {
 		return
 	}
 	for _, child := range b.children {
+		if child == nil {
+			continue
+		}
 		child._update(dt)
 	}
 	if b.paused {
 		return
 	}
 	updateable, ok := b.Self.(Updateable)
-	if ok && !b.IsRemove() {
+	if ok {
 		updateable.Update(dt)
 	}
 
 	sortchildren := false
 
 	newsize := 0
-	for i, child := range b.children {
-		if child.IsRemove() {
-			child._unmount()
-			b.children[i] = nil
+	for _, child := range b.children {
+		if child == nil {
 			sortchildren = true
 		} else {
 			newsize++
@@ -125,7 +137,7 @@ func (b *BaseNode) _update(dt float64) {
 
 func (b *BaseNode) _draw(win pixel.Target, mat pixel.Matrix) {
 	b.lastmat = mat
-	if !b.active || !b.show || b.remove {
+	if !b.active || !b.show {
 		return
 	}
 	drawable, ok := b.Self.(Drawable)
@@ -133,16 +145,11 @@ func (b *BaseNode) _draw(win pixel.Target, mat pixel.Matrix) {
 		drawable.Draw(win, mat)
 	}
 	for _, child := range b.children {
+		if child == nil {
+			continue
+		}
 		child._draw(win, child._getMat().Chained(mat))
 	}
-}
-
-func (b *BaseNode) IsRemove() bool {
-	return b.remove
-}
-
-func (b *BaseNode) SetRemove(remove bool) {
-	b.remove = remove
 }
 
 func NewBaseNode(name string) *BaseNode {
@@ -164,7 +171,6 @@ func NewBaseNode(name string) *BaseNode {
 		styles:        DefaultStyles(),
 		pausable:      true,
 		paused:        false,
-		remove:        false,
 	}
 	b.Self = b
 	b.calcMat()
@@ -270,13 +276,17 @@ func (b *BaseNode) SetActive(active bool) {
 
 func (b *BaseNode) sortChildren() {
 	sort.SliceStable(b.children, func(i, j int) bool {
+		if b.children[i] == nil {
+			return true
+		} else if b.children[j] == nil {
+			return false
+		}
 		less := (b.children[i]._getZindex() < b.children[j]._getZindex())
 		return less
 	})
 }
 
 func (b *BaseNode) AddChild(child Node) {
-	child.SetRemove(false)
 	b.children = append(b.children, child)
 	b.sortChildren()
 	child._init()
@@ -284,9 +294,10 @@ func (b *BaseNode) AddChild(child Node) {
 }
 
 func (b *BaseNode) RemoveChild(child Node) {
-	for _, ch := range b.children {
+	for i, ch := range b.children {
 		if child == ch {
-			child.SetRemove(true)
+			ch._unmount()
+			b.children[i] = nil
 			SceneManager().Redraw()
 			break
 		}
@@ -294,8 +305,12 @@ func (b *BaseNode) RemoveChild(child Node) {
 }
 
 func (b *BaseNode) RemoveChildren() {
-	for _, ch := range b.children {
-		ch.SetRemove(true)
+	for i, ch := range b.children {
+		if ch == nil {
+			continue
+		}
+		ch._unmount()
+		b.children[i] = nil
 	}
 	SceneManager().Redraw()
 }
@@ -325,6 +340,9 @@ func (b *BaseNode) _updateFromTheme(theme *Theme) {
 	}
 	b.Self.UpdateFromTheme(theme)
 	for _, ch := range b.children {
+		if ch == nil {
+			continue
+		}
 		ch._updateFromTheme(theme)
 	}
 }
@@ -339,6 +357,9 @@ func (b *BaseNode) Pause() {
 	if b.pausable {
 		b.paused = true
 		for _, c := range b.children {
+			if c == nil {
+				continue
+			}
 			c.Pause()
 		}
 	}
@@ -348,6 +369,9 @@ func (b *BaseNode) Unpause() {
 	if b.pausable {
 		b.paused = false
 		for _, c := range b.children {
+			if c == nil {
+				continue
+			}
 			c.Unpause()
 		}
 	}

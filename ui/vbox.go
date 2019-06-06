@@ -38,8 +38,11 @@ func (v *VBox) recalcPositions() {
 	notremove := 0
 	notok := 0
 	for _, child := range v.Children() {
+		if child == nil {
+			continue
+		}
 		uichild, ok := child.(UINode)
-		if ok && child.GetName() != "__bg" && !child.IsRemove() {
+		if ok && child.GetName() != "__bg" {
 			notremove++
 			childbounds := uichild.Size()
 			ypos += childbounds.Y + 2*padding
@@ -57,8 +60,11 @@ func (v *VBox) recalcPositions() {
 	ypos = math.Round(size.Y/2 - padding - borderWidth)
 	maxxHalf := math.Round(maxx / 2)
 	for _, child := range v.Children() {
+		if child == nil {
+			continue
+		}
 		uichild, ok := child.(UINode)
-		if ok && child.GetName() != "__bg" && !child.IsRemove() {
+		if ok && child.GetName() != "__bg" {
 			switch v.halignment {
 			case nodes.HAlignmentLeft:
 				uichild.SetAlignment(nodes.AlignmentTopLeft)
@@ -94,10 +100,7 @@ func (v *VBox) RemoveChild(child nodes.Node) {
 }
 
 func (v *VBox) RemoveChildren() {
-	for _, ch := range v.Children() {
-		if ch.GetName() != "__bg" {
-			ch.SetRemove(true)
-		}
-	}
+	v.UIBase.RemoveChildren()
+	v.AddChild(v.background)
 	v.recalcPositions()
 }

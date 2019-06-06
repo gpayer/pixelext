@@ -36,6 +36,9 @@ func (h *HBox) recalcPositions() {
 	xpos := padding
 	maxy := 0.0
 	for _, child := range h.Children() {
+		if child == nil {
+			continue
+		}
 		uichild, ok := child.(UINode)
 		if ok && child.GetName() != "__bg" {
 			childbounds := uichild.Size()
@@ -51,6 +54,9 @@ func (h *HBox) recalcPositions() {
 
 	xpos = -size.X/2 + padding + borderWidth
 	for _, child := range h.Children() {
+		if child == nil {
+			continue
+		}
 		uichild, ok := child.(UINode)
 		if ok && child.GetName() != "__bg" {
 			uichild.SetAlignment(nodes.AlignmentCenterLeft)
