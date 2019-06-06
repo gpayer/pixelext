@@ -92,27 +92,33 @@ func (b *BaseNode) _update(dt float64) {
 		return
 	}
 	updateable, ok := b.Self.(Updateable)
-	if ok {
+	if ok && !b.IsRemove() {
 		updateable.Update(dt)
 	}
 
 	sortchildren := false
-restart:
+
+	newsize := 0
 	for i, child := range b.children {
 		if child.IsRemove() {
-			b.children[i] = b.children[len(b.children)-1]
-			b.children[len(b.children)-1] = nil
-			b.children = b.children[:len(b.children)-1]
-			newChildren := make([]Node, len(b.children)-1)
-			copy(newChildren, b.children[:len(b.children)-1])
-			b.children = newChildren
 			child._unmount()
+			b.children[i] = nil
 			sortchildren = true
-			goto restart
+		} else {
+			newsize++
 		}
 	}
 
 	if sortchildren {
+		newchildren := make([]Node, newsize)
+		cur := 0
+		for _, child := range b.children {
+			if child != nil {
+				newchildren[cur] = child
+				cur++
+			}
+		}
+		b.children = newchildren
 		b.sortChildren()
 	}
 }

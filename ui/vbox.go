@@ -1,7 +1,6 @@
 package ui
 
 import (
-	"fmt"
 	"math"
 
 	"github.com/gpayer/pixelext/nodes"
@@ -36,23 +35,26 @@ func (v *VBox) recalcPositions() {
 	borderWidth := v.GetStyles().Border.Width
 	ypos := padding
 	maxx := 0.0
-	fmt.Printf("num children: %d\n", len(v.Children()))
+	notremove := 0
+	notok := 0
 	for _, child := range v.Children() {
 		uichild, ok := child.(UINode)
 		if ok && child.GetName() != "__bg" && !child.IsRemove() {
+			notremove++
 			childbounds := uichild.Size()
 			ypos += childbounds.Y + 2*padding
 			if childbounds.X > maxx {
 				maxx = childbounds.X
 			}
+		} else if !ok {
+			notok++
 		}
 	}
-	size := pixel.V(math.Round(maxx+2*padding+borderWidth), math.Round(ypos-padding+borderWidth))
-	fmt.Printf("vbox size: %v\n", size)
+	size := pixel.V(math.Round(maxx+2*padding+2*borderWidth), math.Round(ypos-padding+2*borderWidth))
 	v.SetSize(size)
 	v.background.SetSize(size)
 
-	ypos = math.Round(size.Y/2 - padding - borderWidth/2)
+	ypos = math.Round(size.Y/2 - padding - borderWidth)
 	maxxHalf := math.Round(maxx / 2)
 	for _, child := range v.Children() {
 		uichild, ok := child.(UINode)
