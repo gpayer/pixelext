@@ -198,6 +198,10 @@ func (d *DropDown) ChangeValue(value, text string) {
 	}
 }
 
+func (d *DropDown) Value() string {
+	return d.current
+}
+
 func (d *DropDown) Clear() {
 	d.values = make(map[string]string, 0)
 	d.value.Clear()

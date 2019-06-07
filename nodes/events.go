@@ -12,7 +12,8 @@ func Events() *EventManager {
 }
 
 type EventManager struct {
-	win *pixelgl.Window
+	win     *pixelgl.Window
+	focused Node
 }
 
 func (e *EventManager) setWin(win *pixelgl.Window) {
@@ -78,6 +79,21 @@ func (e *EventManager) MousePreviousPosition() pixel.Vec {
 
 func (e *EventManager) Typed() string {
 	return e.win.Typed()
+}
+
+// SetFocus is used to set the currently focused Node. Pass nil to implicitly give every
+// Node the input focus.
+func (e *EventManager) SetFocus(node Node) {
+	e.focused = node
+}
+
+// IsFocused can be used by a Node to check whether it has the input focus and can use keyboard inputs.
+// Special case nil: in this case every Node implicitly has the input focus.
+func (e *EventManager) IsFocused(node Node) bool {
+	if e.focused == nil {
+		return true
+	}
+	return e.focused == node
 }
 
 func init() {

@@ -89,6 +89,7 @@ func (i *InputBox) Focus() {
 		i.totaltime = 0
 		i.cursor.Show()
 		i.cursorshown = true
+		nodes.Events().SetFocus(i)
 	}
 }
 
@@ -127,6 +128,9 @@ func (i *InputBox) Update(dt float64) {
 			i.cursorshown = false
 			i.cursorpos = 0
 			i.recalc()
+			if nodes.Events().IsFocused(i) {
+				nodes.Events().SetFocus(nil)
+			}
 			return
 		} else if ev.Clicked(pixelgl.MouseButtonLeft, i) {
 			i.setCursorAfterClick()
@@ -174,6 +178,9 @@ func (i *InputBox) Update(dt float64) {
 			i.cursor.Hide()
 			i.cursorpos = 0
 			i.recalc()
+			if nodes.Events().IsFocused(i) {
+				nodes.Events().SetFocus(nil)
+			}
 			return
 		} else {
 			typed := ev.Typed()

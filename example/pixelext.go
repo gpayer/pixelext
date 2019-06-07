@@ -480,11 +480,13 @@ func (d *demo) Update(dt float64) {
 		d.totalT -= 2 * math.Pi
 	}
 
-	dphi = math.Pi / 5.0 * dt
-	if nodes.Events().Pressed(pixelgl.KeyA) {
-		d.rotslider.SetRot(d.rotslider.GetRot() + dphi)
-	} else if nodes.Events().Pressed(pixelgl.KeyD) {
-		d.rotslider.SetRot(d.rotslider.GetRot() - dphi)
+	if nodes.Events().IsFocused(d.rotslider) {
+		dphi = math.Pi / 5.0 * dt
+		if nodes.Events().Pressed(pixelgl.KeyA) {
+			d.rotslider.SetRot(d.rotslider.GetRot() + dphi)
+		} else if nodes.Events().Pressed(pixelgl.KeyD) {
+			d.rotslider.SetRot(d.rotslider.GetRot() - dphi)
+		}
 	}
 }
 
