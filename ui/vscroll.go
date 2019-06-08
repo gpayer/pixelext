@@ -49,8 +49,6 @@ func (v *VScroll) SetInner(inner UINode) {
 	v.root.RemoveChildren()
 	v.root.AddChild(inner)
 	v.inner = inner
-	v.w = inner.Size().X
-	v.scroll = 0
 	v.innerh = inner.Size().Y
 	var newh float64
 	if v.innerh > v.h {
@@ -60,6 +58,12 @@ func (v *VScroll) SetInner(inner UINode) {
 	}
 	v.subscene.SetSize(pixel.V(v.w, newh))
 	v.SetSize(pixel.V(v.w, newh))
+	maxscroll := v.innerh - v.h
+	if v.scroll > maxscroll {
+		v.scroll = maxscroll
+	} else if v.scroll < 0 {
+		v.scroll = 0
+	}
 	v.recalcScrollbar()
 }
 
@@ -74,6 +78,7 @@ func (v *VScroll) recalcScrollbar() {
 		diff := v.innerh - v.h
 		v.inner.SetPos(pixel.V(0, -diff/2+v.scroll))
 	} else {
+		v.inner.SetPos(pixel.ZV)
 		scrollbarh := v.h
 		if scrollbarh > v.Size().Y {
 			scrollbarh = v.Size().Y
@@ -113,4 +118,8 @@ func (v *VScroll) SetScroll(scroll float64) {
 		v.scroll = scroll
 	}
 	v.recalcScrollbar()
+}
+
+func (v *VScroll) Scroll() float64 {
+	return v.scroll
 }
