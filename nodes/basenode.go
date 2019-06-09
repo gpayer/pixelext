@@ -96,7 +96,8 @@ func (b *BaseNode) _update(dt float64) {
 	if !b.active {
 		return
 	}
-	for _, child := range b.children {
+	for i := len(b.children) - 1; i >= 0; i-- {
+		child := b.children[i]
 		if child == nil {
 			continue
 		}

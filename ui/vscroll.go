@@ -6,22 +6,47 @@ import (
 	"github.com/gpayer/pixelext/nodes"
 
 	"github.com/faiface/pixel"
+	"github.com/faiface/pixel/pixelgl"
 )
+
+type scrollBar struct {
+	nodes.BorderBox
+	clicked bool
+}
+
+func newScrollbar(h float64) *scrollBar {
+	s := &scrollBar{
+		BorderBox: *nodes.NewBorderBox("scrollbar", 10, h),
+	}
+	s.Self = s
+	return s
+}
+
+func (s *scrollBar) Update(dt float64) {
+	if nodes.Events().Clicked(pixelgl.MouseButtonLeft, s) {
+		s.clicked = true
+	} else {
+		s.clicked = false
+	}
+}
 
 type VScroll struct {
 	UIBase
 	subscene             *nodes.SubScene
 	root                 nodes.Node
 	inner                UINode
-	scrollbar            *nodes.BorderBox
+	scrollbar            *scrollBar
 	w, h, innerh, scroll float64
+	scrolldrag           bool
+	origclickpos         pixel.Vec
 }
 
 func NewVScroll(name string, w, h float64) *VScroll {
 	v := &VScroll{
-		UIBase: *NewUIBase(name),
-		w:      w,
-		h:      h,
+		UIBase:     *NewUIBase(name),
+		w:          w,
+		h:          h,
+		scrolldrag: false,
 	}
 	if w == 0 {
 		w = 1
@@ -36,7 +61,8 @@ func NewVScroll(name string, w, h float64) *VScroll {
 func (v *VScroll) Init() {
 	v.root = nodes.NewBaseNode("root")
 	v.subscene.SetRoot(v.root)
-	v.scrollbar = nodes.NewBorderBox("scrollbar", 10, v.h) // TODO: event handler, new derived element necessary
+	v.scrollbar = newScrollbar(v.h)
+	v.scrollbar.SetZIndex(10)
 	scrollbarstyle := v.scrollbar.GetStyles()
 	scrollbarstyle.Border.Width = 0
 	scrollbarstyle.Background.Color = color.RGBA{128, 128, 128, 128}
@@ -90,20 +116,35 @@ func (v *VScroll) recalcScrollbar() {
 }
 
 func (v *VScroll) Update(dt float64) {
-	if nodes.Events().MouseHovering(v) {
-		v.scrollbar.Show()
-		mousescroll := nodes.Events().MouseScroll()
-		if mousescroll.Y != 0 {
-			maxscroll := v.innerh - v.h
-			v.scroll -= mousescroll.Y * 5
-			if v.scroll < 0 {
-				v.scroll = 0
-			} else if v.scroll > maxscroll {
-				v.scroll = maxscroll
+	ev := nodes.Events()
+	if v.scrolldrag {
+		if ev.JustReleased(pixelgl.MouseButtonLeft) {
+			v.scrolldrag = false
+		} else {
+			diff := v.origclickpos.Y - ev.MousePosition().Y
+			if diff != 0 {
+				h := v.h * (v.h / v.innerh)
+				maxmove := v.h - h
+				maxscroll := v.innerh - v.h
+				factor := maxscroll / maxmove
+				v.scroll += diff * factor
+				v.SetScroll(v.scroll)
+				v.origclickpos = ev.MousePosition()
 			}
-			v.recalcScrollbar()
 		}
-	} else {
+	}
+	if ev.MouseHovering(v) {
+		v.scrollbar.Show()
+		mousescroll := ev.MouseScroll()
+		if mousescroll.Y != 0 {
+			v.scroll -= mousescroll.Y * 5
+			v.SetScroll(v.scroll)
+		}
+		if !v.scrolldrag && v.scrollbar.clicked {
+			v.scrolldrag = true
+			v.origclickpos = ev.MousePosition()
+		}
+	} else if !v.scrolldrag {
 		v.scrollbar.Hide()
 	}
 }
@@ -111,7 +152,7 @@ func (v *VScroll) Update(dt float64) {
 func (v *VScroll) SetScroll(scroll float64) {
 	maxscroll := v.innerh - v.h
 	if scroll > maxscroll {
-		v.scroll = scroll
+		v.scroll = maxscroll
 	} else if scroll < 0 {
 		v.scroll = 0
 	} else {

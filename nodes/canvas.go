@@ -50,3 +50,9 @@ func (c *Canvas) SetUniform(name string, value interface{}) {
 func (c *Canvas) SetFragmentShader(src string) {
 	c.canvas.SetFragmentShader(src)
 }
+
+func (c *Canvas) Contains(point pixel.Vec) bool {
+	size := c.canvas.Bounds().Size().Scaled(.5)
+	bounds := pixel.R(-size.X, -size.Y, size.X, size.Y)
+	return bounds.Contains(point)
+}

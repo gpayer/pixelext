@@ -61,6 +61,7 @@ func (s *SceneManagerStruct) Run(mat pixel.Matrix) {
 	}
 	dt := time.Since(s.last).Seconds()
 	s.last = time.Now()
+	Events().reset()
 	s.root._update(dt)
 	if s.redrawCount < 60 { // dirty hack
 		s.redraw = true

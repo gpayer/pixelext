@@ -125,6 +125,11 @@ func (d *demo) Init() {
 	d.AddChild(text)
 	d.text3 = text
 
+	slider := ui.NewSlider("slider1b", 0, 1, 0.5)
+	slider.SetSize(pixel.V(100, 30))
+	slider.SetPos(pixel.V(750, 515))
+	d.AddChild(slider)
+
 	sltext := nodes.NewBaseNode("sltext")
 	sltext.SetPos(pixel.V(750, 515))
 	sltext.SetRot(0.0)
@@ -136,7 +141,7 @@ func (d *demo) Init() {
 	sltext.SetRotPoint(pixel.V(-50, -15))
 	d.rotslider = sltext
 
-	slider := ui.NewSlider("slider1", 0, 1, 0.5)
+	slider = ui.NewSlider("slider1", 0, 1, 0.5)
 	slider.SetSize(pixel.V(100, 30))
 	slider.SetAlignment(nodes.AlignmentCenter)
 	slider.SetPos(pixel.V(0, 0))

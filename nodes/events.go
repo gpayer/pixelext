@@ -12,8 +12,15 @@ func Events() *EventManager {
 }
 
 type EventManager struct {
-	win     *pixelgl.Window
-	focused Node
+	win            *pixelgl.Window
+	focused        Node
+	handledButtons map[pixelgl.Button]bool
+}
+
+func (e *EventManager) reset() {
+	for b, _ := range e.handledButtons {
+		e.handledButtons[b] = false
+	}
 }
 
 func (e *EventManager) setWin(win *pixelgl.Window) {
@@ -22,7 +29,8 @@ func (e *EventManager) setWin(win *pixelgl.Window) {
 
 // Clicked checks for mouse clicks inside of the given node
 func (e *EventManager) Clicked(button pixelgl.Button, node Node) bool {
-	if e.win.JustPressed(button) && node.Contains(node._getLastMat().Unproject(e.win.MousePosition())) {
+	if !e.IsButtonHandled(button) && e.win.JustPressed(button) && e.MouseHovering(node) {
+		e.handledButtons[button] = true
 		return true
 	}
 	return false
@@ -96,6 +104,17 @@ func (e *EventManager) IsFocused(node Node) bool {
 	return e.focused == node
 }
 
+func (e *EventManager) IsButtonHandled(b pixelgl.Button) bool {
+	handled, ok := e.handledButtons[b]
+	if ok {
+		return handled
+	} else {
+		return false
+	}
+}
+
 func init() {
-	events = &EventManager{}
+	events = &EventManager{
+		handledButtons: make(map[pixelgl.Button]bool, 0),
+	}
 }
