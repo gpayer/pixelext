@@ -76,6 +76,14 @@ func (v *VScroll) SetInner(inner UINode) {
 	v.root.AddChild(inner)
 	v.inner = inner
 	v.innerh = inner.Size().Y
+	switch v.halignment {
+	case nodes.HAlignmentLeft:
+		v.inner.SetAlignment(nodes.AlignmentCenterLeft)
+	case nodes.HAlignmentRight:
+		v.inner.SetAlignment(nodes.AlignmentCenterRight)
+	case nodes.HAlignmentCenter:
+		v.inner.SetAlignment(nodes.AlignmentCenter)
+	}
 	var newh float64
 	if v.innerh > v.h {
 		newh = v.h
@@ -94,6 +102,14 @@ func (v *VScroll) SetInner(inner UINode) {
 }
 
 func (v *VScroll) recalcScrollbar() {
+	innerx := 0.0
+	switch v.halignment {
+	case nodes.HAlignmentLeft:
+		innerx = -v.w / 2
+	case nodes.HAlignmentRight:
+		innerx = v.w / 2
+	}
+
 	if v.innerh > v.h {
 		h := v.h * (v.h / v.innerh)
 		v.scrollbar.SetSize(pixel.V(10, h))
@@ -102,9 +118,9 @@ func (v *VScroll) recalcScrollbar() {
 		factor := maxmove / maxscroll
 		v.scrollbar.SetPos(pixel.V(v.w/2-5, v.h/2-h/2-v.scroll*factor))
 		diff := v.innerh - v.h
-		v.inner.SetPos(pixel.V(0, -diff/2+v.scroll))
+		v.inner.SetPos(pixel.V(innerx, -diff/2+v.scroll))
 	} else {
-		v.inner.SetPos(pixel.ZV)
+		v.inner.SetPos(pixel.V(innerx, 0))
 		scrollbarh := v.h
 		if scrollbarh > v.Size().Y {
 			scrollbarh = v.Size().Y
