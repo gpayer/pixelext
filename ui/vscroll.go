@@ -36,6 +36,7 @@ type VScroll struct {
 	root                 nodes.Node
 	inner                UINode
 	scrollbar            *scrollBar
+	displayScrollbar     bool
 	w, h, innerh, scroll float64
 	scrolldrag           bool
 	origclickpos         pixel.Vec
@@ -43,10 +44,11 @@ type VScroll struct {
 
 func NewVScroll(name string, w, h float64) *VScroll {
 	v := &VScroll{
-		UIBase:     *NewUIBase(name),
-		w:          w,
-		h:          h,
-		scrolldrag: false,
+		UIBase:           *NewUIBase(name),
+		w:                w,
+		h:                h,
+		scrolldrag:       false,
+		displayScrollbar: false,
 	}
 	if w == 0 {
 		w = 1
@@ -111,6 +113,7 @@ func (v *VScroll) recalcScrollbar() {
 	}
 
 	if v.innerh > v.h {
+		v.displayScrollbar = true
 		h := v.h * (v.h / v.innerh)
 		v.scrollbar.SetSize(pixel.V(10, h))
 		maxmove := v.h - h
@@ -120,6 +123,8 @@ func (v *VScroll) recalcScrollbar() {
 		diff := v.innerh - v.h
 		v.inner.SetPos(pixel.V(innerx, -diff/2+v.scroll))
 	} else {
+		v.displayScrollbar = false
+		v.scrollbar.Hide()
 		v.inner.SetPos(pixel.V(innerx, 0))
 		scrollbarh := v.h
 		if scrollbarh > v.Size().Y {
@@ -150,7 +155,9 @@ func (v *VScroll) Update(dt float64) {
 		}
 	}
 	if ev.MouseHovering(v) {
-		v.scrollbar.Show()
+		if v.displayScrollbar {
+			v.scrollbar.Show()
+		}
 		mousescroll := ev.MouseScroll()
 		if mousescroll.Y != 0 {
 			v.scroll -= mousescroll.Y * 5

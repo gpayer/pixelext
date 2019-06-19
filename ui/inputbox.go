@@ -83,6 +83,10 @@ func (i *InputBox) SetValue(value string) {
 	i.recalc()
 }
 
+func (i *InputBox) Value() string {
+	return string(i.content)
+}
+
 func (i *InputBox) Focus() {
 	if !i.focused {
 		i.focused = true
