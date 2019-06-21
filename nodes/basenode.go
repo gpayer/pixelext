@@ -187,6 +187,10 @@ func (b *BaseNode) Initialized() bool {
 	return b.initialized
 }
 
+func (b *BaseNode) SetName(name string) {
+	b.Name = name
+}
+
 func (b *BaseNode) GetName() string {
 	return b.Name
 }

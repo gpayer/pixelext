@@ -155,5 +155,6 @@ func (g *Grid) RemoveChild(child nodes.Node) {
 
 func (g *Grid) RemoveChildren() {
 	g.UIBase.RemoveChildren()
+	g.uichildren = make([]UINode, 0)
 	g.recalcPositions()
 }

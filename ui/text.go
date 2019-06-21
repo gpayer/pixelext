@@ -52,6 +52,10 @@ func (t *Text) Printf(format string, a ...interface{}) {
 	nodes.SceneManager().Redraw()
 }
 
+func (t *Text) GetContent() string {
+	return t.content.String()
+}
+
 func (t *Text) Draw(win pixel.Target, mat pixel.Matrix) {
 	t.txt.Draw(win, mat)
 }
