@@ -89,9 +89,11 @@ func (d *DropDown) Init() {
 	d.AddChild(d.dropdown)
 
 	d.vscroll = NewVScroll("vscroll", size.X, d.hdropdown)
+	d.vscroll.SetHAlignment(nodes.HAlignmentLeft)
 	d.dropdown.AddChild(d.vscroll)
 
 	d.list = NewVBox("dropdownvbox")
+	d.list.SetHAlignment(nodes.HAlignmentLeft)
 	listStyles := d.list.GetStyles()
 	listStyles.Border.Width = 0
 	listStyles.Padding = 2
