@@ -86,6 +86,10 @@ func (ui *UIBase) Size() pixel.Vec {
 	return ui.size
 }
 
+func (ui *UIBase) Alignment() nodes.Alignment {
+	return ui.alignment
+}
+
 func (ui *UIBase) SetAlignment(a nodes.Alignment) {
 	ui.alignment = a
 	ui.UISelf.SetPos(ui.origpos)
@@ -94,6 +98,10 @@ func (ui *UIBase) SetAlignment(a nodes.Alignment) {
 func (ui *UIBase) OverrideStyles(styles *nodes.Styles) {
 	ui.overrideStyles = true
 	ui.Self.SetStyles(styles)
+}
+
+func (ui *UIBase) HAlignment() nodes.HorizontalAlignment {
+	return ui.halignment
 }
 
 func (ui *UIBase) SetHAlignment(h nodes.HorizontalAlignment) {
