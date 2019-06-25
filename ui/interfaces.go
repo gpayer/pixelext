@@ -8,6 +8,7 @@ import (
 
 type UINode interface {
 	nodes.Node
+	GetOrigPos() pixel.Vec
 	Size() pixel.Vec
 	Alignment() nodes.Alignment
 	SetAlignment(a nodes.Alignment)

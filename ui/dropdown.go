@@ -104,12 +104,12 @@ func (d *DropDown) Init() {
 func (d *DropDown) initValue(text, value string) {
 	btn := NewButton("btn", 0, 0, text)
 	btn.OnClick(func() {
+		d.current = value
 		d.onchange(value, text)
 		d.value.Clear()
 		d.value.Printf("%s", text)
 		d.state = dropDownClosed
 		d.vscroll.SetScroll(0)
-		d.current = value
 	})
 
 	baseStyle := nodes.DefaultStyles()

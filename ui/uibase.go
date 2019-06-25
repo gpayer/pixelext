@@ -55,6 +55,7 @@ func (ui *UIBase) SetPos(pos pixel.Vec) {
 	case nodes.AlignmentBottomCenter:
 		ui.offset = pixel.V(0, hhalf)
 	case nodes.AlignmentCenter:
+		ui.offset = pixel.V(0, 0)
 	case nodes.AlignmentTopCenter:
 		ui.offset = pixel.V(0, -hhalf)
 	case nodes.AlignmentBottomRight:
@@ -67,6 +68,10 @@ func (ui *UIBase) SetPos(pos pixel.Vec) {
 	}
 	pos = pos.Add(ui.offset)
 	ui.BaseNode.SetPos(pos)
+}
+
+func (ui *UIBase) GetOrigPos() pixel.Vec {
+	return ui.origpos
 }
 
 // Contains returns whether the given point (in local coordinates) lies within the
