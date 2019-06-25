@@ -53,6 +53,10 @@ func (s *SceneManagerStruct) SetRoot(root Node) {
 	s.Redraw()
 }
 
+func (s *SceneManagerStruct) Root() Node {
+	return s.root
+}
+
 func (s *SceneManagerStruct) Run(mat pixel.Matrix) {
 	if s.first {
 		s.last = time.Now()

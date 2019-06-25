@@ -20,6 +20,7 @@ type Node interface {
 	SetOrigin(origin pixel.Vec)
 	GetOrigin() pixel.Vec
 	GetPos() pixel.Vec
+	LocalToGlobalPos(local pixel.Vec) pixel.Vec
 	SetPos(pos pixel.Vec)
 	SetRot(rot float64)
 	GetRot() float64

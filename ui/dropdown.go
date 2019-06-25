@@ -86,7 +86,7 @@ func (d *DropDown) Init() {
 
 	d.dropdown = nodes.NewBorderBox("dropdown", size.X, d.hdropdown+4)
 	d.dropdown.Hide()
-	d.AddChild(d.dropdown)
+	d.dropdown.SetZIndex(9999)
 
 	d.vscroll = NewVScroll("vscroll", size.X, d.hdropdown)
 	d.vscroll.SetHAlignment(nodes.HAlignmentLeft)
@@ -153,7 +153,6 @@ func (d *DropDown) createDropdown() {
 	d.vscroll.SetInner(d.list)
 	size := d.vscroll.Size().Add(pixel.V(2, 2))
 	d.dropdown.SetSize(size)
-	d.dropdown.SetPos(pixel.V(0, -d.Size().Y/2-size.Y/2))
 }
 
 func (d *DropDown) AddValue(text, value string) {
@@ -221,17 +220,30 @@ func (d *DropDown) OnChange(fn func(string, string)) {
 func (d *DropDown) Update(dt float64) {
 	if nodes.Events().Clicked(pixelgl.MouseButtonLeft, d) {
 		if d.state == dropDownClosed {
-			d.dropdown.Show()
+			d.showDropDown()
 			d.state = dropDownOpening
 		}
 	} else if nodes.Events().JustReleased(pixelgl.MouseButtonLeft) {
 		if d.state == dropDownOpening {
 			d.state = dropDownOpened
-		} else if d.state == dropDownOpened {
+		} else if d.state == dropDownOpened && !nodes.Events().MouseHovering(d.dropdown) {
 			d.vscroll.SetScroll(0)
 			d.state = dropDownClosed
 		}
 	} else if d.state == dropDownClosed {
-		d.dropdown.Hide()
+		d.hideDropDown()
 	}
+}
+
+func (d *DropDown) showDropDown() {
+	d.dropdown.Show()
+	size := d.vscroll.Size().Add(pixel.V(2, 2))
+	pos := d.LocalToGlobalPos(pixel.V(0, -d.Size().Y/2-size.Y/2))
+	d.dropdown.SetPos(pos)
+	nodes.SceneManager().Root().AddChild(d.dropdown)
+}
+
+func (d *DropDown) hideDropDown() {
+	d.dropdown.Hide()
+	nodes.SceneManager().Root().RemoveChild(d.dropdown)
 }

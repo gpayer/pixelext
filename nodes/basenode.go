@@ -208,6 +208,10 @@ func (b *BaseNode) GetPos() pixel.Vec {
 	return b.pos
 }
 
+func (b *BaseNode) LocalToGlobalPos(local pixel.Vec) pixel.Vec {
+	return b._getLastMat().Project(local.Sub(b.Self.GetExtraOffset()))
+}
+
 func (b *BaseNode) SetRot(rot float64) {
 	b.rot = rot
 	b.calcMat()
