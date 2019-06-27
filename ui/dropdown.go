@@ -22,13 +22,17 @@ const (
 	dropDownOpened
 )
 
+type dropdownValue struct {
+	value, desc string
+}
+
 type DropDown struct {
 	UIBase
 	hdropdown  float64
 	state      dropDownState
 	current    string
 	atlasname  string
-	values     map[string]string
+	values     []dropdownValue
 	value      *Text
 	background *nodes.BorderBox
 	sub        *nodes.SubScene
@@ -45,7 +49,6 @@ func NewDropDown(name, atlasname string, w, h, hdropdown float64) *DropDown {
 		hdropdown: hdropdown,
 		current:   "",
 		atlasname: atlasname,
-		values:    make(map[string]string),
 		onchange:  func(_ string, _ string) {},
 	}
 	d.Self = d
@@ -89,7 +92,6 @@ func (d *DropDown) Init() {
 	d.dropdown.SetZIndex(9999)
 
 	d.vscroll = NewVScroll("vscroll", size.X, d.hdropdown)
-	d.vscroll.SetHAlignment(nodes.HAlignmentLeft)
 	d.dropdown.AddChild(d.vscroll)
 
 	d.list = NewVBox("dropdownvbox")
@@ -102,7 +104,9 @@ func (d *DropDown) Init() {
 }
 
 func (d *DropDown) initValue(text, value string) {
-	btn := NewButton("btn", 0, 0, text)
+	btnW := d.Size().X - 2*d.GetStyles().Padding
+	btn := NewButton("btn", btnW, 0, text)
+	btn.SetHAlignment(nodes.HAlignmentLeft)
 	btn.OnClick(func() {
 		d.current = value
 		d.onchange(value, text)
@@ -147,8 +151,8 @@ func (d *DropDown) SetSize(size pixel.Vec) {
 
 func (d *DropDown) createDropdown() {
 	d.list.RemoveChildren()
-	for val, txt := range d.values {
-		d.initValue(txt, val)
+	for _, val := range d.values {
+		d.initValue(val.desc, val.value)
 	}
 	d.vscroll.SetInner(d.list)
 	size := d.vscroll.Size().Add(pixel.V(2, 2))
@@ -156,23 +160,34 @@ func (d *DropDown) createDropdown() {
 }
 
 func (d *DropDown) AddValue(text, value string) {
-	d.values[value] = text
+	d.values = append(d.values, dropdownValue{
+		desc:  text,
+		value: value,
+	})
 	if d.Initialized() {
 		d.createDropdown()
 	}
 }
 
 func (d *DropDown) SetValue(value string) {
-	text, ok := d.values[value]
-	if ok {
-		d.value.Clear()
-		d.value.Printf(text)
-		d.current = value
+	for i, _ := range d.values {
+		if d.values[i].value == value {
+			d.value.Clear()
+			d.value.Printf(d.values[i].desc)
+			d.current = value
+			break
+		}
 	}
 }
 
 func (d *DropDown) RemoveValue(value string) {
-	delete(d.values, value)
+	for i, _ := range d.values {
+		if d.values[i].value == value {
+			copy(d.values[i:], d.values[i+1:])
+			d.values = d.values[:len(d.values)-1]
+			break
+		}
+	}
 	if d.current == value {
 		d.value.Clear()
 		d.value.Printf("---")
@@ -184,17 +199,22 @@ func (d *DropDown) RemoveValue(value string) {
 }
 
 func (d *DropDown) ChangeValue(value, text string) {
-	_, ok := d.values[value]
-	if ok {
-		d.values[value] = text
-		if d.current == value {
-			d.value.Clear()
-			d.value.Printf(text)
+	found := false
+	for i, _ := range d.values {
+		if d.values[i].value == value {
+			d.values[i].desc = text
+			if d.current == value {
+				d.value.Clear()
+				d.value.Printf(text)
+			}
+			if d.Initialized() {
+				d.createDropdown()
+			}
+			found = true
+			break
 		}
-		if d.Initialized() {
-			d.createDropdown()
-		}
-	} else {
+	}
+	if !found {
 		d.AddValue(text, value)
 	}
 }
@@ -204,7 +224,7 @@ func (d *DropDown) Value() string {
 }
 
 func (d *DropDown) Clear() {
-	d.values = make(map[string]string, 0)
+	d.values = make([]dropdownValue, 0)
 	d.value.Clear()
 	d.value.Printf("---")
 	d.current = ""

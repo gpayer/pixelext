@@ -12,6 +12,7 @@ type UIBase struct {
 	nodes.BaseNode
 	alignment      nodes.Alignment
 	halignment     nodes.HorizontalAlignment
+	valignment     nodes.VerticalAlignment
 	UISelf         UINode
 	size           pixel.Vec
 	origpos        pixel.Vec
@@ -24,6 +25,7 @@ func NewUIBase(name string) *UIBase {
 		BaseNode:       *nodes.NewBaseNode(name),
 		alignment:      nodes.AlignmentCenter,
 		halignment:     nodes.HAlignmentCenter,
+		valignment:     nodes.VAlignmentCenter,
 		overrideStyles: false,
 	}
 	ui.Self = ui
@@ -111,4 +113,12 @@ func (ui *UIBase) HAlignment() nodes.HorizontalAlignment {
 
 func (ui *UIBase) SetHAlignment(h nodes.HorizontalAlignment) {
 	ui.halignment = h
+}
+
+func (ui *UIBase) VAlignment() nodes.VerticalAlignment {
+	return ui.valignment
+}
+
+func (ui *UIBase) SetVAlignment(v nodes.VerticalAlignment) {
+	ui.valignment = v
 }

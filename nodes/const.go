@@ -22,3 +22,11 @@ const (
 	HAlignmentCenter
 	HAlignmentRight
 )
+
+type VerticalAlignment int
+
+const (
+	VAlignmentTop VerticalAlignment = iota
+	VAlignmentCenter
+	VAlignmentBottom
+)

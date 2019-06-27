@@ -15,4 +15,6 @@ type UINode interface {
 	OverrideStyles(styles *nodes.Styles)
 	HAlignment() nodes.HorizontalAlignment
 	SetHAlignment(h nodes.HorizontalAlignment)
+	VAlignment() nodes.VerticalAlignment
+	SetVAlignment(v nodes.VerticalAlignment)
 }

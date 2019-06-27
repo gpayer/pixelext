@@ -67,6 +67,15 @@ func NewButton(name string, w, h float64, text string) *Button {
 	return b
 }
 
+func (b *Button) alignText() {
+	p := b.GetStyles().Padding
+	size := b.Size()
+	w := size.X/2 - p
+	h := size.Y/2 - p
+	bounds := pixel.R(-w, -h, w, h)
+	AlignUINode(b.text, bounds, b.VAlignment(), b.HAlignment())
+}
+
 func (b *Button) createText() {
 	styles := b.canvases[ButtonEnabled].GetStyles()
 	w := b.w
@@ -75,12 +84,12 @@ func (b *Button) createText() {
 	b.text.Printf(b.textcontent)
 	if w == 0 {
 		w = b.text.Size().X + 2*styles.Padding
+		b.SetVAlignment(nodes.VAlignmentCenter)
 	}
 	if h == 0 {
 		h = b.text.Size().Y + 2*styles.Padding
+		b.SetHAlignment(nodes.HAlignmentCenter)
 	}
-	b.text.SetAlignment(nodes.AlignmentCenter)
-	b.text.SetPos(pixel.V(0, styles.Text.OffsetY))
 	b.text.SetZIndex(10)
 	b.AddChild(b.text)
 	b.SetSize(pixel.V(w, h))
@@ -110,6 +119,7 @@ func (b *Button) SetSize(size pixel.Vec) {
 	for _, canvas := range b.canvases {
 		canvas.SetSize(size)
 	}
+	b.alignText()
 	b.drawCanvases()
 }
 
@@ -126,6 +136,7 @@ func (b *Button) SetStyles(styles *nodes.Styles) {
 		b.RemoveChild(b.text)
 		b.createText()
 	}
+	b.alignText()
 }
 
 func (b *Button) UpdateFromTheme(theme *nodes.Theme) {
@@ -158,6 +169,16 @@ func (b *Button) SetText(text string) {
 	b.textcontent = text
 	b.text.Clear()
 	b.text.Printf(text)
+}
+
+func (b *Button) SetVAlignment(v nodes.VerticalAlignment) {
+	b.UIBase.SetVAlignment(v)
+	b.alignText()
+}
+
+func (b *Button) SetHAlignment(h nodes.HorizontalAlignment) {
+	b.UIBase.SetHAlignment(h)
+	b.alignText()
 }
 
 func (b *Button) Update(dt float64) {
