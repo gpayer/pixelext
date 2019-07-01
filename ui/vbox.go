@@ -54,7 +54,7 @@ func (v *VBox) recalcPositions() {
 		}
 	}
 	size := pixel.V(math.Round(maxx+2*padding+2*borderWidth), math.Round(ypos-padding+2*borderWidth))
-	v.SetSize(size)
+	v.UISelf.SetSize(size)
 	v.background.SetSize(size)
 
 	ypos = math.Round(size.Y/2 - padding - borderWidth)
@@ -102,5 +102,9 @@ func (v *VBox) RemoveChild(child nodes.Node) {
 func (v *VBox) RemoveChildren() {
 	v.UIBase.RemoveChildren()
 	v.AddChild(v.background)
+	v.recalcPositions()
+}
+
+func (v *VBox) ChildChanged() {
 	v.recalcPositions()
 }

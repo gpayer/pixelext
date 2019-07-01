@@ -158,3 +158,7 @@ func (g *Grid) RemoveChildren() {
 	g.uichildren = make([]UINode, 0)
 	g.recalcPositions()
 }
+
+func (g *Grid) ChildChanged() {
+	g.recalcPositions()
+}

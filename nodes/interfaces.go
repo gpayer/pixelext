@@ -13,8 +13,9 @@ type Node interface {
 	_getMat() pixel.Matrix
 	_getLastMat() pixel.Matrix
 	_setLastMat(mat pixel.Matrix)
-	_getZindex() int
 	Initialized() bool
+	Parent() Node
+	SetParent(p Node)
 	SetName(name string)
 	GetName() string
 	SetOrigin(origin pixel.Vec)
@@ -28,14 +29,17 @@ type Node interface {
 	GetScale() pixel.Vec
 	SetRotPoint(rotpoint pixel.Vec)
 	GetRotPoint() pixel.Vec
+	ZIndex() int
 	SetZIndex(z int)
 	GetExtraOffset() pixel.Vec
 	Show()
 	Hide()
 	AddChild(child Node)
 	Children() []Node
+	SortChildren()
 	RemoveChild(child Node)
 	RemoveChildren()
+	ChildChanged()
 	SetStyles(styles *Styles)
 	GetStyles() *Styles
 	SetSize(size pixel.Vec)

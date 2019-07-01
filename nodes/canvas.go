@@ -26,6 +26,10 @@ func (c *Canvas) SetSize(size pixel.Vec) {
 	SceneManager().Redraw()
 }
 
+func (c *Canvas) Size() pixel.Vec {
+	return c.canvas.Bounds().Size()
+}
+
 func (c *Canvas) Draw(win pixel.Target, mat pixel.Matrix) {
 	c.canvas.Draw(win, mat)
 }

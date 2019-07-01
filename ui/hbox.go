@@ -88,3 +88,7 @@ func (h *HBox) RemoveChildren() {
 	h.UIBase.RemoveChildren()
 	h.recalcPositions()
 }
+
+func (h *HBox) ChildChanged() {
+	h.recalcPositions()
+}

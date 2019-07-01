@@ -11,6 +11,7 @@ type BaseNode struct {
 	Self                      Node
 	Name                      string
 	children                  []Node
+	parent                    Node
 	show, active, initialized bool
 	mat, lastmat              pixel.Matrix
 	pos                       pixel.Vec
@@ -42,10 +43,6 @@ func (b *BaseNode) _setLastMat(mat pixel.Matrix) {
 		}
 		child._setLastMat(child._getMat().Chained(mat))
 	}
-}
-
-func (b *BaseNode) _getZindex() int {
-	return b.zindex
 }
 
 func (b *BaseNode) _init() {
@@ -132,7 +129,7 @@ func (b *BaseNode) _update(dt float64) {
 			}
 		}
 		b.children = newchildren
-		b.sortChildren()
+		b.SortChildren()
 	}
 }
 
@@ -185,6 +182,14 @@ func (b *BaseNode) calcMat() {
 
 func (b *BaseNode) Initialized() bool {
 	return b.initialized
+}
+
+func (b *BaseNode) Parent() Node {
+	return b.parent
+}
+
+func (b *BaseNode) SetParent(p Node) {
+	b.parent = p
 }
 
 func (b *BaseNode) SetName(name string) {
@@ -248,8 +253,15 @@ func (b *BaseNode) GetRotPoint() pixel.Vec {
 	return b.rotpoint
 }
 
+func (b *BaseNode) ZIndex() int {
+	return b.zindex
+}
+
 func (b *BaseNode) SetZIndex(z int) {
 	b.zindex = z
+	if b.parent != nil {
+		b.parent.SortChildren()
+	}
 	SceneManager().Redraw()
 }
 
@@ -283,21 +295,22 @@ func (b *BaseNode) SetActive(active bool) {
 	SceneManager().Redraw()
 }
 
-func (b *BaseNode) sortChildren() {
+func (b *BaseNode) SortChildren() {
 	sort.SliceStable(b.children, func(i, j int) bool {
 		if b.children[i] == nil {
 			return true
 		} else if b.children[j] == nil {
 			return false
 		}
-		less := (b.children[i]._getZindex() < b.children[j]._getZindex())
+		less := (b.children[i].ZIndex() < b.children[j].ZIndex())
 		return less
 	})
 }
 
 func (b *BaseNode) AddChild(child Node) {
 	b.children = append(b.children, child)
-	b.sortChildren()
+	child.SetParent(b.Self)
+	b.SortChildren()
 	child._init()
 	SceneManager().Redraw()
 }
@@ -326,6 +339,9 @@ func (b *BaseNode) RemoveChildren() {
 
 func (b *BaseNode) Children() []Node {
 	return b.children
+}
+
+func (b *BaseNode) ChildChanged() {
 }
 
 func (b *BaseNode) SetStyles(styles *Styles) {

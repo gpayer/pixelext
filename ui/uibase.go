@@ -87,6 +87,9 @@ func (ui *UIBase) Contains(point pixel.Vec) bool {
 func (ui *UIBase) SetSize(size pixel.Vec) {
 	ui.size = size
 	ui.UISelf.SetPos(ui.origpos)
+	if ui.Parent() != nil {
+		ui.Parent().ChildChanged()
+	}
 }
 
 func (ui *UIBase) Size() pixel.Vec {
