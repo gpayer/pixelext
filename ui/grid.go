@@ -5,8 +5,6 @@ import (
 
 	"github.com/gpayer/pixelext/nodes"
 
-	"github.com/faiface/pixel/imdraw"
-
 	"github.com/faiface/pixel"
 )
 
@@ -65,6 +63,9 @@ func (g *Grid) recalcPositions() {
 	}
 
 	b = pixel.V(math.Round(sumSlice(maxx)), math.Round(sumSlice(maxy)))
+	g.bbox.SetSize(b)
+	g.bbox.Clear(styles.Background.Color)
+
 	row = 0
 	curcol = 0
 	x := math.Round(-b.X / 2)
@@ -84,30 +85,21 @@ func (g *Grid) recalcPositions() {
 		}
 	}
 
-	im := imdraw.New(nil)
 	if styles.Border.Width > 0 {
-		bw := math.Round(styles.Border.Width / 2)
-		im.Color = styles.Border.Color
-		im.Push(pixel.V(bw, bw), pixel.V(b.X-bw, bw), b, pixel.V(bw, b.Y-bw))
-		im.Polygon(styles.Border.Width)
+		g.bbox.DrawRect(pixel.V(0, 0), pixel.V(b.X-1, b.Y-1), styles.Border.Color)
 		x = maxx[0]
 		for i := 1; i < len(maxx); i++ {
-			im.Push(pixel.V(x, 0), pixel.V(x, b.Y))
-			im.Line(1)
+			g.bbox.DrawLine(pixel.V(x, 0), pixel.V(x, b.Y), styles.Border.Color)
 			x += maxx[i]
 		}
 		y = b.Y - maxy[0]
 		for i := 1; i < len(maxy); i++ {
-			im.Push(pixel.V(0, y), pixel.V(b.X, y))
-			im.Line(1)
+			g.bbox.DrawLine(pixel.V(0, y), pixel.V(b.X, y), styles.Border.Color)
 			y -= maxy[i]
 		}
 	}
-	g.bbox.SetSize(b)
-	g.bbox.Clear(styles.Background.Color)
-	im.Draw(g.bbox.Canvas())
 
-	g.SetSize(b)
+	g.UISelf.SetSize(b)
 	nodes.SceneManager().Redraw()
 }
 
@@ -136,6 +128,9 @@ func (g *Grid) SetStyles(styles *nodes.Styles) {
 }
 
 func (g *Grid) RemoveChild(child nodes.Node) {
+	if child == g.bbox {
+		return
+	}
 	g.UIBase.RemoveChild(child)
 	uichild, ok := child.(UINode)
 	if ok {
@@ -156,9 +151,21 @@ func (g *Grid) RemoveChild(child nodes.Node) {
 func (g *Grid) RemoveChildren() {
 	g.UIBase.RemoveChildren()
 	g.uichildren = make([]UINode, 0)
+	g.AddChild(g.bbox)
 	g.recalcPositions()
 }
 
 func (g *Grid) ChildChanged() {
 	g.recalcPositions()
+}
+
+func (g *Grid) Cols() int {
+	return g.cols
+}
+
+func (g *Grid) SetCols(cols int) {
+	if cols > 0 {
+		g.cols = cols
+		g.recalcPositions()
+	}
 }

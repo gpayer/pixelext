@@ -13,6 +13,12 @@ type Canvas struct {
 }
 
 func NewCanvas(name string, w, h float64) *Canvas {
+	if w < 2 {
+		w = 2
+	}
+	if h < 2 {
+		h = 2
+	}
 	c := &Canvas{
 		BaseNode: *NewBaseNode(name),
 		canvas:   pixelgl.NewCanvas(pixel.R(0, 0, w, h)),
@@ -59,4 +65,102 @@ func (c *Canvas) Contains(point pixel.Vec) bool {
 	size := c.canvas.Bounds().Size().Scaled(.5)
 	bounds := pixel.R(-size.X, -size.Y, size.X, size.Y)
 	return bounds.Contains(point)
+}
+
+func (c *Canvas) DrawLine(p1, p2 pixel.Vec, col color.Color) {
+	var ur, ug, ub, ua uint32 = col.RGBA()
+	var bcol []byte = make([]byte, 4)
+	bcol[0] = byte(ur)
+	bcol[1] = byte(ug)
+	bcol[2] = byte(ub)
+	bcol[3] = byte(ua)
+
+	disp := &displayDef{
+		x:   int(c.Size().X),
+		y:   int(c.Size().Y),
+		buf: c.canvas.Pixels(),
+	}
+
+	gbham(int(p1.X), int(p1.Y), int(p2.X), int(p2.Y), disp, bcol)
+
+	c.canvas.SetPixels(disp.buf)
+}
+
+func (c *Canvas) DrawRect(p1, p2 pixel.Vec, col color.Color) {
+	c.DrawLine(p1, pixel.V(p1.X, p2.Y), col)
+	c.DrawLine(p1, pixel.V(p2.X, p1.Y), col)
+	c.DrawLine(p2, pixel.V(p1.X, p2.Y), col)
+	c.DrawLine(p2, pixel.V(p2.X, p1.Y), col)
+}
+
+type displayDef struct {
+	x, y int
+	buf  []byte
+}
+
+func setPixel(x, y int, disp *displayDef, col []byte) {
+	if x >= 0 && y >= 0 && x < disp.x && y < disp.y {
+		start := 4 * (disp.x*y + x)
+		copy(disp.buf[start:start+4], col)
+	}
+}
+
+func sgn(x int) int {
+	if x > 0 {
+		return 1
+	} else if x < 0 {
+		return -1
+	} else {
+		return 0
+	}
+}
+
+func gbham(xstart, ystart, xend, yend int, disp *displayDef, col []byte) {
+	var x, y, t, dx, dy, incx, incy, pdx, pdy, ddx, ddy, deltaslowdirection, deltafastdirection, err int
+
+	dx = xend - xstart
+	dy = yend - ystart
+
+	incx = sgn(dx)
+	incy = sgn(dy)
+	if dx < 0 {
+		dx = -dx
+	}
+	if dy < 0 {
+		dy = -dy
+	}
+
+	if dx > dy {
+		pdx = incx
+		pdy = 0
+		ddx = incx
+		ddy = incy
+		deltaslowdirection = dy
+		deltafastdirection = dx
+	} else {
+		pdx = 0
+		pdy = incy
+		ddx = incx
+		ddy = incy
+		deltaslowdirection = dx
+		deltafastdirection = dy
+	}
+
+	x = xstart
+	y = ystart
+	err = deltafastdirection / 2
+	setPixel(x, y, disp, col)
+
+	for t = 0; t < deltafastdirection; t++ {
+		err -= deltaslowdirection
+		if err < 0 {
+			err += deltafastdirection
+			x += ddx
+			y += ddy
+		} else {
+			x += pdx
+			y += pdy
+		}
+		setPixel(x, y, disp, col)
+	}
 }

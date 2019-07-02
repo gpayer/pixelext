@@ -21,6 +21,7 @@ type SceneManagerStruct struct {
 	redraw      bool
 	clearColor  color.Color
 	redrawCount int
+	updateCount int
 	win         *pixelgl.Window
 	theme       *Theme
 }
@@ -77,7 +78,13 @@ func (s *SceneManagerStruct) Run(mat pixel.Matrix) {
 		s.win.Update()
 		s.redraw = false
 	} else {
-		s.win.UpdateInput()
+		s.updateCount++
+		if s.updateCount > 6 {
+			s.updateCount = 0
+			s.win.Update() // only this updates s.win.bounds
+		} else {
+			s.win.UpdateInput()
+		}
 		sleepRemaining := time.Until(s.last.Add(17 * time.Millisecond))
 		if sleepRemaining > 0 {
 			time.Sleep(sleepRemaining)

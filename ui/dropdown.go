@@ -65,7 +65,7 @@ func (d *DropDown) Init() {
 	d.AddChild(d.background)
 
 	subscenewidth := size.X - 15 - styles.Padding
-	d.sub = nodes.NewSubScene("subscene", subscenewidth, size.Y-4)
+	d.sub = nodes.NewSubScene("subscene", subscenewidth, size.Y-6)
 	d.sub.SetPos(pixel.V(-5, 0))
 	d.AddChild(d.sub)
 
@@ -84,10 +84,10 @@ func (d *DropDown) Init() {
 	im.Push(pixel.V(4, math.Round(size.Y/2)+3), pixel.V(8, math.Round(size.Y/2)-3), pixel.V(12, math.Round(size.Y/2)+3))
 	im.Line(1)
 	im.Draw(d.btn.Canvas())
-	d.btn.SetPos(pixel.V(size.X/2-8, 0))
+	d.btn.SetPos(pixel.V(size.X/2-10, 0))
 	d.AddChild(d.btn)
 
-	d.dropdown = nodes.NewBorderBox("dropdown", size.X, d.hdropdown+4)
+	d.dropdown = nodes.NewBorderBox("dropdown", size.X+4, d.hdropdown+4)
 	d.dropdown.Hide()
 	d.dropdown.SetZIndex(9999)
 
@@ -155,7 +155,7 @@ func (d *DropDown) createDropdown() {
 		d.initValue(val.desc, val.value)
 	}
 	d.vscroll.SetInner(d.list)
-	size := d.vscroll.Size().Add(pixel.V(2, 2))
+	size := d.vscroll.Size().Add(pixel.V(4, 4))
 	d.dropdown.SetSize(size)
 }
 
