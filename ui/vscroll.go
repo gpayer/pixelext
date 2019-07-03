@@ -58,12 +58,7 @@ func NewVScroll(name string, w, h float64) *VScroll {
 	v.AddChild(v.subscene)
 	v.Self = v
 	v.UISelf = v
-	return v
-}
-
-func (v *VScroll) Init() {
 	v.root = nodes.NewBaseNode("root")
-	v.subscene.SetRoot(v.root)
 	v.scrollbar = newScrollbar(v.h)
 	v.scrollbar.SetLocked(true)
 	v.scrollbar.SetZIndex(10)
@@ -73,19 +68,25 @@ func (v *VScroll) Init() {
 	v.scrollbar.SetPos(pixel.V(v.w/2-5, 0))
 	v.scrollbar.Hide()
 	v.AddChild(v.scrollbar)
-	if v.inner != nil {
-		v.SetInner(v.inner)
-	}
+	return v
+}
+
+func (v *VScroll) Init() {
+	v.subscene.SetRoot(v.root)
 }
 
 func (v *VScroll) SetInner(inner UINode) {
 	v.inner = inner
-	if !v.Initialized() {
-		return
-	}
 	v.root.RemoveChildren()
 	v.root.AddChild(inner)
 	v.innerh = inner.Size().Y
+	v.recalcSize()
+}
+
+func (v *VScroll) recalcSize() {
+	if v.inner == nil {
+		return
+	}
 	switch v.halignment {
 	case nodes.HAlignmentLeft:
 		v.inner.SetAlignment(nodes.AlignmentCenterLeft)
@@ -115,7 +116,7 @@ func (v *VScroll) SetSize(size pixel.Vec) {
 	v.UIBase.SetSize(size)
 	v.w = size.X
 	v.h = size.Y
-	v.SetInner(v.inner)
+	v.recalcSize()
 }
 
 func (v *VScroll) recalcScrollbar() {
@@ -173,14 +174,16 @@ func (v *VScroll) Update(dt float64) {
 		if v.displayScrollbar {
 			v.scrollbar.Show()
 		}
-		mousescroll := ev.MouseScroll()
-		if mousescroll.Y != 0 {
-			v.scroll -= mousescroll.Y * 5
-			v.SetScroll(v.scroll)
-		}
-		if !v.scrolldrag && v.scrollbar.clicked {
-			v.scrolldrag = true
-			v.origclickpos = ev.MousePosition()
+		if !ev.IsMouseScrollHandled() {
+			mousescroll := ev.MouseScroll()
+			if mousescroll.Y != 0 {
+				v.scroll -= mousescroll.Y * 5
+				v.SetScroll(v.scroll)
+			}
+			if !v.scrolldrag && v.scrollbar.clicked {
+				v.scrolldrag = true
+				v.origclickpos = ev.MousePosition()
+			}
 		}
 	} else if !v.scrolldrag {
 		v.scrollbar.Hide()

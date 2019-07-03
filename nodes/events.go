@@ -12,15 +12,17 @@ func Events() *EventManager {
 }
 
 type EventManager struct {
-	win            *pixelgl.Window
-	focused        Node
-	handledButtons map[pixelgl.Button]bool
+	win                *pixelgl.Window
+	focused            Node
+	handledButtons     map[pixelgl.Button]bool
+	mouseScrollHandled bool
 }
 
 func (e *EventManager) reset() {
 	for b, _ := range e.handledButtons {
 		e.handledButtons[b] = false
 	}
+	e.mouseScrollHandled = false
 }
 
 func (e *EventManager) setWin(win *pixelgl.Window) {
@@ -70,6 +72,7 @@ func (e *EventManager) Repeated(button pixelgl.Button) bool {
 }
 
 func (e *EventManager) MouseScroll() pixel.Vec {
+	e.mouseScrollHandled = true
 	return e.win.MouseScroll()
 }
 
@@ -111,6 +114,10 @@ func (e *EventManager) IsButtonHandled(b pixelgl.Button) bool {
 	} else {
 		return false
 	}
+}
+
+func (e *EventManager) IsMouseScrollHandled() bool {
+	return e.mouseScrollHandled
 }
 
 func init() {
