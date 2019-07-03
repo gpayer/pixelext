@@ -25,6 +25,7 @@ type BaseNode struct {
 	extraoffset               pixel.Vec
 	styles                    *Styles
 	pausable, paused          bool
+	locked                    bool
 }
 
 func (b *BaseNode) _getMat() pixel.Matrix {
@@ -169,6 +170,7 @@ func NewBaseNode(name string) *BaseNode {
 		styles:        DefaultStyles(),
 		pausable:      true,
 		paused:        false,
+		locked:        false,
 	}
 	b.Self = b
 	b.calcMat()
@@ -328,7 +330,7 @@ func (b *BaseNode) RemoveChild(child Node) {
 
 func (b *BaseNode) RemoveChildren() {
 	for i, ch := range b.children {
-		if ch == nil {
+		if ch == nil || ch.Locked() {
 			continue
 		}
 		ch._unmount()
@@ -400,4 +402,12 @@ func (b *BaseNode) Unpause() {
 			c.Unpause()
 		}
 	}
+}
+
+func (b *BaseNode) SetLocked(locked bool) {
+	b.locked = locked
+}
+
+func (b *BaseNode) Locked() bool {
+	return b.locked
 }

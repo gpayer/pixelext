@@ -49,6 +49,8 @@ type Node interface {
 	SetPausable(pausable bool)
 	Pause()
 	Unpause()
+	SetLocked(locked bool)
+	Locked() bool
 }
 
 type Initializable interface {

@@ -53,7 +53,8 @@ func NewVScroll(name string, w, h float64) *VScroll {
 	if w == 0 {
 		w = 1
 	}
-	v.subscene = nodes.NewSubScene("scoll", w, 1)
+	v.subscene = nodes.NewSubScene("scroll", w, 1)
+	v.subscene.SetLocked(true)
 	v.AddChild(v.subscene)
 	v.Self = v
 	v.UISelf = v
@@ -64,6 +65,7 @@ func (v *VScroll) Init() {
 	v.root = nodes.NewBaseNode("root")
 	v.subscene.SetRoot(v.root)
 	v.scrollbar = newScrollbar(v.h)
+	v.scrollbar.SetLocked(true)
 	v.scrollbar.SetZIndex(10)
 	scrollbarstyle := v.scrollbar.GetStyles()
 	scrollbarstyle.Border.Width = 0
@@ -71,12 +73,18 @@ func (v *VScroll) Init() {
 	v.scrollbar.SetPos(pixel.V(v.w/2-5, 0))
 	v.scrollbar.Hide()
 	v.AddChild(v.scrollbar)
+	if v.inner != nil {
+		v.SetInner(v.inner)
+	}
 }
 
 func (v *VScroll) SetInner(inner UINode) {
+	v.inner = inner
+	if !v.Initialized() {
+		return
+	}
 	v.root.RemoveChildren()
 	v.root.AddChild(inner)
-	v.inner = inner
 	v.innerh = inner.Size().Y
 	switch v.halignment {
 	case nodes.HAlignmentLeft:
@@ -93,7 +101,7 @@ func (v *VScroll) SetInner(inner UINode) {
 		newh = v.innerh
 	}
 	v.subscene.SetSize(pixel.V(v.w, newh))
-	v.SetSize(pixel.V(v.w, newh))
+	v.UIBase.SetSize(pixel.V(v.w, newh))
 	maxscroll := v.innerh - v.h
 	if v.scroll > maxscroll {
 		v.scroll = maxscroll
@@ -101,6 +109,13 @@ func (v *VScroll) SetInner(inner UINode) {
 		v.scroll = 0
 	}
 	v.recalcScrollbar()
+}
+
+func (v *VScroll) SetSize(size pixel.Vec) {
+	v.UIBase.SetSize(size)
+	v.w = size.X
+	v.h = size.Y
+	v.SetInner(v.inner)
 }
 
 func (v *VScroll) recalcScrollbar() {
