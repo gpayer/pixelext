@@ -52,6 +52,7 @@ func NewButton(name string, w, h float64, text string) *Button {
 	for _, state := range states {
 		b.canvases[state] = nodes.NewCanvas("", w, h)
 		b.canvases[state].GetStyles().Border.Width = 2
+		b.canvases[state].SetLocked(true)
 		b.AddChild(b.canvases[state])
 	}
 
@@ -78,21 +79,12 @@ func (b *Button) alignText() {
 
 func (b *Button) createText() {
 	styles := b.canvases[ButtonEnabled].GetStyles()
-	w := b.w
-	h := b.h
 	b.text = NewText("buttontxt", styles.Text.Atlas)
 	b.text.Printf(b.textcontent)
-	if w == 0 {
-		w = b.text.Size().X + 2*styles.Padding
-		b.SetVAlignment(nodes.VAlignmentCenter)
-	}
-	if h == 0 {
-		h = b.text.Size().Y + 2*styles.Padding
-		b.SetHAlignment(nodes.HAlignmentCenter)
-	}
+	b.text.SetLocked(true)
 	b.text.SetZIndex(10)
 	b.AddChild(b.text)
-	b.SetSize(pixel.V(w, h))
+	b.internalSetSize()
 }
 
 func (b *Button) drawCanvases() {
@@ -115,6 +107,24 @@ func (b *Button) drawCanvases() {
 }
 
 func (b *Button) SetSize(size pixel.Vec) {
+	b.w = size.X
+	b.h = size.Y
+	b.internalSetSize()
+}
+
+func (b *Button) internalSetSize() {
+	w := b.w
+	h := b.h
+	styles := b.canvases[ButtonEnabled].GetStyles()
+	if w == 0 {
+		w = b.text.Size().X + 2*styles.Padding
+		b.SetVAlignment(nodes.VAlignmentCenter)
+	}
+	if h == 0 {
+		h = b.text.Size().Y + 2*styles.Padding
+		b.SetHAlignment(nodes.HAlignmentCenter)
+	}
+	size := pixel.V(w, h)
 	b.UIBase.SetSize(size)
 	for _, canvas := range b.canvases {
 		canvas.SetSize(size)
@@ -169,6 +179,7 @@ func (b *Button) SetText(text string) {
 	b.textcontent = text
 	b.text.Clear()
 	b.text.Printf(text)
+	b.internalSetSize()
 }
 
 func (b *Button) SetVAlignment(v nodes.VerticalAlignment) {
