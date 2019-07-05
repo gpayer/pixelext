@@ -26,6 +26,9 @@ type BaseNode struct {
 	styles                    *Styles
 	pausable, paused          bool
 	locked                    bool
+	drawable                  Drawable
+	updateable                Updateable
+	mounted                   bool
 }
 
 func (b *BaseNode) _getMat() pixel.Matrix {
@@ -61,6 +64,15 @@ func (b *BaseNode) _init() {
 		init.Init()
 	}
 	b.initialized = true
+
+	updateable, ok := b.Self.(Updateable)
+	if ok {
+		b.updateable = updateable
+	}
+	drawable, ok := b.Self.(Drawable)
+	if ok {
+		b.drawable = drawable
+	}
 }
 
 func (b *BaseNode) _mount() {
@@ -70,10 +82,15 @@ func (b *BaseNode) _mount() {
 		}
 		child._mount()
 	}
+	if b.mounted {
+		return
+	}
+	b.Self.UpdateFromTheme(SceneManager().Theme())
 	mountable, ok := b.Self.(Mountable)
 	if ok {
 		mountable.Mount()
 	}
+	b.mounted = true
 	SceneManager().Redraw()
 }
 
@@ -84,10 +101,14 @@ func (b *BaseNode) _unmount() {
 		}
 		child._unmount()
 	}
+	if !b.mounted {
+		return
+	}
 	mountable, ok := b.Self.(Mountable)
 	if ok {
 		mountable.Unmount()
 	}
+	b.mounted = false
 }
 
 func (b *BaseNode) _update(dt float64) {
@@ -104,9 +125,9 @@ func (b *BaseNode) _update(dt float64) {
 	if b.paused {
 		return
 	}
-	updateable, ok := b.Self.(Updateable)
-	if ok {
-		updateable.Update(dt)
+
+	if b.updateable != nil {
+		b.updateable.Update(dt)
 	}
 
 	sortchildren := false
@@ -139,9 +160,9 @@ func (b *BaseNode) _draw(win pixel.Target, mat pixel.Matrix) {
 	if !b.active || !b.show {
 		return
 	}
-	drawable, ok := b.Self.(Drawable)
-	if ok {
-		drawable.Draw(win, mat)
+
+	if b.drawable != nil {
+		b.drawable.Draw(win, mat)
 	}
 	for _, child := range b.children {
 		if child == nil {
@@ -171,6 +192,7 @@ func NewBaseNode(name string) *BaseNode {
 		pausable:      true,
 		paused:        false,
 		locked:        false,
+		mounted:       false,
 	}
 	b.Self = b
 	b.calcMat()
@@ -314,6 +336,7 @@ func (b *BaseNode) AddChild(child Node) {
 	child.SetParent(b.Self)
 	b.SortChildren()
 	child._init()
+	child._mount()
 	SceneManager().Redraw()
 }
 

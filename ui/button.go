@@ -1,17 +1,12 @@
 package ui
 
 import (
-	"image/color"
-
 	"github.com/gpayer/pixelext/nodes"
 	"github.com/gpayer/pixelext/services"
 
 	"github.com/faiface/pixel/pixelgl"
 
-	"golang.org/x/image/colornames"
-
 	"github.com/faiface/pixel"
-	"github.com/faiface/pixel/imdraw"
 )
 
 type ButtonState int
@@ -56,14 +51,6 @@ func NewButton(name string, w, h float64, text string) *Button {
 		b.AddChild(b.canvases[state])
 	}
 
-	b.canvases[ButtonHover].GetStyles().Background.Color = colornames.Lightblue
-	b.canvases[ButtonHover].GetStyles().Text.Color = colornames.Black
-	b.canvases[ButtonEnabled].GetStyles().Text.Color = colornames.Black
-	b.canvases[ButtonPressed].GetStyles().Border.Width = 5
-	b.canvases[ButtonPressed].GetStyles().Border.Color = color.RGBA{10, 10, 10, 255}
-	b.canvases[ButtonPressed].GetStyles().Background.Color = colornames.Darkblue
-	b.canvases[ButtonPressed].GetStyles().Border.Color = colornames.Gray
-
 	b.createText()
 	return b
 }
@@ -93,14 +80,7 @@ func (b *Button) drawCanvases() {
 		canvas.Clear(styles.Background.Color)
 		if styles.Border.Width > 0 {
 			bounds := b.Size()
-			im := imdraw.New(nil)
-			im.Color = styles.Border.Color
-			im.Push(pixel.ZV,
-				pixel.V(0, bounds.Y),
-				pixel.V(bounds.X, bounds.Y),
-				pixel.V(bounds.X, 0))
-			im.Polygon(styles.Border.Width)
-			im.Draw(canvas.Canvas())
+			canvas.DrawRect(pixel.ZV, pixel.V(bounds.X-1, bounds.Y-1), styles.Border.Color)
 		}
 	}
 	nodes.SceneManager().Redraw()
@@ -110,6 +90,10 @@ func (b *Button) SetSize(size pixel.Vec) {
 	b.w = size.X
 	b.h = size.Y
 	b.internalSetSize()
+}
+
+func (b *Button) GetOrigSize() pixel.Vec {
+	return pixel.V(b.w, b.h)
 }
 
 func (b *Button) internalSetSize() {
@@ -223,7 +207,7 @@ func (b *Button) Update(dt float64) {
 	for state, canvas := range b.canvases {
 		if state == b.state {
 			canvas.Show()
-			b.text.SetStyles(canvas.GetStyles())
+			b.text.OverrideStyles(canvas.GetStyles())
 		} else {
 			canvas.Hide()
 		}
