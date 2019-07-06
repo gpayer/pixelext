@@ -35,8 +35,10 @@ func (c *CheckBox) drawFalse() {
 
 func (c *CheckBox) drawTrue() {
 	size := c.Size()
-	c.box.Clear(colornames.Skyblue)
+	c.box.Clear(colornames.Black)
 	c.box.DrawRect(pixel.ZV, pixel.V(size.X-1, size.Y-1), colornames.White)
+	p := c.GetStyles().Padding
+	c.box.FillRect(pixel.V(p, p), pixel.V(size.X-p-1, size.Y-p-1), colornames.Skyblue)
 }
 
 func (c *CheckBox) SetSize(size pixel.Vec) {

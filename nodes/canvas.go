@@ -93,6 +93,35 @@ func (c *Canvas) DrawRect(p1, p2 pixel.Vec, col color.Color) {
 	c.DrawLine(p2, pixel.V(p2.X, p1.Y), col)
 }
 
+func (c *Canvas) FillRect(p1, p2 pixel.Vec, col color.Color) {
+	var starty, endy, startx, endx int
+	bounds := pixel.R(p1.X, p1.Y, p2.X, p2.Y).Norm()
+	startx = int(bounds.Min.X)
+	starty = int(bounds.Min.Y)
+	endx = int(bounds.Max.X)
+	endy = int(bounds.Max.Y)
+
+	var ur, ug, ub, ua uint32 = col.RGBA()
+	var bcol []byte = make([]byte, 4)
+	bcol[0] = byte(ur)
+	bcol[1] = byte(ug)
+	bcol[2] = byte(ub)
+	bcol[3] = byte(ua)
+
+	disp := &displayDef{
+		x:   int(c.Size().X),
+		y:   int(c.Size().Y),
+		buf: c.canvas.Pixels(),
+	}
+
+	for y := starty; y <= endy; y++ {
+		for x := startx; x <= endx; x++ { // TODO: replace with clever implementation
+			setPixel(x, y, disp, bcol)
+		}
+	}
+	c.canvas.SetPixels(disp.buf)
+}
+
 type displayDef struct {
 	x, y int
 	buf  []byte
