@@ -39,7 +39,7 @@ func (e *EventManager) Clicked(button pixelgl.Button, node Node) bool {
 }
 
 func (e *EventManager) MouseHovering(node Node) bool {
-	if node.Contains(node._getLastMat().Unproject(e.win.MousePosition())) {
+	if node.Contains(node.GetLastMat().Unproject(e.win.MousePosition())) {
 		return true
 	}
 	return false
@@ -81,7 +81,7 @@ func (e *EventManager) MousePosition() pixel.Vec {
 }
 
 func (e *EventManager) LocalMousePosition(node Node) pixel.Vec {
-	return node._getLastMat().Unproject(e.win.MousePosition()).Add(node.GetExtraOffset())
+	return node.GetLastMat().Unproject(e.win.MousePosition()).Add(node.GetExtraOffset())
 }
 
 func (e *EventManager) MousePreviousPosition() pixel.Vec {
@@ -118,6 +118,10 @@ func (e *EventManager) IsButtonHandled(b pixelgl.Button) bool {
 
 func (e *EventManager) IsMouseScrollHandled() bool {
 	return e.mouseScrollHandled
+}
+
+func (e *EventManager) SetButtonHandled(b pixelgl.Button) {
+	e.handledButtons[b] = true
 }
 
 func init() {

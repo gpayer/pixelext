@@ -35,7 +35,7 @@ func (b *BaseNode) _getMat() pixel.Matrix {
 	return b.mat
 }
 
-func (b *BaseNode) _getLastMat() pixel.Matrix {
+func (b *BaseNode) GetLastMat() pixel.Matrix {
 	return b.lastmat
 }
 
@@ -238,7 +238,14 @@ func (b *BaseNode) GetPos() pixel.Vec {
 }
 
 func (b *BaseNode) LocalToGlobalPos(local pixel.Vec) pixel.Vec {
-	return b._getLastMat().Project(local.Sub(b.Self.GetExtraOffset()))
+	return b.GetLastMat().Project(local.Sub(b.Self.GetExtraOffset()))
+}
+
+func (b *BaseNode) GlobalToLocalPos(global pixel.Vec) pixel.Vec {
+	if b.parent == nil {
+		return global
+	}
+	return b.parent.GetLastMat().Unproject(global).Add(b.Self.GetExtraOffset())
 }
 
 func (b *BaseNode) SetRot(rot float64) {

@@ -11,7 +11,7 @@ type Node interface {
 	_update(dt float64)
 	_draw(win pixel.Target, mat pixel.Matrix)
 	_getMat() pixel.Matrix
-	_getLastMat() pixel.Matrix
+	GetLastMat() pixel.Matrix
 	_setLastMat(mat pixel.Matrix)
 	Initialized() bool
 	Parent() Node
@@ -22,6 +22,7 @@ type Node interface {
 	GetOrigin() pixel.Vec
 	GetPos() pixel.Vec
 	LocalToGlobalPos(local pixel.Vec) pixel.Vec
+	GlobalToLocalPos(global pixel.Vec) pixel.Vec
 	SetPos(pos pixel.Vec)
 	SetRot(rot float64)
 	GetRot() float64
@@ -68,4 +69,8 @@ type Updateable interface {
 
 type Drawable interface {
 	Draw(win pixel.Target, mat pixel.Matrix)
+}
+
+type Sizer interface {
+	Size() pixel.Vec
 }
