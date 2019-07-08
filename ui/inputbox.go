@@ -135,6 +135,7 @@ func (i *InputBox) Update(dt float64) {
 			if nodes.Events().IsFocused(i) {
 				nodes.Events().SetFocus(nil)
 			}
+			i.onenter(string(i.content))
 			return
 		} else if ev.Clicked(pixelgl.MouseButtonLeft, i) {
 			i.setCursorAfterClick()

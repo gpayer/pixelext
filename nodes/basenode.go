@@ -441,3 +441,13 @@ func (b *BaseNode) SetLocked(locked bool) {
 func (b *BaseNode) Locked() bool {
 	return b.locked
 }
+
+func (b *BaseNode) Iterate(fn func(n Node)) {
+	if b.Locked() {
+		return
+	}
+	fn(b)
+	for _, c := range b.Self.Children() {
+		c.Iterate(fn)
+	}
+}

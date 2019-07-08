@@ -52,6 +52,7 @@ type Node interface {
 	Unpause()
 	SetLocked(locked bool)
 	Locked() bool
+	Iterate(fn func(n Node))
 }
 
 type Initializable interface {

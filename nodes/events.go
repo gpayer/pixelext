@@ -116,6 +116,10 @@ func (e *EventManager) IsButtonHandled(b pixelgl.Button) bool {
 	}
 }
 
+func (e *EventManager) SetButtonUnhandled(b pixelgl.Button) {
+	e.handledButtons[b] = false
+}
+
 func (e *EventManager) IsMouseScrollHandled() bool {
 	return e.mouseScrollHandled
 }
