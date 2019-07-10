@@ -245,7 +245,7 @@ func (b *BaseNode) GlobalToLocalPos(global pixel.Vec) pixel.Vec {
 	if b.parent == nil {
 		return global
 	}
-	return b.parent.GetLastMat().Unproject(global).Add(b.Self.GetExtraOffset())
+	return b.parent.GetLastMat().Unproject(global)
 }
 
 func (b *BaseNode) SetRot(rot float64) {

@@ -13,12 +13,14 @@ type Grid struct {
 	bbox       *nodes.Canvas
 	cols       int
 	uichildren []UINode
+	recalc     bool
 }
 
 func NewGrid(name string, cols int) *Grid {
 	g := &Grid{
 		UIBase: *NewUIBase(name),
 		cols:   cols,
+		recalc: true,
 	}
 	g.Self = g
 	g.UISelf = g
@@ -31,6 +33,9 @@ func NewGrid(name string, cols int) *Grid {
 }
 
 func (g *Grid) recalcPositions() {
+	if !g.recalc {
+		return
+	}
 	styles := g.GetStyles()
 	maxx := make([]float64, 1)
 	maxy := make([]float64, 1)
@@ -166,6 +171,13 @@ func (g *Grid) Cols() int {
 func (g *Grid) SetCols(cols int) {
 	if cols > 0 {
 		g.cols = cols
+		g.recalcPositions()
+	}
+}
+
+func (g *Grid) SetRecalc(recalc bool) {
+	g.recalc = recalc
+	if recalc {
 		g.recalcPositions()
 	}
 }

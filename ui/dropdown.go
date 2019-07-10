@@ -267,3 +267,12 @@ func (d *DropDown) hideDropDown() {
 	d.dropdown.Hide()
 	nodes.SceneManager().Root().RemoveChild(d.dropdown)
 }
+
+func (d *DropDown) Mount() {
+}
+
+func (d *DropDown) Unmount() {
+	if d.state != dropDownClosed {
+		d.hideDropDown()
+	}
+}
