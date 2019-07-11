@@ -57,8 +57,10 @@ func (i *InputBox) Init() {
 	//padding := i.GetStyles().Padding
 	//size := i.Size()
 	i.background.SetZIndex(-1)
+	i.background.SetLocked(true)
 	i.AddChild(i.background)
 	i.sub.SetPos(pixel.V(0, 0))
+	i.sub.SetLocked(true)
 	i.AddChild(i.sub)
 	subroot := nodes.NewBaseNode("subroot")
 	i.sub.SetRoot(subroot)
