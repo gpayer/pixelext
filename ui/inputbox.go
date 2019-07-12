@@ -125,6 +125,13 @@ func (i *InputBox) recalc() {
 	i.cursor.SetPos(pixel.V(cursorposx, 0))
 }
 
+func (i *InputBox) SetSize(size pixel.Vec) {
+	i.UIBase.SetSize(size)
+	i.background.SetSize(size)
+	i.sub.SetSize(pixel.V(size.X-8, size.Y-6))
+	i.recalc()
+}
+
 func (i *InputBox) Update(dt float64) {
 	ev := nodes.Events()
 	if i.focused {
