@@ -196,8 +196,11 @@ func (i *InputBox) Update(dt float64) {
 				if i.cursorpos == 0 {
 					i.content = append(typedRunes, i.content...)
 				} else if i.cursorpos < len(i.content) {
-					i.content = append(i.content[:i.cursorpos], typedRunes...)
-					i.content = append(i.content, i.content[i.cursorpos:]...)
+					newcontent := make([]rune, len(i.content)+len(typedRunes))
+					copy(newcontent, i.content[:i.cursorpos])
+					copy(newcontent[i.cursorpos:], typedRunes)
+					copy(newcontent[i.cursorpos+len(typedRunes):], i.content[i.cursorpos:])
+					i.content = newcontent
 				} else {
 					i.content = append(i.content, typedRunes...)
 				}
