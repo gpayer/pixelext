@@ -12,6 +12,7 @@ type selectListEntry struct {
 	text, value string
 	selected    bool
 	btn         *Button
+	content     interface{}
 }
 
 type SelectList struct {
@@ -23,8 +24,8 @@ type SelectList struct {
 	pressedStyle, selectedStyle         *nodes.Styles
 	entries                             []*selectListEntry
 	value2entry                         map[string]*selectListEntry
-	onselect                            func(v string)
-	onunselect                          func(v string)
+	onselect                            func(v string, content interface{})
+	onunselect                          func(v string, content interface{})
 	multiselect                         bool
 }
 
@@ -37,8 +38,8 @@ func NewSelectList(name string, w, h float64, multiselect bool) *SelectList {
 		vscroll:     NewVScroll("vscroll", w-2*defaultStyles.Padding-2*defaultStyles.Border.Width, h-2*defaultStyles.Border.Width),
 		list:        NewVBox("list"),
 		value2entry: make(map[string]*selectListEntry),
-		onselect:    func(_ string) {},
-		onunselect:  func(_ string) {},
+		onselect:    func(_ string, _ interface{}) {},
+		onunselect:  func(_ string, _ interface{}) {},
 		multiselect: multiselect,
 	}
 	s.Self = s
@@ -70,6 +71,9 @@ func (s *SelectList) Init() {
 	s.AddChild(s.background)
 	s.vscroll.SetLocked(true)
 	s.vscroll.SetHAlignment(nodes.HAlignmentLeft)
+	s.vscroll.SetAlignment(nodes.AlignmentTopCenter)
+	size := s.Size()
+	s.vscroll.SetPos(pixel.V(0, size.Y/2-s.GetStyles().Border.Width))
 	s.AddChild(s.vscroll)
 	st := s.list.GetStyles()
 	st.Border.Width = 0
@@ -79,15 +83,15 @@ func (s *SelectList) Init() {
 	s.vscroll.SetInner(s.list)
 }
 
-func (s *SelectList) OnSelect(onselect func(v string)) {
+func (s *SelectList) OnSelect(onselect func(v string, content interface{})) {
 	s.onselect = onselect
 }
 
-func (s *SelectList) OnUnselect(onunselect func(v string)) {
+func (s *SelectList) OnUnselect(onunselect func(v string, content interface{})) {
 	s.onunselect = onunselect
 }
 
-func (s *SelectList) AddEntry(text string, value string) {
+func (s *SelectList) AddEntry(text string, value string, content interface{}) {
 	btnW := s.Size().X - 2*s.GetStyles().Padding
 	btn := NewButton("btn", btnW, 0, text)
 	btn.SetHAlignment(nodes.HAlignmentLeft)
@@ -95,14 +99,14 @@ func (s *SelectList) AddEntry(text string, value string) {
 		e := s.value2entry[value]
 		if e.selected {
 			if s.multiselect {
-				s.onunselect(value)
+				s.onunselect(value, e.content)
 				e.btn.SetButtonStyles(ButtonEnabled, s.enabledStyle)
 			}
 		} else {
 			if !s.multiselect {
 				s.UnselectAll()
 			}
-			s.onselect(value)
+			s.onselect(value, e.content)
 			e.btn.SetButtonStyles(ButtonEnabled, s.selectedStyle)
 		}
 		e.selected = !e.selected
@@ -122,6 +126,7 @@ func (s *SelectList) AddEntry(text string, value string) {
 		value:    value,
 		selected: false,
 		btn:      btn,
+		content:  content,
 	}
 	s.entries = append(s.entries, newentry)
 	s.value2entry[value] = newentry
@@ -143,10 +148,18 @@ func (s *SelectList) UnselectAll() {
 	}
 }
 
-func (s *SelectList) Selected() []string {
-	var sel []string
+type SelectListSelection struct {
+	value   string
+	content interface{}
+}
+
+func (s *SelectList) Selected() []SelectListSelection {
+	var sel []SelectListSelection
 	for _, e := range s.entries {
-		sel = append(sel, e.value)
+		sel = append(sel, SelectListSelection{
+			value:   e.value,
+			content: e.content,
+		})
 	}
 	return sel
 }
@@ -156,6 +169,7 @@ func (s *SelectList) SetSize(size pixel.Vec) {
 	s.background.SetSize(size)
 	st := s.GetStyles()
 	s.vscroll.SetSize(size.Sub(pixel.V(2*st.Padding+2*st.Border.Width, 2*st.Border.Width)))
+	s.vscroll.SetPos(pixel.V(0, size.Y/2-st.Border.Width))
 }
 
 func (s *SelectList) SetStyles(styles *nodes.Styles) {

@@ -121,6 +121,9 @@ func (b *Button) SetButtonStyles(state ButtonState, styles *nodes.Styles) {
 	b.overrideStyles = true
 	b.canvases[state].SetStyles(styles)
 	b.drawCanvases()
+	if state == b.state {
+		b.text.OverrideStyles(styles)
+	}
 }
 
 func (b *Button) SetStyles(styles *nodes.Styles) {
