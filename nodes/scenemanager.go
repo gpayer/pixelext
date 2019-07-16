@@ -2,6 +2,7 @@ package nodes
 
 import (
 	"image/color"
+	"math"
 	"time"
 
 	"github.com/faiface/pixel"
@@ -24,6 +25,7 @@ type SceneManagerStruct struct {
 	updateCount int
 	win         *pixelgl.Window
 	theme       *Theme
+	globalMat   pixel.Matrix
 }
 
 func (s *SceneManagerStruct) SetWin(win *pixelgl.Window) {
@@ -59,6 +61,7 @@ func (s *SceneManagerStruct) Root() Node {
 }
 
 func (s *SceneManagerStruct) Run(mat pixel.Matrix) {
+	s.globalMat = mat
 	if s.first {
 		s.last = time.Now()
 		s.first = false
@@ -84,10 +87,10 @@ func (s *SceneManagerStruct) Run(mat pixel.Matrix) {
 			s.win.Update() // only this updates s.win.bounds
 		} else {
 			s.win.UpdateInput()
-		}
-		sleepRemaining := time.Until(s.last.Add(17 * time.Millisecond))
-		if sleepRemaining > 0 {
-			time.Sleep(sleepRemaining)
+			sleepRemaining := time.Until(s.last.Add(17 * time.Millisecond))
+			if sleepRemaining > 0 {
+				time.Sleep(sleepRemaining)
+			}
 		}
 	}
 }
@@ -120,6 +123,18 @@ func (s *SceneManagerStruct) Unpause() {
 	}
 }
 
+func (s *SceneManagerStruct) CenterPos() pixel.Vec {
+	winsize := s.win.Bounds().Size()
+	w := math.Round(winsize.X / 2)
+	h := math.Round(winsize.Y / 2)
+	return s.globalMat.Project(pixel.V(w, h))
+}
+
 func init() {
-	sceneManager = &SceneManagerStruct{first: true, clearColor: color.RGBA{0, 0, 0, 255}, theme: DefaultTheme()}
+	sceneManager = &SceneManagerStruct{
+		first:      true,
+		clearColor: color.RGBA{0, 0, 0, 255},
+		theme:      DefaultTheme(),
+		globalMat:  pixel.IM,
+	}
 }

@@ -39,13 +39,13 @@ func (b *BaseNode) GetLastMat() pixel.Matrix {
 	return b.lastmat
 }
 
-func (b *BaseNode) _setLastMat(mat pixel.Matrix) {
+func (b *BaseNode) SetLastMat(mat pixel.Matrix) {
 	b.lastmat = mat
 	for _, child := range b.children {
 		if child == nil {
 			continue
 		}
-		child._setLastMat(child._getMat().Chained(mat))
+		child.SetLastMat(child._getMat().Chained(mat))
 	}
 }
 
@@ -449,5 +449,19 @@ func (b *BaseNode) Iterate(fn func(n Node)) {
 	fn(b)
 	for _, c := range b.Self.Children() {
 		c.Iterate(fn)
+	}
+}
+
+func (b *BaseNode) CopyFrom(from Node) {
+	b.Self.SetName(b.GetName())
+	b.Self.SetPos(from.GetPos())
+	b.Self.SetRot(from.GetRot())
+	b.Self.SetRotPoint(from.GetRotPoint())
+	b.Self.SetZIndex(from.ZIndex())
+	b.Self.SetLastMat(from.GetLastMat())
+
+	sizer, ok := from.(Sizer)
+	if ok {
+		b.Self.SetSize(sizer.Size())
 	}
 }

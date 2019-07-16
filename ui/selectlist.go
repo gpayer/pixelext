@@ -27,6 +27,8 @@ type SelectList struct {
 	onselect                            func(v string, content interface{})
 	onunselect                          func(v string, content interface{})
 	multiselect                         bool
+	btnPool                             []*Button
+	btnCurrent                          []*Button
 }
 
 func NewSelectList(name string, w, h float64, multiselect bool) *SelectList {
@@ -93,7 +95,16 @@ func (s *SelectList) OnUnselect(onunselect func(v string, content interface{})) 
 
 func (s *SelectList) AddEntry(text string, value string, content interface{}) {
 	btnW := s.Size().X - 2*s.GetStyles().Padding
-	btn := NewButton("btn", btnW, 0, text)
+	var btn *Button
+	if len(s.btnPool) > 0 {
+		btn = s.btnPool[len(s.btnPool)-1]
+		s.btnPool = s.btnPool[:len(s.btnPool)-1]
+		btn.SetSize(pixel.V(btnW, 0))
+		btn.SetText(text)
+	} else {
+		btn = NewButton("btn", btnW, 0, text)
+	}
+	s.btnCurrent = append(s.btnCurrent, btn)
 	btn.SetHAlignment(nodes.HAlignmentLeft)
 	btn.OnClick(func() {
 		e := s.value2entry[value]
@@ -135,6 +146,8 @@ func (s *SelectList) AddEntry(text string, value string, content interface{}) {
 func (s *SelectList) Clear() {
 	s.entries = s.entries[:0]
 	s.value2entry = make(map[string]*selectListEntry)
+	s.btnPool = append(s.btnPool, s.btnCurrent...)
+	s.btnCurrent = s.btnCurrent[:0]
 	s.list.RemoveChildren()
 	s.vscroll.SetInner(s.list)
 }

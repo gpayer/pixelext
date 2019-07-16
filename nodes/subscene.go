@@ -46,6 +46,6 @@ func (s *SubScene) Draw(win pixel.Target, mat pixel.Matrix) {
 	}
 	s.Canvas.Draw(win, mat)
 	if s.root != nil {
-		s.root._setLastMat(mat)
+		s.root.SetLastMat(mat)
 	}
 }

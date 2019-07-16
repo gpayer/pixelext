@@ -12,7 +12,7 @@ type Node interface {
 	_draw(win pixel.Target, mat pixel.Matrix)
 	_getMat() pixel.Matrix
 	GetLastMat() pixel.Matrix
-	_setLastMat(mat pixel.Matrix)
+	SetLastMat(mat pixel.Matrix)
 	Initialized() bool
 	Parent() Node
 	SetParent(p Node)
@@ -53,6 +53,7 @@ type Node interface {
 	SetLocked(locked bool)
 	Locked() bool
 	Iterate(fn func(n Node))
+	CopyFrom(from Node)
 }
 
 type Initializable interface {
