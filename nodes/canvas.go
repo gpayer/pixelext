@@ -1,15 +1,23 @@
 package nodes
 
 import (
+	"fmt"
 	"image/color"
+	"sync"
 
 	"github.com/faiface/pixel"
 	"github.com/faiface/pixel/pixelgl"
 )
 
+const maxCanvasCache = 1000
+
+var lockCacheCanvas sync.Mutex
+var cacheCanvas []*pixelgl.Canvas
+
 type Canvas struct {
 	BaseNode
 	canvas *pixelgl.Canvas
+	size   pixel.Vec
 }
 
 func NewCanvas(name string, w, h float64) *Canvas {
@@ -21,19 +29,58 @@ func NewCanvas(name string, w, h float64) *Canvas {
 	}
 	c := &Canvas{
 		BaseNode: *NewBaseNode(name),
-		canvas:   pixelgl.NewCanvas(pixel.R(0, 0, w, h)),
 	}
 	c.Self = c
+	c.size = pixel.V(w, h)
+	c.attachCanvas()
 	return c
 }
 
+func (c *Canvas) attachCanvas() {
+	if c.canvas == nil {
+		lockCacheCanvas.Lock()
+		defer lockCacheCanvas.Unlock()
+		if len(cacheCanvas) > 0 {
+			c.canvas = cacheCanvas[len(cacheCanvas)-1]
+			cacheCanvas = cacheCanvas[:len(cacheCanvas)-1]
+			fmt.Printf("attachCanvas: from cache, new len(cacheCanvas): %d, current bounds: %v", len(cacheCanvas), c.canvas.Bounds())
+			c.canvas.SetBounds(pixel.R(0, 0, c.size.X, c.size.Y))
+			fmt.Printf(", name: %s, new bounds: %f, %f\n", c.GetName(), c.size.X, c.size.Y)
+			c.canvas.Clear(c.Self.GetStyles().Background.Color)
+		} else {
+			fmt.Printf("attachCanvas: new, name: %s\n", c.GetName())
+			c.canvas = pixelgl.NewCanvas(pixel.R(0, 0, c.size.X, c.size.Y))
+		}
+	}
+}
+
+func (c *Canvas) detachCanvas() {
+	lockCacheCanvas.Lock()
+	defer lockCacheCanvas.Unlock()
+	if len(cacheCanvas) < maxCanvasCache {
+		cacheCanvas = append(cacheCanvas, c.canvas)
+		c.canvas = nil
+	}
+	fmt.Printf("detachCanvas: name: %s, len(cacheCanvas): %d\n", c.GetName(), len(cacheCanvas))
+}
+
 func (c *Canvas) SetSize(size pixel.Vec) {
+	c.attachCanvas()
+	c.size = size
 	c.canvas.SetBounds(pixel.R(0, 0, size.X, size.Y))
 	SceneManager().Redraw()
 }
 
 func (c *Canvas) Size() pixel.Vec {
-	return c.canvas.Bounds().Size()
+	return c.size
+}
+
+func (c *Canvas) Mount() {
+	c.attachCanvas()
+}
+
+func (c *Canvas) Unmount() {
+	c.detachCanvas()
 }
 
 func (c *Canvas) Draw(win pixel.Target, mat pixel.Matrix) {
@@ -41,6 +88,7 @@ func (c *Canvas) Draw(win pixel.Target, mat pixel.Matrix) {
 }
 
 func (c *Canvas) Clear(color color.Color) {
+	c.attachCanvas()
 	c.canvas.Clear(color)
 	SceneManager().Redraw()
 }
@@ -50,24 +98,29 @@ func (c *Canvas) Canvas() *pixelgl.Canvas {
 }
 
 func (c *Canvas) GetCanvas() *pixelgl.Canvas {
+	c.attachCanvas()
 	return c.canvas
 }
 
 func (c *Canvas) SetUniform(name string, value interface{}) {
+	c.attachCanvas()
 	c.canvas.SetUniform(name, value)
 }
 
 func (c *Canvas) SetFragmentShader(src string) {
+	c.attachCanvas()
 	c.canvas.SetFragmentShader(src)
 }
 
 func (c *Canvas) Contains(point pixel.Vec) bool {
+	c.attachCanvas()
 	size := c.canvas.Bounds().Size().Scaled(.5)
 	bounds := pixel.R(-size.X, -size.Y, size.X, size.Y)
 	return bounds.Contains(point)
 }
 
 func (c *Canvas) DrawLine(p1, p2 pixel.Vec, col color.Color) {
+	c.attachCanvas()
 	var ur, ug, ub, ua uint32 = col.RGBA()
 	var bcol []byte = make([]byte, 4)
 	bcol[0] = byte(ur)
@@ -87,6 +140,7 @@ func (c *Canvas) DrawLine(p1, p2 pixel.Vec, col color.Color) {
 }
 
 func (c *Canvas) DrawRect(p1, p2 pixel.Vec, col color.Color) {
+	c.attachCanvas()
 	c.DrawLine(p1, pixel.V(p1.X, p2.Y), col)
 	c.DrawLine(p1, pixel.V(p2.X, p1.Y), col)
 	c.DrawLine(p2, pixel.V(p1.X, p2.Y), col)
@@ -94,6 +148,7 @@ func (c *Canvas) DrawRect(p1, p2 pixel.Vec, col color.Color) {
 }
 
 func (c *Canvas) FillRect(p1, p2 pixel.Vec, col color.Color) {
+	c.attachCanvas()
 	var starty, endy, startx, endx int
 	bounds := pixel.R(p1.X, p1.Y, p2.X, p2.Y).Norm()
 	startx = int(bounds.Min.X)

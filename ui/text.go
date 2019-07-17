@@ -4,12 +4,18 @@ import (
 	"fmt"
 	"image/color"
 	"strings"
+	"sync"
 
 	"github.com/gpayer/pixelext/nodes"
 
 	"github.com/faiface/pixel"
 	"github.com/faiface/pixel/text"
 )
+
+const maxCacheText = 1000
+
+var lockCacheText sync.Mutex
+var cacheText []*text.Text // TODO: cache separated by atlas!
 
 type Text struct {
 	UIBase
@@ -20,13 +26,13 @@ type Text struct {
 func NewText(name, atlasname string) *Text {
 	t := &Text{
 		UIBase: *NewUIBase(name),
-		txt:    text.New(pixel.ZV, nodes.FontService.Get(atlasname)),
 	}
 	t.Self = t
 	t.UISelf = t
 	t.overrideStyles = true // TODO: make this method without atlas parameter
 	styles := t.GetStyles()
 	styles.Text.Atlas = atlasname
+	t.attachText()
 	return t
 }
 
@@ -40,11 +46,43 @@ func NewTextCustom(name, atlasname string, textcolor color.Color) *Text {
 	return t
 }
 
+func (t *Text) attachText() {
+	if t.txt == nil {
+		styles := t.GetStyles()
+		lockCacheText.Lock()
+		defer lockCacheText.Unlock()
+		if len(cacheText) > 0 {
+			t.txt = cacheText[len(cacheText)-1]
+			cacheText = cacheText[:len(cacheText)-1]
+			content := t.content.String()
+			t.content.Reset()
+			t.txt.Clear()
+			t.txt.Color = t.GetStyles().Text.Color
+			t.innerPrintf(content)
+		} else {
+			t.txt = text.New(pixel.ZV, nodes.FontService.Get(styles.Text.Atlas))
+		}
+	}
+}
+
+func (t *Text) detachText() {
+	if t.txt == nil {
+		return
+	}
+	lockCacheText.Lock()
+	defer lockCacheText.Unlock()
+	if len(cacheText) < maxCacheText {
+		cacheText = append(cacheText, t.txt)
+		t.txt = nil
+	}
+}
+
 func (t *Text) Text() *text.Text {
+	t.attachText()
 	return t.txt
 }
 
-func (t *Text) Printf(format string, a ...interface{}) {
+func (t *Text) innerPrintf(format string, a ...interface{}) {
 	fmt.Fprintf(&t.content, format, a...)
 	fmt.Fprintf(t.txt, format, a...)
 	t.SetExtraOffset(pixel.V(-t.txt.Bounds().W()/2, -t.txt.Bounds().H()/2-t.txt.Dot.Y+t.txt.Atlas().Descent()))
@@ -52,8 +90,21 @@ func (t *Text) Printf(format string, a ...interface{}) {
 	nodes.SceneManager().Redraw()
 }
 
+func (t *Text) Printf(format string, a ...interface{}) {
+	t.attachText()
+	t.innerPrintf(format, a...)
+}
+
 func (t *Text) GetContent() string {
 	return t.content.String()
+}
+
+func (t *Text) Mount() {
+	t.attachText()
+}
+
+func (t *Text) Unmount() {
+	t.detachText()
 }
 
 func (t *Text) Draw(win pixel.Target, mat pixel.Matrix) {
@@ -61,12 +112,19 @@ func (t *Text) Draw(win pixel.Target, mat pixel.Matrix) {
 }
 
 func (t *Text) Clear() {
+	t.attachText()
 	t.content.Reset()
 	t.txt.Clear()
 	nodes.SceneManager().Redraw()
 }
 
+func (t *Text) Size() pixel.Vec {
+	t.attachText()
+	return t.UIBase.Size()
+}
+
 func (t *Text) SetStyles(styles *nodes.Styles) {
+	t.attachText()
 	redraw := false
 	oldstyles := t.GetStyles()
 	if oldstyles.Text.Color != styles.Text.Color || oldstyles.Text.OffsetY != styles.Text.OffsetY {
