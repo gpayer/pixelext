@@ -20,6 +20,7 @@ func NewHBox(name string) *HBox {
 	}
 	h.Self = h
 	h.UISelf = h
+	h.background.SetLocked(true)
 	return h
 }
 

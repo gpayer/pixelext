@@ -7,11 +7,13 @@ import (
 type SubScene struct {
 	Canvas
 	root Node
+	size pixel.Vec
 }
 
 func NewSubScene(name string, w, h float64) *SubScene {
 	s := &SubScene{
 		Canvas: *NewCanvas(name, w, h),
+		size:   pixel.V(w, h),
 	}
 	s.Self = s
 	s.canvas.SetBounds(pixel.R(-w/2, -h/2, w/2, h/2))
@@ -48,4 +50,14 @@ func (s *SubScene) Draw(win pixel.Target, mat pixel.Matrix) {
 	if s.root != nil {
 		s.root.SetLastMat(mat)
 	}
+}
+
+func (s *SubScene) Mount() {
+	s.Canvas.Mount()
+	w, h := s.size.XY()
+	s.canvas.SetBounds(pixel.R(-w/2, -h/2, w/2, h/2))
+}
+
+func (s *SubScene) Unmount() {
+	s.Canvas.Unmount()
 }

@@ -41,3 +41,12 @@ func (b *BorderBox) SetStyles(styles *Styles) {
 	b.Canvas.SetStyles(styles)
 	b.redrawCanvas()
 }
+
+func (b *BorderBox) Mount() {
+	b.Canvas.Mount()
+	b.redrawCanvas()
+}
+
+func (b *BorderBox) Unmount() {
+	b.Canvas.Unmount()
+}

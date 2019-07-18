@@ -17,7 +17,8 @@ import (
 type dropDownState int
 
 const (
-	dropDownClosed dropDownState = iota
+	dropDownInit dropDownState = iota
+	dropDownClosed
 	dropDownOpening
 	dropDownOpened
 )
@@ -50,6 +51,7 @@ func NewDropDown(name, atlasname string, w, h, hdropdown float64) *DropDown {
 		current:   "",
 		atlasname: atlasname,
 		onchange:  func(_ string, _ string) {},
+		state:     dropDownInit,
 	}
 	d.Self = d
 	d.UISelf = d
@@ -62,11 +64,13 @@ func (d *DropDown) Init() {
 	styles := d.GetStyles()
 	d.background = nodes.NewBorderBox("background", size.X, size.Y)
 	d.background.SetZIndex(-1)
+	d.background.SetLocked(true)
 	d.AddChild(d.background)
 
 	subscenewidth := size.X - 15 - styles.Padding
 	d.sub = nodes.NewSubScene("subscene", subscenewidth, size.Y-6)
 	d.sub.SetPos(pixel.V(-5, 0))
+	d.sub.SetLocked(true)
 	d.AddChild(d.sub)
 
 	subroot := nodes.NewBaseNode("subroot")
@@ -79,12 +83,9 @@ func (d *DropDown) Init() {
 	d.value.SetZIndex(10)
 	subroot.AddChild(d.value)
 
-	d.btn = nodes.NewCanvas("btn", 15, size.Y)
-	im := imdraw.New(nil)
-	im.Push(pixel.V(4, math.Round(size.Y/2)+3), pixel.V(8, math.Round(size.Y/2)-3), pixel.V(12, math.Round(size.Y/2)+3))
-	im.Line(1)
-	im.Draw(d.btn.Canvas())
+	d.btn = nodes.NewCanvas("btn", 15, size.Y-2*styles.Border.Width)
 	d.btn.SetPos(pixel.V(size.X/2-10, 0))
+	d.btn.SetLocked(true)
 	d.AddChild(d.btn)
 
 	d.dropdown = nodes.NewBorderBox("dropdown", size.X+4, d.hdropdown+4)
@@ -238,6 +239,10 @@ func (d *DropDown) OnChange(fn func(string, string)) {
 }
 
 func (d *DropDown) Update(dt float64) {
+	if d.state == dropDownInit {
+		d.state = dropDownClosed
+		nodes.SceneManager().Root().AddChild(d.dropdown)
+	}
 	if nodes.Events().Clicked(pixelgl.MouseButtonLeft, d) {
 		if d.state == dropDownClosed {
 			d.showDropDown()
@@ -260,19 +265,23 @@ func (d *DropDown) showDropDown() {
 	size := d.vscroll.Size().Add(pixel.V(2, 2))
 	pos := d.LocalToGlobalPos(pixel.V(0, -d.Size().Y/2-size.Y/2))
 	d.dropdown.SetPos(pos)
-	nodes.SceneManager().Root().AddChild(d.dropdown)
 }
 
 func (d *DropDown) hideDropDown() {
 	d.dropdown.Hide()
-	nodes.SceneManager().Root().RemoveChild(d.dropdown)
 }
 
 func (d *DropDown) Mount() {
+	size := d.Size()
+	im := imdraw.New(nil)
+	im.Push(pixel.V(4, math.Round(size.Y/2)+3), pixel.V(8, math.Round(size.Y/2)-3), pixel.V(12, math.Round(size.Y/2)+3))
+	im.Line(1)
+	im.Draw(d.btn.Canvas())
 }
 
 func (d *DropDown) Unmount() {
 	if d.state != dropDownClosed {
 		d.hideDropDown()
 	}
+	nodes.SceneManager().Root().RemoveChild(d.dropdown)
 }

@@ -80,3 +80,13 @@ func (c *CheckBox) Update(dt float64) {
 		c.oldstate = c.state
 	}
 }
+
+func (c *CheckBox) Mount() {
+	if c.state {
+		c.drawTrue()
+	} else {
+		c.drawFalse()
+	}
+}
+
+func (c *CheckBox) Unmount() {}

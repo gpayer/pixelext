@@ -1,9 +1,7 @@
 package nodes
 
 import (
-	"fmt"
 	"image/color"
-	"sync"
 
 	"github.com/faiface/pixel"
 	"github.com/faiface/pixel/pixelgl"
@@ -11,8 +9,7 @@ import (
 
 const maxCanvasCache = 1000
 
-var lockCacheCanvas sync.Mutex
-var cacheCanvas []*pixelgl.Canvas
+var cacheCanvasFifo chan *pixelgl.Canvas
 
 type Canvas struct {
 	BaseNode
@@ -38,30 +35,26 @@ func NewCanvas(name string, w, h float64) *Canvas {
 
 func (c *Canvas) attachCanvas() {
 	if c.canvas == nil {
-		lockCacheCanvas.Lock()
-		defer lockCacheCanvas.Unlock()
-		if len(cacheCanvas) > 0 {
-			c.canvas = cacheCanvas[len(cacheCanvas)-1]
-			cacheCanvas = cacheCanvas[:len(cacheCanvas)-1]
-			fmt.Printf("attachCanvas: from cache, new len(cacheCanvas): %d, current bounds: %v", len(cacheCanvas), c.canvas.Bounds())
+		select {
+		case cachedCanvas := <-cacheCanvasFifo:
+			c.canvas = cachedCanvas
 			c.canvas.SetBounds(pixel.R(0, 0, c.size.X, c.size.Y))
-			fmt.Printf(", name: %s, new bounds: %f, %f\n", c.GetName(), c.size.X, c.size.Y)
 			c.canvas.Clear(c.Self.GetStyles().Background.Color)
-		} else {
-			fmt.Printf("attachCanvas: new, name: %s\n", c.GetName())
+		default:
 			c.canvas = pixelgl.NewCanvas(pixel.R(0, 0, c.size.X, c.size.Y))
 		}
 	}
 }
 
 func (c *Canvas) detachCanvas() {
-	lockCacheCanvas.Lock()
-	defer lockCacheCanvas.Unlock()
-	if len(cacheCanvas) < maxCanvasCache {
-		cacheCanvas = append(cacheCanvas, c.canvas)
-		c.canvas = nil
+	if c.canvas == nil {
+		return
 	}
-	fmt.Printf("detachCanvas: name: %s, len(cacheCanvas): %d\n", c.GetName(), len(cacheCanvas))
+	select {
+	case cacheCanvasFifo <- c.canvas:
+	default:
+	}
+	c.canvas = nil
 }
 
 func (c *Canvas) SetSize(size pixel.Vec) {
@@ -247,4 +240,8 @@ func gbham(xstart, ystart, xend, yend int, disp *displayDef, col []byte) {
 		}
 		setPixel(x, y, disp, col)
 	}
+}
+
+func init() {
+	cacheCanvasFifo = make(chan *pixelgl.Canvas, maxCanvasCache)
 }

@@ -20,6 +20,7 @@ func NewVBox(name string) *VBox {
 	}
 	v.Self = v
 	v.UISelf = v
+	v.background.SetLocked(true)
 	return v
 }
 

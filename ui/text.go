@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"image/color"
 	"strings"
-	"sync"
 
 	"github.com/gpayer/pixelext/nodes"
 
@@ -14,8 +13,7 @@ import (
 
 const maxCacheText = 1000
 
-var lockCacheText sync.Mutex
-var cacheText []*text.Text // TODO: cache separated by atlas!
+var cacheTextFifo chan *text.Text
 
 type Text struct {
 	UIBase
@@ -49,17 +47,20 @@ func NewTextCustom(name, atlasname string, textcolor color.Color) *Text {
 func (t *Text) attachText() {
 	if t.txt == nil {
 		styles := t.GetStyles()
-		lockCacheText.Lock()
-		defer lockCacheText.Unlock()
-		if len(cacheText) > 0 {
-			t.txt = cacheText[len(cacheText)-1]
-			cacheText = cacheText[:len(cacheText)-1]
+		select {
+		case cachedTxt := <-cacheTextFifo:
+			t.txt = cachedTxt
+			if t.txt == nil {
+				panic(fmt.Errorf("t.txt is nil"))
+			}
 			content := t.content.String()
+			content = (content + " ")[:len(content)]
 			t.content.Reset()
 			t.txt.Clear()
 			t.txt.Color = t.GetStyles().Text.Color
 			t.innerPrintf(content)
-		} else {
+			t.SetPos(t.GetOrigPos())
+		default:
 			t.txt = text.New(pixel.ZV, nodes.FontService.Get(styles.Text.Atlas))
 		}
 	}
@@ -69,12 +70,11 @@ func (t *Text) detachText() {
 	if t.txt == nil {
 		return
 	}
-	lockCacheText.Lock()
-	defer lockCacheText.Unlock()
-	if len(cacheText) < maxCacheText {
-		cacheText = append(cacheText, t.txt)
-		t.txt = nil
+	select {
+	case cacheTextFifo <- t.txt:
+	default:
 	}
+	t.txt = nil
 }
 
 func (t *Text) Text() *text.Text {
@@ -149,4 +149,8 @@ func (t *Text) UpdateFromTheme(theme *nodes.Theme) {
 		return
 	}
 	t.SetStyles(theme.Text)
+}
+
+func init() {
+	cacheTextFifo = make(chan *text.Text, maxCacheText)
 }
