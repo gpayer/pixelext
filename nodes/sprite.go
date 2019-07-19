@@ -38,12 +38,19 @@ func NewSprite(name string, pic pixel.Picture) *Sprite {
 func (s *Sprite) SetBounds(bounds pixel.Rect) {
 	s.bounds = bounds
 	s.sprite.Set(s.pic, bounds)
+	SceneManager().Redraw()
 }
 
 func (s *Sprite) Bounds() pixel.Rect {
 	return s.bounds
 }
 
-func (s *Sprite) Set(pic pixel.Picture, bounds pixel.Rect) {
-	s.sprite.Set(pic, bounds)
+func (s *Sprite) Set(pic pixel.Picture) {
+	s.sprite = pixel.NewSprite(pic, pic.Bounds())
+	s.bounds = pic.Bounds()
+	SceneManager().Redraw()
+}
+
+func (s *Sprite) Size() pixel.Vec {
+	return s.bounds.Size()
 }
