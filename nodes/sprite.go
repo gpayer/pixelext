@@ -47,6 +47,7 @@ func (s *Sprite) Bounds() pixel.Rect {
 
 func (s *Sprite) Set(pic pixel.Picture) {
 	s.sprite = pixel.NewSprite(pic, pic.Bounds())
+	s.pic = pic
 	s.bounds = pic.Bounds()
 	SceneManager().Redraw()
 }
