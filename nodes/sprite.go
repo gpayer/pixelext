@@ -37,7 +37,9 @@ func NewSprite(name string, pic pixel.Picture) *Sprite {
 
 func (s *Sprite) SetBounds(bounds pixel.Rect) {
 	s.bounds = bounds
-	s.sprite.Set(s.pic, bounds)
+	if s.sprite != nil {
+		s.sprite.Set(s.pic, bounds)
+	}
 	SceneManager().Redraw()
 }
 

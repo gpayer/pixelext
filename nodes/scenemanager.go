@@ -130,6 +130,23 @@ func (s *SceneManagerStruct) CenterPos() pixel.Vec {
 	return s.globalMat.Project(pixel.V(w, h))
 }
 
+func (s *SceneManagerStruct) KeepOnScreen(n Node, r pixel.Rect) pixel.Vec {
+	winmax := s.globalMat.Project(s.win.Bounds().Size())
+	winmin := s.globalMat.Project(pixel.ZV)
+	var move pixel.Vec
+	if r.Min.X < winmin.X {
+		move.X = winmin.X - r.Min.X
+	} else if r.Max.X > winmax.X {
+		move.X = winmax.X - r.Max.X
+	}
+	if r.Min.Y < winmin.Y {
+		move.Y = winmin.Y - r.Min.Y
+	} else if r.Max.Y > winmax.Y {
+		move.Y = winmax.Y - r.Max.Y
+	}
+	return move
+}
+
 func init() {
 	sceneManager = &SceneManagerStruct{
 		first:      true,

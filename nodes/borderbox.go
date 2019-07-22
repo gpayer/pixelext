@@ -1,6 +1,8 @@
 package nodes
 
 import (
+	"fmt"
+
 	"github.com/faiface/pixel"
 )
 
@@ -42,11 +44,13 @@ func (b *BorderBox) SetStyles(styles *Styles) {
 	b.redrawCanvas()
 }
 
-func (b *BorderBox) Mount() {
-	b.Canvas.Mount()
-	b.redrawCanvas()
-}
-
-func (b *BorderBox) Unmount() {
-	b.Canvas.Unmount()
+func (b *BorderBox) KeepOnScreen() {
+	globalcenter := b.LocalToGlobalPos(pixel.ZV)
+	fmt.Println("globalcenter =", globalcenter)
+	sizeh := b.Size().Scaled(.5)
+	bounds := pixel.R(globalcenter.X-sizeh.X, globalcenter.Y-sizeh.Y, globalcenter.X+sizeh.X, globalcenter.Y+sizeh.Y)
+	fmt.Println("bounds =", bounds)
+	move := SceneManager().KeepOnScreen(b, bounds)
+	fmt.Println("move =", move)
+	b.SetPos(b.GetPos().Add(move))
 }

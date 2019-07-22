@@ -31,6 +31,7 @@ func (s *SubScene) SetRoot(root Node) {
 }
 
 func (s *SubScene) SetSize(size pixel.Vec) {
+	s.Canvas.SetSize(size)
 	s.canvas.SetBounds(pixel.R(-size.X/2, -size.Y/2, size.X/2, size.Y/2))
 	SceneManager().Redraw()
 }
@@ -52,12 +53,13 @@ func (s *SubScene) Draw(win pixel.Target, mat pixel.Matrix) {
 	}
 }
 
-func (s *SubScene) Mount() {
+/*func (s *SubScene) Mount() {
 	s.Canvas.Mount()
 	w, h := s.size.XY()
+	s.Canvas.SetSize(s.size)
 	s.canvas.SetBounds(pixel.R(-w/2, -h/2, w/2, h/2))
 }
 
 func (s *SubScene) Unmount() {
 	s.Canvas.Unmount()
-}
+}*/

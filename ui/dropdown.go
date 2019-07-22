@@ -265,6 +265,7 @@ func (d *DropDown) showDropDown() {
 	size := d.vscroll.Size().Add(pixel.V(2, 2))
 	pos := d.LocalToGlobalPos(pixel.V(0, -d.Size().Y/2-size.Y/2))
 	d.dropdown.SetPos(pos)
+	d.dropdown.KeepOnScreen()
 }
 
 func (d *DropDown) hideDropDown() {
@@ -284,4 +285,5 @@ func (d *DropDown) Unmount() {
 		d.hideDropDown()
 	}
 	nodes.SceneManager().Root().RemoveChild(d.dropdown)
+	d.state = dropDownInit
 }

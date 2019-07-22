@@ -125,3 +125,11 @@ func (ui *UIBase) VAlignment() nodes.VerticalAlignment {
 func (ui *UIBase) SetVAlignment(v nodes.VerticalAlignment) {
 	ui.valignment = v
 }
+
+func (ui *UIBase) KeepOnScreen() {
+	globalcenter := ui.Self.GetLastMat().Project(ui.Self.GetPos().Add(ui.Self.GetExtraOffset()))
+	sizeh := ui.UISelf.Size().Scaled(.5)
+	bounds := pixel.R(globalcenter.X-sizeh.X, globalcenter.Y-sizeh.Y, globalcenter.X+sizeh.X, globalcenter.Y+sizeh.Y)
+	move := nodes.SceneManager().KeepOnScreen(ui, bounds)
+	ui.Self.SetPos(ui.UISelf.GetOrigPos().Add(move))
+}
