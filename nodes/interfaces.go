@@ -11,6 +11,7 @@ type Node interface {
 	_update(dt float64)
 	_draw(win pixel.Target, mat pixel.Matrix)
 	_getMat() pixel.Matrix
+	calcLastMat()
 	GetLastMat() pixel.Matrix
 	SetLastMat(mat pixel.Matrix)
 	Initialized() bool

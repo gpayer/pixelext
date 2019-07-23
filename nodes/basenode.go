@@ -14,6 +14,7 @@ type BaseNode struct {
 	parent                    Node
 	show, active, initialized bool
 	mat, lastmat              pixel.Matrix
+	calculated                bool
 	pos                       pixel.Vec
 	bounds                    pixel.Rect
 	scale                     pixel.Vec
@@ -157,6 +158,7 @@ func (b *BaseNode) _update(dt float64) {
 
 func (b *BaseNode) _draw(win pixel.Target, mat pixel.Matrix) {
 	b.lastmat = mat
+	b.calculated = true
 	if !b.active || !b.show {
 		return
 	}
@@ -193,6 +195,7 @@ func NewBaseNode(name string) *BaseNode {
 		paused:        false,
 		locked:        false,
 		mounted:       false,
+		calculated:    false,
 	}
 	b.Self = b
 	b.calcMat()
@@ -201,7 +204,20 @@ func NewBaseNode(name string) *BaseNode {
 
 func (b *BaseNode) calcMat() {
 	b.mat = pixel.IM.Moved(b.extraoffset).ScaledXY(b.origin, b.scale).Rotated(b.rotpoint, b.rot).Moved(b.pos)
+	b.calculated = false
 	SceneManager().Redraw()
+}
+
+func (b *BaseNode) calcLastMat() {
+	if !b.calculated {
+		if b.parent != nil {
+			b.parent.calcLastMat()
+			b.lastmat = b._getMat().Chained(b.parent._getMat())
+		} else {
+			b.lastmat = b._getMat()
+		}
+		b.calculated = true
+	}
 }
 
 func (b *BaseNode) Initialized() bool {
@@ -238,6 +254,7 @@ func (b *BaseNode) GetPos() pixel.Vec {
 }
 
 func (b *BaseNode) LocalToGlobalPos(local pixel.Vec) pixel.Vec {
+	b.calcLastMat()
 	return b.GetLastMat().Project(local.Sub(b.Self.GetExtraOffset()))
 }
 
@@ -245,6 +262,7 @@ func (b *BaseNode) GlobalToLocalPos(global pixel.Vec) pixel.Vec {
 	if b.parent == nil {
 		return global
 	}
+	b.calcLastMat()
 	return b.parent.GetLastMat().Unproject(global)
 }
 
