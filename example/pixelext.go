@@ -71,7 +71,7 @@ func (b *backgroundGrid) Init() {
 }
 
 func makeText(x, y float64, name string, al nodes.Alignment) *ui.Text {
-	text := ui.NewText(name, "standard")
+	text := ui.NewTextCustom(name, "standard", colornames.White)
 	text.Printf("AyPQ\nyFQB")
 	text.SetPos(pixel.V(x, y))
 	text.SetAlignment(al)
@@ -202,16 +202,16 @@ func (d *demo) Init() {
 	hbox.SetStyles(styles)
 	d.AddChild(hbox)
 
-	text = ui.NewText("f1", "basic")
+	text = ui.NewText("f1")
 	text.Printf("Field1")
 	hbox.AddChild(text)
-	text = ui.NewText("f2", "basic")
+	text = ui.NewText("f2")
 	text.Printf("Field2\nLine2")
 	txtstyle := text.GetStyles()
 	txtstyle.Text.Color = colornames.Gold
 	text.SetStyles(txtstyle)
 	hbox.AddChild(text)
-	text = ui.NewText("f3", "basic")
+	text = ui.NewText("f3")
 	text.Printf("Field3")
 	hbox.AddChild(text)
 
@@ -260,18 +260,18 @@ func (d *demo) Init() {
 	grid.SetPos(pixel.V(910, 590))
 	d.AddChild(grid)
 
-	text = ui.NewText("", "basic")
+	text = ui.NewText("")
 	text.Printf("One Field")
 	grid.AddChild(text)
 
 	button = ui.NewButton("btn1", 0, 0, "Btn!")
 	grid.AddChild(button)
 
-	text = ui.NewText("", "basic")
+	text = ui.NewText("")
 	text.Printf("Last")
 	grid.AddChild(text)
 
-	text = ui.NewText("", "basic")
+	text = ui.NewText("")
 	text.Printf("Next line")
 	grid.AddChild(text)
 
@@ -306,10 +306,10 @@ func (d *demo) Init() {
 	vbox := ui.NewVBox("vbox1")
 	vbox.SetPos(pixel.V(1100, 400))
 
-	text = ui.NewText("", "basic")
+	text = ui.NewText("")
 	text.Printf("Line 1")
 	vbox.AddChild(text)
-	text = ui.NewText("", "basic")
+	text = ui.NewText("")
 	text.Printf("Line 2 is pretty long")
 	vbox.AddChild(text)
 
@@ -319,16 +319,16 @@ func (d *demo) Init() {
 	vscroll.SetPos(pixel.V(150, 650))
 	d.AddChild(vscroll)
 	vbox = ui.NewVBox("innervbox")
-	text = ui.NewText("", "basic")
+	text = ui.NewText("")
 	text.Printf("Line 1")
 	vbox.AddChild(text)
-	text = ui.NewText("", "basic")
+	text = ui.NewText("")
 	text.Printf("Line 2 is pretty long")
 	vbox.AddChild(text)
-	text = ui.NewText("", "basic")
+	text = ui.NewText("")
 	text.Printf("Line 3 is not long")
 	vbox.AddChild(text)
-	text = ui.NewText("", "basic")
+	text = ui.NewText("")
 	text.Printf("And another line")
 	vbox.AddChild(text)
 
@@ -354,7 +354,10 @@ func (d *demo) Init() {
 	hbox.AddChild(dropdown)
 
 	valuecounter := 4
-	inputbox = ui.NewInputBox("input1", "standard", 200, 26)
+	styles = nodes.DefaultStyles()
+	styles.Text.Atlas = "standard"
+	inputbox = ui.NewInputBox("input1", 200, 26)
+	inputbox.OverrideStyles(styles)
 	inputbox.OnEnter(func(v string) {
 		if currentDropDownValue != "" {
 			dropdown.ChangeValue(currentDropDownValue, v)
@@ -379,7 +382,7 @@ func (d *demo) Init() {
 			inputbox.SetValue("")
 		}
 	})
-	button.SetStyles(dropdownbtnstyle)
+	button.OverrideStyles(dropdownbtnstyle)
 	hbox.AddChild(button)
 
 	button = ui.NewButton("New", 0, 0, "New")
@@ -415,7 +418,7 @@ func (d *demo) Init() {
 	}
 	nodes.FontService.AddAtlas("great30", ttfface)
 
-	ttftext := ui.NewText("ttftext", "great30")
+	ttftext := ui.NewTextCustom("ttftext", "great30", colornames.White)
 	ttftext.SetPos(pixel.V(1200, 800))
 	ttftext.SetAlignment(nodes.AlignmentBottomLeft)
 	ttftext.Printf("The quick fox jumped over the lazy dog!")
@@ -427,7 +430,7 @@ func (d *demo) Init() {
 	}
 	nodes.FontService.AddAtlas("standard30", ttfface)
 
-	ttftext = ui.NewText("ttftext2", "standard30")
+	ttftext = ui.NewTextCustom("ttftext2", "standard30", colornames.White)
 	ttftext.SetPos(pixel.V(1200, 700))
 	ttftext.SetAlignment(nodes.AlignmentBottomLeft)
 	ttftext.Printf("The quick fox jumped over the lazy dog!")

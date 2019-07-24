@@ -10,9 +10,9 @@ type IntInputBox struct {
 	InputBox
 }
 
-func NewIntInputBox(name, atlasname string, w, h float64) *IntInputBox {
+func NewIntInputBox(name string, w, h float64) *IntInputBox {
 	i := &IntInputBox{
-		InputBox: *NewInputBox(name, atlasname, w, h),
+		InputBox: *NewInputBox(name, w, h),
 	}
 	i.Self = i
 	i.UISelf = i

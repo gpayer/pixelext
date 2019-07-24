@@ -44,6 +44,7 @@ type DropDown struct {
 	onchange   func(value string, text string)
 }
 
+// TODO: theme support
 func NewDropDown(name, atlasname string, w, h, hdropdown float64) *DropDown {
 	d := &DropDown{
 		UIBase:    *NewUIBase(name),
@@ -76,7 +77,7 @@ func (d *DropDown) Init() {
 	subroot := nodes.NewBaseNode("subroot")
 	d.sub.SetRoot(subroot)
 
-	d.value = NewText("value", d.atlasname)
+	d.value = NewTextCustom("value", d.atlasname, styles.Text.Color)
 	d.value.Printf("---")
 	d.value.SetAlignment(nodes.AlignmentCenterLeft)
 	d.value.SetPos(pixel.V(-subscenewidth/2+2, 0))

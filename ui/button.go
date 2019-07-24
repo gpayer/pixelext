@@ -66,7 +66,7 @@ func (b *Button) alignText() {
 
 func (b *Button) createText() {
 	styles := b.canvases[ButtonEnabled].GetStyles()
-	b.text = NewText("buttontxt", styles.Text.Atlas)
+	b.text = NewTextCustom("buttontxt", styles.Text.Atlas, styles.Text.Color)
 	b.text.Printf(b.textcontent)
 	b.text.SetLocked(true)
 	b.text.SetZIndex(10)
@@ -115,6 +115,9 @@ func (b *Button) internalSetSize() {
 	}
 	b.alignText()
 	b.drawCanvases()
+	if b.Parent() != nil {
+		b.Parent().ChildChanged()
+	}
 }
 
 func (b *Button) SetButtonStyles(state ButtonState, styles *nodes.Styles) {

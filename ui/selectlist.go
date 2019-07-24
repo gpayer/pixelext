@@ -50,7 +50,7 @@ func NewSelectList(name string, w, h float64, multiselect bool) *SelectList {
 
 	s.baseStyle = nodes.DefaultStyles()
 	s.baseStyle.Border.Width = 0
-	s.baseStyle.Padding = 0
+	s.baseStyle.Padding = 2
 
 	s.enabledStyle = s.baseStyle.Clone()
 	s.enabledStyle.Background.Color = colornames.Black
@@ -101,6 +101,7 @@ func (s *SelectList) AddEntry(text string, value string, content interface{}) {
 		s.btnPool = s.btnPool[:len(s.btnPool)-1]
 		btn.SetSize(pixel.V(btnW, 0))
 		btn.SetText(text)
+		btn.SetButtonStyles(ButtonEnabled, s.enabledStyle)
 	} else {
 		btn = NewButton("btn", btnW, 0, text)
 	}

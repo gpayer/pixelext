@@ -29,12 +29,11 @@ type InputBox struct {
 	onenter       func(string)
 }
 
-func NewInputBox(name, atlasname string, w, h float64) *InputBox {
+func NewInputBox(name string, w, h float64) *InputBox {
 	i := &InputBox{
 		UIBase:        *NewUIBase(name),
 		background:    nodes.NewBorderBox("bbox", w, h),
 		sub:           nodes.NewSubScene("sub", w-8, h-6),
-		text:          NewText("txt", atlasname),
 		cursor:        nodes.NewCanvas("cursor", 2, h-6),
 		textscroll:    0,
 		blinkduration: 0.5,
@@ -48,14 +47,13 @@ func NewInputBox(name, atlasname string, w, h float64) *InputBox {
 	}
 	i.Self = i
 	i.UISelf = i
+	i.text = NewText("txt")
 	i.cursor.Clear(i.GetStyles().Text.Color)
 	i.SetSize(pixel.V(w, h))
 	return i
 }
 
 func (i *InputBox) Init() {
-	//padding := i.GetStyles().Padding
-	//size := i.Size()
 	i.background.SetZIndex(-1)
 	i.background.SetLocked(true)
 	i.AddChild(i.background)
