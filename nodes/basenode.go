@@ -339,6 +339,10 @@ func (b *BaseNode) Hide() {
 	b.active = false
 }
 
+func (b *BaseNode) IsShown() bool {
+	return b.show
+}
+
 func (b *BaseNode) SetActive(active bool) {
 	b.active = active
 	SceneManager().Redraw()

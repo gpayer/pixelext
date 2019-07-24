@@ -36,6 +36,7 @@ type Node interface {
 	GetExtraOffset() pixel.Vec
 	Show()
 	Hide()
+	IsShown() bool
 	AddChild(child Node)
 	Children() []Node
 	SortChildren()
