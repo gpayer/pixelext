@@ -372,6 +372,7 @@ func (b *BaseNode) AddChild(child Node) {
 func (b *BaseNode) RemoveChild(child Node) {
 	for i, ch := range b.children {
 		if child == ch {
+			ch.SetParent(nil)
 			ch._unmount()
 			b.children[i] = nil
 			SceneManager().Redraw()
@@ -385,6 +386,7 @@ func (b *BaseNode) RemoveChildren() {
 		if ch == nil || ch.Locked() {
 			continue
 		}
+		ch.SetParent(nil)
 		ch._unmount()
 		b.children[i] = nil
 	}
