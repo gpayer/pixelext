@@ -11,6 +11,7 @@ import (
 type HBox struct {
 	UIBase
 	background *nodes.BorderBox
+	w, h       float64
 }
 
 func NewHBox(name string) *HBox {
@@ -50,6 +51,12 @@ func (h *HBox) recalcPositions() {
 		}
 	}
 	size := pixel.V(math.Round(xpos-padding+2*borderWidth), math.Round(maxy+2*padding+2*borderWidth))
+	if h.w > 0 {
+		size.X = h.w
+	}
+	if h.h > 0 {
+		size.Y = h.h
+	}
 	h.SetSize(size)
 	h.background.SetSize(size)
 
@@ -91,5 +98,11 @@ func (h *HBox) RemoveChildren() {
 }
 
 func (h *HBox) ChildChanged() {
+	h.recalcPositions()
+}
+
+func (h *HBox) SetFixedSize(size pixel.Vec) {
+	h.w = size.X
+	h.h = size.Y
 	h.recalcPositions()
 }
