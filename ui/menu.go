@@ -8,9 +8,9 @@ import (
 )
 
 const (
-	MenuStateClosed int = iota
-	MenuStateOpened
-	MenuStateClosing
+	menuStateInit int = iota
+	menuStateClosed
+	menuStateOpened
 )
 
 type Menu struct {
@@ -26,7 +26,7 @@ func NewMenu(name string, parent *Menu, menubar *MenuBar) *Menu {
 		VBox:    *NewVBox(name),
 		parent:  parent,
 		menubar: menubar,
-		state:   MenuStateClosed,
+		state:   menuStateInit,
 	}
 	m.Self = m
 	m.UISelf = m
@@ -34,7 +34,7 @@ func NewMenu(name string, parent *Menu, menubar *MenuBar) *Menu {
 	m.SetAlignment(nodes.AlignmentTopLeft)
 	styles := m.GetStyles()
 	styles.Border.Width = 0
-	styles.Background.Color = colornames.Darkgray
+	styles.Background.Color = colornames.Lightgray
 	m.SetStyles(styles)
 	m.SetZIndex(9999)
 	return m
@@ -43,10 +43,10 @@ func NewMenu(name string, parent *Menu, menubar *MenuBar) *Menu {
 func (m *Menu) SetItems(items []MenuItem) {
 	btnstyle := nodes.DefaultStyles()
 	btnstyle.Border.Width = 0
-	btnstyle.Background.Color = colornames.Darkgray
+	btnstyle.Background.Color = colornames.Lightgray
+	btnstyle.Text.Color = colornames.Black
 	hoverstyle := btnstyle.Clone()
-	hoverstyle.Background.Color = colornames.Lightgray
-	hoverstyle.Text.Color = colornames.Black
+	hoverstyle.Background.Color = colornames.Darkgray
 	clickedstyle := hoverstyle.Clone()
 	clickedstyle.Background.Color = colornames.White
 	disabledstyle := btnstyle.Clone()
@@ -63,7 +63,7 @@ func (m *Menu) SetItems(items []MenuItem) {
 		btn.SetButtonStyles(ButtonPressed, clickedstyle)
 		btn.SetButtonStyles(ButtonDisabled, disabledstyle)
 		btn.OnClick(func() {
-			m.state = MenuStateClosing
+			m.state = menuStateClosed
 			m.menubar.onselect(item.Value)
 		})
 		m.AddChild(btn)
@@ -71,25 +71,25 @@ func (m *Menu) SetItems(items []MenuItem) {
 }
 
 func (m *Menu) Activate(pos pixel.Vec) {
-	if m.state != MenuStateClosed {
-		return
+	if m.state == menuStateInit {
+		m.state = menuStateClosed
+		nodes.SceneManager().Root().AddChild(m)
 	}
 	m.Show()
 	m.SetPos(pos)
-	m.KeepOnScreen()
+	//m.KeepOnScreen()
 	nodes.Events().SetFocus(m)
-	m.state = MenuStateOpened
+	m.state = menuStateOpened
 }
 
 func (m *Menu) Update(dt float64) {
-	if m.state == MenuStateClosing {
-		m.state = MenuStateClosed
-		m.Hide()
-	} else {
-		ev := nodes.Events()
-		if !ev.MouseHovering(m) && (ev.JustPressed(pixelgl.MouseButtonLeft) || ev.JustPressed(pixelgl.MouseButtonMiddle)) {
-			m.state = MenuStateClosed
-			m.Hide()
+	if nodes.Events().JustReleased(pixelgl.MouseButtonLeft) {
+		if m.state == menuStateOpened && !nodes.Events().MouseHovering(m) {
+			m.state = menuStateClosed
 		}
+	} else if m.state == menuStateClosed {
+		// TODO: hide sub menus
+		nodes.Events().SetFocus(nil)
+		m.Hide()
 	}
 }

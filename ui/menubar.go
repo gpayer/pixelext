@@ -32,7 +32,7 @@ func NewMenuBar(name string) *MenuBar {
 	m.UISelf = m
 	styles := m.GetStyles()
 	styles.Border.Width = 0
-	styles.Background.Color = colornames.Darkgray
+	styles.Background.Color = colornames.Lightgray
 	styles.Padding = 2
 	m.SetStyles(styles)
 	return m
@@ -41,10 +41,10 @@ func NewMenuBar(name string) *MenuBar {
 func (m *MenuBar) SetItems(items []MenuItem) {
 	btnstyle := nodes.DefaultStyles()
 	btnstyle.Border.Width = 0
-	btnstyle.Background.Color = colornames.Darkgray
+	btnstyle.Background.Color = colornames.Lightgray
+	btnstyle.Text.Color = colornames.Black
 	hoverstyle := btnstyle.Clone()
-	hoverstyle.Background.Color = colornames.Lightgray
-	hoverstyle.Text.Color = colornames.Black
+	hoverstyle.Background.Color = colornames.Darkgray
 	clickedstyle := hoverstyle.Clone()
 	clickedstyle.Background.Color = colornames.White
 	disabledstyle := btnstyle.Clone()
@@ -65,14 +65,13 @@ func (m *MenuBar) SetItems(items []MenuItem) {
 			menu.SetItems(item.SubMenu)
 			menu.Hide()
 			item.menu = menu
-			nodes.SceneManager().Root().AddChild(menu)
 		}
 		btn.OnClick(func() {
 			m.onselect(item.Value)
 			if item.menu != nil {
 				y := btn.GetPos().Y - math.Round(m.Size().Y/2) + 2
 				x := btn.GetPos().X - math.Round(btn.Size().X/2)
-				globpos := btn.LocalToGlobalPos(pixel.V(x, y))
+				globpos := m.LocalToGlobalPos(pixel.V(x, y))
 				item.menu.Activate(globpos)
 			}
 		})
