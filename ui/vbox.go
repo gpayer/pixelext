@@ -109,3 +109,8 @@ func (v *VBox) RemoveChildren() {
 func (v *VBox) ChildChanged() {
 	v.recalcPositions()
 }
+
+func (v *VBox) SetHAlignment(val nodes.HorizontalAlignment) {
+	v.UIBase.SetHAlignment(val)
+	v.recalcPositions()
+}
