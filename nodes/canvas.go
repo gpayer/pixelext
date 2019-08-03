@@ -33,6 +33,12 @@ func NewCanvas(name string, w, h float64) *Canvas {
 }
 
 func (c *Canvas) SetSize(size pixel.Vec) {
+	if size.X < 1 {
+		size.X = 1
+	}
+	if size.Y < 1 {
+		size.Y = 1
+	}
 	c.canvas.SetBounds(pixel.R(0, 0, size.X, size.Y))
 	c.size = c.canvas.Bounds().Size()
 	c.pixels = make([]uint8, int(math.Ceil(c.size.X))*int(math.Ceil(c.size.Y))*4)

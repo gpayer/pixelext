@@ -17,6 +17,7 @@ type CheckBox struct {
 func NewCheckBox(name string, w, h float64, state bool) *CheckBox {
 	c := &CheckBox{
 		UIBase:   *NewUIBase(name),
+		box:      nodes.NewCanvas("box", w, h),
 		state:    state,
 		oldstate: false,
 		onchange: func(v bool) {},
@@ -24,6 +25,8 @@ func NewCheckBox(name string, w, h float64, state bool) *CheckBox {
 	c.Self = c
 	c.UISelf = c
 	c.UIBase.SetSize(pixel.V(w, h))
+	c.box.SetLocked(true)
+	c.AddChild(c.box)
 	return c
 }
 
@@ -59,10 +62,6 @@ func (c *CheckBox) OnChange(fn func(v bool)) {
 }
 
 func (c *CheckBox) Init() {
-	size := c.Size()
-	c.box = nodes.NewCanvas("box", size.X, size.Y)
-	c.box.SetLocked(true)
-	c.AddChild(c.box)
 	c.drawFalse()
 }
 
