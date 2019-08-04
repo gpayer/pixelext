@@ -144,6 +144,20 @@ func (s *SelectList) AddEntry(text string, value string, content interface{}) {
 	s.value2entry[value] = newentry
 }
 
+func (s *SelectList) ChangeEntry(oldvalue string, text string, value string, content interface{}) {
+	entry, found := s.value2entry[oldvalue]
+	if found {
+		entry.text = text
+		entry.value = value
+		entry.content = content
+		entry.btn.SetText(text)
+		if oldvalue != value {
+			delete(s.value2entry, oldvalue)
+			s.value2entry[value] = entry
+		}
+	}
+}
+
 func (s *SelectList) Clear() {
 	s.entries = s.entries[:0]
 	s.value2entry = make(map[string]*selectListEntry)
@@ -163,16 +177,16 @@ func (s *SelectList) UnselectAll() {
 }
 
 type SelectListSelection struct {
-	value   string
-	content interface{}
+	Value   string
+	Content interface{}
 }
 
 func (s *SelectList) Selected() []SelectListSelection {
 	var sel []SelectListSelection
 	for _, e := range s.entries {
 		sel = append(sel, SelectListSelection{
-			value:   e.value,
-			content: e.content,
+			Value:   e.value,
+			Content: e.content,
 		})
 	}
 	return sel
