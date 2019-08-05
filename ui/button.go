@@ -52,6 +52,8 @@ func NewButton(name string, w, h float64, text string) *Button {
 	}
 
 	b.createText()
+	b.SetVAlignment(nodes.VAlignmentCenter)
+	b.SetHAlignment(nodes.HAlignmentCenter)
 	return b
 }
 
@@ -102,11 +104,9 @@ func (b *Button) internalSetSize() {
 	styles := b.canvases[ButtonEnabled].GetStyles()
 	if w == 0 {
 		w = b.text.Size().X + 2*styles.Padding
-		b.SetVAlignment(nodes.VAlignmentCenter)
 	}
 	if h == 0 {
 		h = b.text.Size().Y + 2*styles.Padding
-		b.SetHAlignment(nodes.HAlignmentCenter)
 	}
 	size := pixel.V(w, h)
 	b.UIBase.SetSize(size)

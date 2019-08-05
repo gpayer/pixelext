@@ -158,6 +158,17 @@ func (s *SelectList) ChangeEntry(oldvalue string, text string, value string, con
 	}
 }
 
+func (s *SelectList) RemoveEntry(value string) {
+	entry, found := s.value2entry[value]
+	if found {
+		delete(s.value2entry, value)
+		s.list.RemoveChild(entry.btn)
+		if entry.selected {
+			s.onunselect(value, entry.content)
+		}
+	}
+}
+
 func (s *SelectList) Clear() {
 	s.entries = s.entries[:0]
 	s.value2entry = make(map[string]*selectListEntry)
@@ -184,10 +195,12 @@ type SelectListSelection struct {
 func (s *SelectList) Selected() []SelectListSelection {
 	var sel []SelectListSelection
 	for _, e := range s.entries {
-		sel = append(sel, SelectListSelection{
-			Value:   e.value,
-			Content: e.content,
-		})
+		if e.selected {
+			sel = append(sel, SelectListSelection{
+				Value:   e.value,
+				Content: e.content,
+			})
+		}
 	}
 	return sel
 }
@@ -213,5 +226,15 @@ func (s *SelectList) SetMultiSelect(ms bool) {
 	s.multiselect = ms
 	if !s.multiselect {
 		s.UnselectAll()
+	}
+}
+
+func (s *SelectList) Count() int {
+	return len(s.list.Children())
+}
+
+func (s *SelectList) IterateEntries(fn func(value string, content interface{})) {
+	for _, e := range s.entries {
+		fn(e.value, e.content)
 	}
 }
