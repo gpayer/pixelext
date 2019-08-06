@@ -239,6 +239,12 @@ func (d *DropDown) OnChange(fn func(string, string)) {
 	d.onchange = fn
 }
 
+func (d *DropDown) IterateEntries(fn func(value, text string)) {
+	for _, e := range d.values {
+		fn(e.value, e.desc)
+	}
+}
+
 func (d *DropDown) Update(dt float64) {
 	if d.state == dropDownInit {
 		d.state = dropDownClosed
@@ -271,6 +277,22 @@ func (d *DropDown) showDropDown() {
 
 func (d *DropDown) hideDropDown() {
 	d.dropdown.Hide()
+}
+
+func (d *DropDown) HDropDown() float64 {
+	return d.hdropdown
+}
+
+func (d *DropDown) SetHDropDown(h float64) {
+	if h == 0 {
+		h = 1
+	}
+	d.hdropdown = h
+	if d.Initialized() {
+		size := d.Size()
+		d.dropdown.SetSize(pixel.V(size.X+4, h+4))
+		d.vscroll.SetSize(pixel.V(size.X, h))
+	}
 }
 
 func (d *DropDown) Mount() {
