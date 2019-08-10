@@ -33,6 +33,11 @@ func (f *FontServiceStruct) Get(name string) *text.Atlas {
 	return f.atlases["basic"]
 }
 
+func (f *FontServiceStruct) Has(name string) bool {
+	_, found := f.atlases[name]
+	return found
+}
+
 var FontService *FontServiceStruct
 
 func init() {
