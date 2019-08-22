@@ -133,3 +133,11 @@ func (ui *UIBase) KeepOnScreen() {
 	move := nodes.SceneManager().KeepOnScreen(ui, bounds)
 	ui.Self.SetPos(ui.UISelf.GetOrigPos().Add(move))
 }
+
+func (ui *UIBase) IsStylesOverridden() bool {
+	return ui.overrideStyles
+}
+
+func (ui *UIBase) SetStylesOverridden(overridden bool) {
+	ui.overrideStyles = overridden
+}

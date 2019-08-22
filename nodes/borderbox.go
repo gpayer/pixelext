@@ -24,10 +24,18 @@ func (b *BorderBox) redrawCanvas() {
 	if styles.Border.Width > 0 {
 		bounds := canvas.Bounds()
 		col := styles.Border.Color
-		//bw := styles.Border.Width / 2
+		bw := styles.Border.Width
+		minx, miny := 0.0, 0.0
 		maxx := bounds.W() - 1
 		maxy := bounds.H() - 1
-		b.DrawRect(pixel.V(0, 0), pixel.V(maxx, maxy), col)
+		for bw > 0 {
+			b.DrawRect(pixel.V(minx, miny), pixel.V(maxx, maxy), col)
+			bw -= 1
+			minx += 1
+			miny += 1
+			maxx -= 1
+			maxy -= 1
+		}
 	}
 	SceneManager().Redraw()
 }

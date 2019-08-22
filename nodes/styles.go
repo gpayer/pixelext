@@ -31,7 +31,7 @@ type Styles struct {
 
 func DefaultStyles() *Styles {
 	s := &Styles{}
-	s.Border.Width = 2
+	s.Border.Width = 1
 	s.Border.Color = colornames.White
 	s.Background.Color = colornames.Black
 	s.Foreground.Color = colornames.Steelblue
