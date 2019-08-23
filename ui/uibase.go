@@ -141,3 +141,14 @@ func (ui *UIBase) IsStylesOverridden() bool {
 func (ui *UIBase) SetStylesOverridden(overridden bool) {
 	ui.overrideStyles = overridden
 }
+
+func (ui *UIBase) SetStyles(styles *nodes.Styles) {
+	oldpadding := ui.UISelf.GetStyles().Padding
+	oldatlas := ui.UISelf.GetStyles().Text.Atlas
+	ui.BaseNode.SetStyles(styles)
+	if oldpadding != styles.Padding || oldatlas != styles.Text.Atlas {
+		if ui.Self.Parent() != nil {
+			ui.Self.Parent().ChildChanged()
+		}
+	}
+}

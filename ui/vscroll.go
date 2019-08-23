@@ -177,7 +177,7 @@ func (v *VScroll) Update(dt float64) {
 		if !ev.IsMouseScrollHandled() {
 			mousescroll := ev.MouseScroll()
 			if mousescroll.Y != 0 {
-				v.scroll -= mousescroll.Y * 5
+				v.scroll -= mousescroll.Y * 15
 				v.SetScroll(v.scroll)
 			}
 			if !v.scrolldrag && v.scrollbar.clicked {
