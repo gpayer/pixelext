@@ -86,6 +86,8 @@ func (t *Text) SetStyles(styles *nodes.Styles) {
 		t.txt.Orig = pixel.ZV
 		t.txt.Clear()
 		fmt.Fprint(t.txt, t.content.String())
+		t.SetExtraOffset(pixel.V(-t.txt.Bounds().W()/2, -t.txt.Bounds().H()/2-t.txt.Dot.Y+t.txt.Atlas().Descent()))
+		t.SetSize(t.txt.Bounds().Size())
 		nodes.SceneManager().Redraw()
 	}
 }
