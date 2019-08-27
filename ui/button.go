@@ -129,6 +129,10 @@ func (b *Button) SetButtonStyles(state ButtonState, styles *nodes.Styles) {
 	}
 }
 
+func (b *Button) GetButtonStyles(state ButtonState) *nodes.Styles {
+	return b.canvases[state].GetStyles()
+}
+
 func (b *Button) SetStyles(styles *nodes.Styles) {
 	oldatlas := b.canvases[ButtonEnabled].GetStyles().Text.Atlas
 	b.UIBase.SetStyles(styles)
@@ -163,6 +167,10 @@ func (b *Button) OnClick(fn func()) {
 
 func (b *Button) SetEnabled(enabled bool) {
 	b.enabled = enabled
+}
+
+func (b *Button) Enabled() bool {
+	return b.enabled
 }
 
 func (b *Button) SetText(text string) {
