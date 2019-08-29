@@ -28,6 +28,7 @@ func NewGrid(name string, cols int) *Grid {
 	g.bbox = nodes.NewCanvas("__bbox", 1, 1)
 	g.bbox.SetZIndex(-10)
 	g.bbox.SetPos(pixel.V(0, 0))
+	g.bbox.SetLocked(true)
 	g.AddChild(g.bbox)
 	return g
 }
@@ -125,6 +126,7 @@ func (g *Grid) AddChild(child nodes.Node) {
 	if len(g.uichildren) > 1 {
 		g.recalcPositions()
 	}
+	child.SetPosLocked(true)
 }
 
 func (g *Grid) SetStyles(styles *nodes.Styles) {
@@ -151,12 +153,15 @@ func (g *Grid) RemoveChild(child nodes.Node) {
 	}
 
 	g.recalcPositions()
+	child.SetPosLocked(false)
 }
 
 func (g *Grid) RemoveChildren() {
+	for _, c := range g.Children() {
+		c.SetPosLocked(false)
+	}
 	g.UIBase.RemoveChildren()
 	g.uichildren = make([]UINode, 0)
-	g.AddChild(g.bbox)
 	g.recalcPositions()
 }
 

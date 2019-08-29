@@ -87,6 +87,7 @@ func (v *VBox) recalcPositions() {
 func (v *VBox) AddChild(child nodes.Node) {
 	v.UIBase.AddChild(child)
 	v.recalcPositions()
+	child.SetPosLocked(true)
 }
 
 func (v *VBox) SetStyles(styles *nodes.Styles) {
@@ -98,9 +99,15 @@ func (v *VBox) SetStyles(styles *nodes.Styles) {
 func (v *VBox) RemoveChild(child nodes.Node) {
 	v.UIBase.RemoveChild(child)
 	v.recalcPositions()
+	child.SetPosLocked(false)
 }
 
 func (v *VBox) RemoveChildren() {
+	for _, c := range v.Children() {
+		if c != nil {
+			c.SetPosLocked(false)
+		}
+	}
 	v.UIBase.RemoveChildren()
 	v.AddChild(v.background)
 	v.recalcPositions()

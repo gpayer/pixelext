@@ -56,6 +56,8 @@ type Node interface {
 	Locked() bool
 	Iterate(fn func(n Node))
 	CopyFrom(from Node)
+	SetPosLocked(locked bool)
+	PosLocked() bool
 }
 
 type Initializable interface {

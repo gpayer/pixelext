@@ -79,6 +79,7 @@ func (h *HBox) recalcPositions() {
 func (h *HBox) AddChild(child nodes.Node) {
 	h.UIBase.AddChild(child)
 	h.recalcPositions()
+	child.SetPosLocked(true)
 }
 
 func (h *HBox) SetStyles(styles *nodes.Styles) {
@@ -90,9 +91,13 @@ func (h *HBox) SetStyles(styles *nodes.Styles) {
 func (h *HBox) RemoveChild(child nodes.Node) {
 	h.UIBase.RemoveChild(child)
 	h.recalcPositions()
+	child.SetPosLocked(false)
 }
 
 func (h *HBox) RemoveChildren() {
+	for _, c := range h.Children() {
+		c.SetPosLocked(false)
+	}
 	h.UIBase.RemoveChildren()
 	h.recalcPositions()
 }

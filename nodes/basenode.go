@@ -30,6 +30,7 @@ type BaseNode struct {
 	drawable                  Drawable
 	updateable                Updateable
 	mounted                   bool
+	poslocked                 bool
 }
 
 func (b *BaseNode) _getMat() pixel.Matrix {
@@ -488,4 +489,12 @@ func (b *BaseNode) CopyFrom(from Node) {
 	if ok {
 		b.Self.SetSize(sizer.Size())
 	}
+}
+
+func (b *BaseNode) SetPosLocked(locked bool) {
+	b.poslocked = locked
+}
+
+func (b *BaseNode) PosLocked() bool {
+	return b.poslocked
 }
