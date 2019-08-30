@@ -39,7 +39,7 @@ func (c *Canvas) SetSize(size pixel.Vec) {
 	if size.Y < 1 {
 		size.Y = 1
 	}
-	c.canvas.SetBounds(pixel.R(0, 0, size.X, size.Y))
+	c.canvas.SetBounds(pixel.R(0, 0, math.Ceil(size.X), math.Ceil(size.Y)))
 	c.size = c.canvas.Bounds().Size()
 	c.pixels = make([]uint8, int(math.Ceil(c.size.X))*int(math.Ceil(c.size.Y))*4)
 	SceneManager().Redraw()
